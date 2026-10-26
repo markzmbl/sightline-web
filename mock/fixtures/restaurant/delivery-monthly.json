@@ -1,0 +1,1520 @@
+{
+  "slug": "delivery-monthly",
+  "workspace": "restaurant",
+  "question": "How did delivery revenue develop per month over the last year?",
+  "final_status": "complete",
+  "continuation": null,
+  "stages": [
+    {
+      "phase": "understand",
+      "stage": "situate",
+      "ms": 1103
+    },
+    {
+      "phase": "understand",
+      "stage": "abstract",
+      "ms": 2108
+    },
+    {
+      "phase": "understand",
+      "stage": "bind",
+      "ms": 442
+    },
+    {
+      "phase": "analyse",
+      "stage": "enrich",
+      "ms": 258
+    },
+    {
+      "phase": "analyse",
+      "stage": "derive",
+      "ms": 607
+    },
+    {
+      "phase": "analyse",
+      "stage": "query",
+      "ms": 597
+    },
+    {
+      "phase": "present",
+      "stage": "idiom",
+      "ms": 907
+    },
+    {
+      "phase": "present",
+      "stage": "render",
+      "ms": 75123
+    },
+    {
+      "phase": "present",
+      "stage": "perceive",
+      "ms": 4661
+    },
+    {
+      "phase": "present",
+      "stage": "validate",
+      "ms": 690
+    }
+  ],
+  "restatement": null,
+  "card": {
+    "blocking": false,
+    "points": [
+      {
+        "id": "point",
+        "step": "point",
+        "question": "What should the chart say?",
+        "options": [
+          {
+            "id": "p0",
+            "label": "line revenue €84k → €105k, Jan–Dec 2025",
+            "hint": ""
+          },
+          {
+            "id": "none",
+            "label": "nothing: only name what is shown",
+            "hint": ""
+          }
+        ],
+        "chosen": "p0",
+        "default": "p0",
+        "by": "s1",
+        "confidence": 0.1200000000000001,
+        "why": "the System 1 model was not sure (0.12 below 0.50)",
+        "open": true,
+        "stage": "idiom"
+      }
+    ]
+  },
+  "clarify": null,
+  "result": {
+    "sql": "SELECT DATE_TRUNC('MONTH', \"f\".\"date_key\") AS \"month\", SUM(\"f\".\"line_revenue\") AS \"line_revenue\" FROM \"fact_order_lines\" AS \"f\" JOIN \"dim_channel\" AS \"dim_channel\" ON \"f\".\"channel_key\" = \"dim_channel\".\"channel_key\" WHERE \"dim_channel\".\"channel_name\" = 'delivery' AND \"f\".\"date_key\" >= CAST('2025-01-01' AS DATE) AND \"f\".\"date_key\" <= CAST('2025-12-31' AS DATE) GROUP BY DATE_TRUNC('MONTH', \"f\".\"date_key\") ORDER BY \"month\" ASC LIMIT 10000",
+    "columns": [
+      {
+        "name": "month",
+        "type": "temporal"
+      },
+      {
+        "name": "line_revenue",
+        "type": "q_ratio"
+      }
+    ],
+    "rows": [
+      [
+        "2025-01-01T00:00:00",
+        83890.93
+      ],
+      [
+        "2025-02-01T00:00:00",
+        65233.22
+      ],
+      [
+        "2025-03-01T00:00:00",
+        78073.19
+      ],
+      [
+        "2025-04-01T00:00:00",
+        74628.61
+      ],
+      [
+        "2025-05-01T00:00:00",
+        85407.91
+      ],
+      [
+        "2025-06-01T00:00:00",
+        87531.01
+      ],
+      [
+        "2025-07-01T00:00:00",
+        96801.15
+      ],
+      [
+        "2025-08-01T00:00:00",
+        112612.24
+      ],
+      [
+        "2025-09-01T00:00:00",
+        103268.42
+      ],
+      [
+        "2025-10-01T00:00:00",
+        107351.73
+      ],
+      [
+        "2025-11-01T00:00:00",
+        101077.72
+      ],
+      [
+        "2025-12-01T00:00:00",
+        105056.56
+      ]
+    ],
+    "row_count": 12,
+    "truncated": false,
+    "chart": {
+      "chart": "line",
+      "label": "lines",
+      "spec": {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "description": "line (deterministic fallback); rules: CH-Q-POS, CH-T-POS, FORM-RECOGNISED, INTENT-AFFINITY, VIS-TASK-FIT, VIS-TEMPORAL-X",
+        "data": {
+          "values": [
+            {
+              "month": "2025-01-01T00:00:00",
+              "line_revenue": 83890.93,
+              "__value": 83890.93,
+              "__series": "",
+              "__partial": false,
+              "__tip": "€84k"
+            },
+            {
+              "month": "2025-02-01T00:00:00",
+              "line_revenue": 65233.22,
+              "__value": 65233.22,
+              "__series": "",
+              "__partial": false,
+              "__tip": "€65k"
+            },
+            {
+              "month": "2025-03-01T00:00:00",
+              "line_revenue": 78073.19,
+              "__value": 78073.19,
+              "__series": "",
+              "__partial": false,
+              "__tip": "€78k"
+            },
+            {
+              "month": "2025-04-01T00:00:00",
+              "line_revenue": 74628.61,
+              "__value": 74628.61,
+              "__series": "",
+              "__partial": false,
+              "__tip": "€75k"
+            },
+            {
+              "month": "2025-05-01T00:00:00",
+              "line_revenue": 85407.91,
+              "__value": 85407.91,
+              "__series": "",
+              "__partial": false,
+              "__tip": "€85k"
+            },
+            {
+              "month": "2025-06-01T00:00:00",
+              "line_revenue": 87531.01,
+              "__value": 87531.01,
+              "__series": "",
+              "__partial": false,
+              "__tip": "€88k"
+            },
+            {
+              "month": "2025-07-01T00:00:00",
+              "line_revenue": 96801.15,
+              "__value": 96801.15,
+              "__series": "",
+              "__partial": false,
+              "__tip": "€97k"
+            },
+            {
+              "month": "2025-08-01T00:00:00",
+              "line_revenue": 112612.24,
+              "__value": 112612.24,
+              "__series": "",
+              "__partial": false,
+              "__tip": "€113k"
+            },
+            {
+              "month": "2025-09-01T00:00:00",
+              "line_revenue": 103268.42,
+              "__value": 103268.42,
+              "__series": "",
+              "__partial": false,
+              "__tip": "€103k"
+            },
+            {
+              "month": "2025-10-01T00:00:00",
+              "line_revenue": 107351.73,
+              "__value": 107351.73,
+              "__series": "",
+              "__partial": false,
+              "__tip": "€107k"
+            },
+            {
+              "month": "2025-11-01T00:00:00",
+              "line_revenue": 101077.72,
+              "__value": 101077.72,
+              "__series": "",
+              "__partial": false,
+              "__tip": "€101k"
+            },
+            {
+              "month": "2025-12-01T00:00:00",
+              "line_revenue": 105056.56,
+              "__value": 105056.56,
+              "__series": "",
+              "__partial": false,
+              "__tip": "€105k"
+            }
+          ]
+        },
+        "height": 320,
+        "layer": [
+          {
+            "transform": [
+              {
+                "filter": "!datum.__partial"
+              }
+            ],
+            "mark": {
+              "type": "area",
+              "opacity": 1,
+              "line": false,
+              "fill": {
+                "gradient": "linear",
+                "x1": 0,
+                "y1": 0,
+                "x2": 0,
+                "y2": 1,
+                "stops": [
+                  {
+                    "offset": 0,
+                    "color": "rgba(18,39,253,0.22)"
+                  },
+                  {
+                    "offset": 0.6,
+                    "color": "rgba(79,123,255,0.08)"
+                  },
+                  {
+                    "offset": 1,
+                    "color": "rgba(111,160,255,0)"
+                  }
+                ]
+              }
+            },
+            "encoding": {
+              "x": {
+                "field": "month",
+                "type": "temporal",
+                "title": null,
+                "axis": {
+                  "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                  "labelOverlap": true,
+                  "format": "%b",
+                  "values": [
+                    {
+                      "year": 2025,
+                      "month": 1,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 2,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 3,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 4,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 5,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 6,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 7,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 8,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 9,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 1
+                    }
+                  ]
+                },
+                "scale": {
+                  "padding": 14
+                }
+              },
+              "y": {
+                "field": "__value",
+                "type": "quantitative",
+                "title": "line revenue (€)",
+                "axis": {
+                  "format": "~s",
+                  "labelExpr": "datum.value == 0 ? '€0' : (datum.label ? '€' + datum.label : '')"
+                }
+              }
+            }
+          },
+          {
+            "transform": [
+              {
+                "filter": "!datum.__partial"
+              }
+            ],
+            "mark": {
+              "type": "line",
+              "strokeWidth": 2.5,
+              "color": "#1227FD",
+              "strokeCap": "round",
+              "strokeJoin": "round"
+            },
+            "encoding": {
+              "x": {
+                "field": "month",
+                "type": "temporal",
+                "title": null,
+                "axis": {
+                  "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                  "labelOverlap": true,
+                  "format": "%b",
+                  "values": [
+                    {
+                      "year": 2025,
+                      "month": 1,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 2,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 3,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 4,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 5,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 6,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 7,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 8,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 9,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 1
+                    }
+                  ]
+                },
+                "scale": {
+                  "padding": 14
+                }
+              },
+              "y": {
+                "field": "__value",
+                "type": "quantitative",
+                "title": "line revenue (€)",
+                "axis": {
+                  "format": "~s",
+                  "labelExpr": "datum.value == 0 ? '€0' : (datum.label ? '€' + datum.label : '')"
+                }
+              }
+            }
+          },
+          {
+            "transform": [
+              {
+                "filter": "!datum.__partial"
+              }
+            ],
+            "mark": {
+              "type": "point",
+              "filled": true,
+              "size": 56,
+              "opacity": 1,
+              "color": "#1227FD",
+              "stroke": "#FFFFFF",
+              "strokeWidth": 1.25
+            },
+            "encoding": {
+              "x": {
+                "field": "month",
+                "type": "temporal",
+                "title": null,
+                "axis": {
+                  "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                  "labelOverlap": true,
+                  "format": "%b",
+                  "values": [
+                    {
+                      "year": 2025,
+                      "month": 1,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 2,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 3,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 4,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 5,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 6,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 7,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 8,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 9,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 1
+                    }
+                  ]
+                },
+                "scale": {
+                  "padding": 14
+                }
+              },
+              "y": {
+                "field": "__value",
+                "type": "quantitative",
+                "title": "line revenue (€)",
+                "axis": {
+                  "format": "~s",
+                  "labelExpr": "datum.value == 0 ? '€0' : (datum.label ? '€' + datum.label : '')"
+                }
+              },
+              "tooltip": [
+                {
+                  "field": "month",
+                  "type": "temporal",
+                  "title": "month",
+                  "format": "%b %Y"
+                },
+                {
+                  "field": "__tip",
+                  "type": "nominal",
+                  "title": "line revenue (€)"
+                }
+              ]
+            }
+          },
+          {
+            "data": {
+              "values": [
+                {
+                  "__x": "2025-01-01T00:00:00",
+                  "__y": 83890.93,
+                  "__text": "€84k"
+                }
+              ]
+            },
+            "mark": {
+              "type": "text",
+              "color": "#191C1F",
+              "fontWeight": 600,
+              "fontSize": 11.5,
+              "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+              "baseline": "bottom",
+              "dy": -9,
+              "align": "center",
+              "dx": 0
+            },
+            "encoding": {
+              "x": {
+                "field": "__x",
+                "type": "temporal"
+              },
+              "y": {
+                "field": "__y",
+                "type": "quantitative"
+              },
+              "text": {
+                "field": "__text"
+              }
+            }
+          },
+          {
+            "data": {
+              "values": [
+                {
+                  "__x": "2025-12-01T00:00:00",
+                  "__y": 105056.56,
+                  "__text": "€105k"
+                }
+              ]
+            },
+            "mark": {
+              "type": "text",
+              "color": "#191C1F",
+              "fontWeight": 600,
+              "fontSize": 11.5,
+              "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+              "baseline": "bottom",
+              "dy": -9,
+              "align": "center",
+              "dx": 0
+            },
+            "encoding": {
+              "x": {
+                "field": "__x",
+                "type": "temporal"
+              },
+              "y": {
+                "field": "__y",
+                "type": "quantitative"
+              },
+              "text": {
+                "field": "__text"
+              }
+            }
+          }
+        ],
+        "title": {
+          "text": "Delivery revenue rose from €84k to €105k, Jan–Dec 2025",
+          "subtitle": [
+            "Line revenue per month · delivery only · 2025"
+          ]
+        },
+        "usermeta": {
+          "theme": "pattern-perspectives"
+        },
+        "config": {
+          "background": "#FFFFFF",
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+          "padding": {
+            "left": 20,
+            "right": 24,
+            "top": 20,
+            "bottom": 18
+          },
+          "view": {
+            "stroke": null
+          },
+          "title": {
+            "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "fontSize": 16,
+            "fontWeight": 600,
+            "color": "#191C1F",
+            "anchor": "start",
+            "offset": 16,
+            "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "subtitleColor": "#5F6368",
+            "subtitleFontSize": 12.5,
+            "subtitleFontWeight": 400,
+            "subtitlePadding": 6,
+            "subtitleLineHeight": 17
+          },
+          "axis": {
+            "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "labelFontSize": 10.5,
+            "labelColor": "#5F6368",
+            "labelPadding": 8,
+            "labelSeparation": 6,
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "titlePadding": 12,
+            "domainColor": "#C9C9CD",
+            "tickColor": "#C9C9CD",
+            "gridColor": "#E2E2E7",
+            "gridWidth": 1
+          },
+          "axisX": {
+            "grid": false,
+            "ticks": true,
+            "tickSize": 4,
+            "domain": true
+          },
+          "axisY": {
+            "domain": false,
+            "ticks": false,
+            "grid": true
+          },
+          "axisBand": {
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelColor": "#191C1F",
+            "labelFontSize": 11,
+            "labelPadding": 10
+          },
+          "legend": {
+            "orient": "bottom",
+            "direction": "horizontal",
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelFontSize": 12,
+            "labelColor": "#191C1F",
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "symbolType": "circle",
+            "symbolSize": 110,
+            "symbolStrokeWidth": 0,
+            "columnPadding": 16,
+            "padding": 4,
+            "offset": 16
+          },
+          "range": {
+            "category": [
+              "#1227FD",
+              "#00967A",
+              "#8B5CF6",
+              "#B07800",
+              "#46277A",
+              "#4F7BFF",
+              "#191C1F"
+            ],
+            "ramp": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "heatmap": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "diverging": [
+              "#E23B4A",
+              "#F4F4F6",
+              "#1227FD"
+            ]
+          },
+          "mark": {
+            "color": "#1227FD"
+          },
+          "line": {
+            "color": "#1227FD",
+            "strokeWidth": 2.5,
+            "strokeCap": "round",
+            "strokeJoin": "round"
+          },
+          "point": {
+            "color": "#1227FD",
+            "size": 56,
+            "filled": true
+          },
+          "area": {
+            "color": "#1227FD",
+            "opacity": 0.16
+          },
+          "bar": {
+            "color": "#1227FD",
+            "cornerRadiusEnd": 5
+          },
+          "arc": {
+            "stroke": "#FFFFFF",
+            "strokeWidth": 2
+          },
+          "rect": {
+            "color": "#1227FD"
+          },
+          "rule": {
+            "color": "#C9C9CD"
+          },
+          "text": {
+            "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "fontSize": 11,
+            "color": "#191C1F"
+          }
+        }
+      },
+      "png_url": null,
+      "alternatives": [
+        {
+          "chart": "area",
+          "label": "areas",
+          "hint": null
+        },
+        {
+          "chart": "bar",
+          "label": "columns",
+          "hint": "read how much each period holds, one by one"
+        },
+        {
+          "chart": "table",
+          "label": "a table",
+          "hint": null
+        }
+      ]
+    },
+    "findings": [
+      "line revenue €84k → €105k, Jan–Dec 2025"
+    ]
+  },
+  "charts": {
+    "line": {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "description": "line (deterministic fallback); rules: CH-Q-POS, CH-T-POS, FORM-RECOGNISED, INTENT-AFFINITY, VIS-TASK-FIT, VIS-TEMPORAL-X",
+      "data": {
+        "values": [
+          {
+            "month": "2025-01-01T00:00:00",
+            "line_revenue": 83890.93,
+            "__value": 83890.93,
+            "__series": "",
+            "__partial": false,
+            "__tip": "€84k"
+          },
+          {
+            "month": "2025-02-01T00:00:00",
+            "line_revenue": 65233.22,
+            "__value": 65233.22,
+            "__series": "",
+            "__partial": false,
+            "__tip": "€65k"
+          },
+          {
+            "month": "2025-03-01T00:00:00",
+            "line_revenue": 78073.19,
+            "__value": 78073.19,
+            "__series": "",
+            "__partial": false,
+            "__tip": "€78k"
+          },
+          {
+            "month": "2025-04-01T00:00:00",
+            "line_revenue": 74628.61,
+            "__value": 74628.61,
+            "__series": "",
+            "__partial": false,
+            "__tip": "€75k"
+          },
+          {
+            "month": "2025-05-01T00:00:00",
+            "line_revenue": 85407.91,
+            "__value": 85407.91,
+            "__series": "",
+            "__partial": false,
+            "__tip": "€85k"
+          },
+          {
+            "month": "2025-06-01T00:00:00",
+            "line_revenue": 87531.01,
+            "__value": 87531.01,
+            "__series": "",
+            "__partial": false,
+            "__tip": "€88k"
+          },
+          {
+            "month": "2025-07-01T00:00:00",
+            "line_revenue": 96801.15,
+            "__value": 96801.15,
+            "__series": "",
+            "__partial": false,
+            "__tip": "€97k"
+          },
+          {
+            "month": "2025-08-01T00:00:00",
+            "line_revenue": 112612.24,
+            "__value": 112612.24,
+            "__series": "",
+            "__partial": false,
+            "__tip": "€113k"
+          },
+          {
+            "month": "2025-09-01T00:00:00",
+            "line_revenue": 103268.42,
+            "__value": 103268.42,
+            "__series": "",
+            "__partial": false,
+            "__tip": "€103k"
+          },
+          {
+            "month": "2025-10-01T00:00:00",
+            "line_revenue": 107351.73,
+            "__value": 107351.73,
+            "__series": "",
+            "__partial": false,
+            "__tip": "€107k"
+          },
+          {
+            "month": "2025-11-01T00:00:00",
+            "line_revenue": 101077.72,
+            "__value": 101077.72,
+            "__series": "",
+            "__partial": false,
+            "__tip": "€101k"
+          },
+          {
+            "month": "2025-12-01T00:00:00",
+            "line_revenue": 105056.56,
+            "__value": 105056.56,
+            "__series": "",
+            "__partial": false,
+            "__tip": "€105k"
+          }
+        ]
+      },
+      "height": 320,
+      "layer": [
+        {
+          "transform": [
+            {
+              "filter": "!datum.__partial"
+            }
+          ],
+          "mark": {
+            "type": "area",
+            "opacity": 1,
+            "line": false,
+            "fill": {
+              "gradient": "linear",
+              "x1": 0,
+              "y1": 0,
+              "x2": 0,
+              "y2": 1,
+              "stops": [
+                {
+                  "offset": 0,
+                  "color": "rgba(18,39,253,0.22)"
+                },
+                {
+                  "offset": 0.6,
+                  "color": "rgba(79,123,255,0.08)"
+                },
+                {
+                  "offset": 1,
+                  "color": "rgba(111,160,255,0)"
+                }
+              ]
+            }
+          },
+          "encoding": {
+            "x": {
+              "field": "month",
+              "type": "temporal",
+              "title": null,
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelOverlap": true,
+                "format": "%b",
+                "values": [
+                  {
+                    "year": 2025,
+                    "month": 1,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 2,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 3,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 4,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 5,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 6,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 7,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 8,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 9,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 1
+                  }
+                ]
+              },
+              "scale": {
+                "padding": 14
+              }
+            },
+            "y": {
+              "field": "__value",
+              "type": "quantitative",
+              "title": "line revenue (€)",
+              "axis": {
+                "format": "~s",
+                "labelExpr": "datum.value == 0 ? '€0' : (datum.label ? '€' + datum.label : '')"
+              }
+            }
+          }
+        },
+        {
+          "transform": [
+            {
+              "filter": "!datum.__partial"
+            }
+          ],
+          "mark": {
+            "type": "line",
+            "strokeWidth": 2.5,
+            "color": "#1227FD",
+            "strokeCap": "round",
+            "strokeJoin": "round"
+          },
+          "encoding": {
+            "x": {
+              "field": "month",
+              "type": "temporal",
+              "title": null,
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelOverlap": true,
+                "format": "%b",
+                "values": [
+                  {
+                    "year": 2025,
+                    "month": 1,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 2,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 3,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 4,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 5,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 6,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 7,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 8,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 9,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 1
+                  }
+                ]
+              },
+              "scale": {
+                "padding": 14
+              }
+            },
+            "y": {
+              "field": "__value",
+              "type": "quantitative",
+              "title": "line revenue (€)",
+              "axis": {
+                "format": "~s",
+                "labelExpr": "datum.value == 0 ? '€0' : (datum.label ? '€' + datum.label : '')"
+              }
+            }
+          }
+        },
+        {
+          "transform": [
+            {
+              "filter": "!datum.__partial"
+            }
+          ],
+          "mark": {
+            "type": "point",
+            "filled": true,
+            "size": 56,
+            "opacity": 1,
+            "color": "#1227FD",
+            "stroke": "#FFFFFF",
+            "strokeWidth": 1.25
+          },
+          "encoding": {
+            "x": {
+              "field": "month",
+              "type": "temporal",
+              "title": null,
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelOverlap": true,
+                "format": "%b",
+                "values": [
+                  {
+                    "year": 2025,
+                    "month": 1,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 2,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 3,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 4,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 5,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 6,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 7,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 8,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 9,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 1
+                  }
+                ]
+              },
+              "scale": {
+                "padding": 14
+              }
+            },
+            "y": {
+              "field": "__value",
+              "type": "quantitative",
+              "title": "line revenue (€)",
+              "axis": {
+                "format": "~s",
+                "labelExpr": "datum.value == 0 ? '€0' : (datum.label ? '€' + datum.label : '')"
+              }
+            },
+            "tooltip": [
+              {
+                "field": "month",
+                "type": "temporal",
+                "title": "month",
+                "format": "%b %Y"
+              },
+              {
+                "field": "__tip",
+                "type": "nominal",
+                "title": "line revenue (€)"
+              }
+            ]
+          }
+        },
+        {
+          "data": {
+            "values": [
+              {
+                "__x": "2025-01-01T00:00:00",
+                "__y": 83890.93,
+                "__text": "€84k"
+              }
+            ]
+          },
+          "mark": {
+            "type": "text",
+            "color": "#191C1F",
+            "fontWeight": 600,
+            "fontSize": 11.5,
+            "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "baseline": "bottom",
+            "dy": -9,
+            "align": "center",
+            "dx": 0
+          },
+          "encoding": {
+            "x": {
+              "field": "__x",
+              "type": "temporal"
+            },
+            "y": {
+              "field": "__y",
+              "type": "quantitative"
+            },
+            "text": {
+              "field": "__text"
+            }
+          }
+        },
+        {
+          "data": {
+            "values": [
+              {
+                "__x": "2025-12-01T00:00:00",
+                "__y": 105056.56,
+                "__text": "€105k"
+              }
+            ]
+          },
+          "mark": {
+            "type": "text",
+            "color": "#191C1F",
+            "fontWeight": 600,
+            "fontSize": 11.5,
+            "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "baseline": "bottom",
+            "dy": -9,
+            "align": "center",
+            "dx": 0
+          },
+          "encoding": {
+            "x": {
+              "field": "__x",
+              "type": "temporal"
+            },
+            "y": {
+              "field": "__y",
+              "type": "quantitative"
+            },
+            "text": {
+              "field": "__text"
+            }
+          }
+        }
+      ],
+      "title": {
+        "text": "Delivery revenue rose from €84k to €105k, Jan–Dec 2025",
+        "subtitle": [
+          "Line revenue per month · delivery only · 2025"
+        ]
+      },
+      "usermeta": {
+        "theme": "pattern-perspectives"
+      },
+      "config": {
+        "background": "#FFFFFF",
+        "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+        "padding": {
+          "left": 20,
+          "right": 24,
+          "top": 20,
+          "bottom": 18
+        },
+        "view": {
+          "stroke": null
+        },
+        "title": {
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "fontSize": 16,
+          "fontWeight": 600,
+          "color": "#191C1F",
+          "anchor": "start",
+          "offset": 16,
+          "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "subtitleColor": "#5F6368",
+          "subtitleFontSize": 12.5,
+          "subtitleFontWeight": 400,
+          "subtitlePadding": 6,
+          "subtitleLineHeight": 17
+        },
+        "axis": {
+          "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "labelFontSize": 10.5,
+          "labelColor": "#5F6368",
+          "labelPadding": 8,
+          "labelSeparation": 6,
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "titlePadding": 12,
+          "domainColor": "#C9C9CD",
+          "tickColor": "#C9C9CD",
+          "gridColor": "#E2E2E7",
+          "gridWidth": 1
+        },
+        "axisX": {
+          "grid": false,
+          "ticks": true,
+          "tickSize": 4,
+          "domain": true
+        },
+        "axisY": {
+          "domain": false,
+          "ticks": false,
+          "grid": true
+        },
+        "axisBand": {
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelColor": "#191C1F",
+          "labelFontSize": 11,
+          "labelPadding": 10
+        },
+        "legend": {
+          "orient": "bottom",
+          "direction": "horizontal",
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelFontSize": 12,
+          "labelColor": "#191C1F",
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "symbolType": "circle",
+          "symbolSize": 110,
+          "symbolStrokeWidth": 0,
+          "columnPadding": 16,
+          "padding": 4,
+          "offset": 16
+        },
+        "range": {
+          "category": [
+            "#1227FD",
+            "#00967A",
+            "#8B5CF6",
+            "#B07800",
+            "#46277A",
+            "#4F7BFF",
+            "#191C1F"
+          ],
+          "ramp": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "heatmap": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "diverging": [
+            "#E23B4A",
+            "#F4F4F6",
+            "#1227FD"
+          ]
+        },
+        "mark": {
+          "color": "#1227FD"
+        },
+        "line": {
+          "color": "#1227FD",
+          "strokeWidth": 2.5,
+          "strokeCap": "round",
+          "strokeJoin": "round"
+        },
+        "point": {
+          "color": "#1227FD",
+          "size": 56,
+          "filled": true
+        },
+        "area": {
+          "color": "#1227FD",
+          "opacity": 0.16
+        },
+        "bar": {
+          "color": "#1227FD",
+          "cornerRadiusEnd": 5
+        },
+        "arc": {
+          "stroke": "#FFFFFF",
+          "strokeWidth": 2
+        },
+        "rect": {
+          "color": "#1227FD"
+        },
+        "rule": {
+          "color": "#C9C9CD"
+        },
+        "text": {
+          "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "fontSize": 11,
+          "color": "#191C1F"
+        }
+      }
+    }
+  },
+  "chart_options": [
+    {
+      "chart": "line",
+      "label": "lines",
+      "hint": "follow the direction of each series and compare them"
+    },
+    {
+      "chart": "area",
+      "label": "areas",
+      "hint": null
+    },
+    {
+      "chart": "bar",
+      "label": "columns",
+      "hint": "read how much each period holds, one by one"
+    },
+    {
+      "chart": "table",
+      "label": "a table",
+      "hint": null
+    }
+  ]
+}

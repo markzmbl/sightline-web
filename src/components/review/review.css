@@ -1,0 +1,774 @@
+/* The key user's review view: the status tabs, kind chips and entry list, and one entry open
+   beside them. Everything sits under the rv- prefix. */
+
+/* Shared bits */
+
+.rv-chip {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+/* Where an entry came from: library, drafted, learned. */
+.rv-tag {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--raised);
+  color: var(--muted);
+  font: 500 10.5px/1 var(--mono);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.rv-dot {
+  display: inline-block;
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.rv-dot--proposed {
+  background: var(--accent);
+}
+
+.rv-dot--approved {
+  background: var(--good);
+}
+
+.rv-dot--rejected {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--muted);
+}
+
+.rv-button {
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.rv-button:hover:not(:disabled) {
+  background: var(--raised);
+}
+
+.rv-button--primary {
+  border-color: transparent;
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.rv-button--primary:hover:not(:disabled) {
+  background: var(--ink);
+  opacity: 0.88;
+}
+
+.rv-button--quiet {
+  border-color: transparent;
+  color: var(--muted);
+}
+
+.rv-button--quiet:hover:not(:disabled) {
+  color: var(--ink);
+}
+
+.rv-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Status tabs */
+
+.rv-tabs {
+  display: flex;
+  flex: none;
+  gap: 4px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.rv-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  box-shadow: inset 0 -2px 0 transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.rv-tab:hover {
+  color: var(--ink);
+}
+
+.rv-tab[aria-selected="true"] {
+  box-shadow: inset 0 -2px 0 var(--accent);
+  color: var(--ink);
+}
+
+.rv-tab__count {
+  min-width: 18px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--raised);
+  color: var(--ink);
+  font: 600 10.5px/17px var(--mono);
+  text-align: center;
+}
+
+/* Kind chips */
+
+.rv-kinds {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px 6px;
+}
+
+.rv-kinds__chip {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12.5px;
+}
+
+.rv-kinds__count {
+  color: var(--muted);
+  font: 500 11px/1 var(--mono);
+}
+
+.rv-kinds__chip[aria-pressed="true"] .rv-kinds__count {
+  color: inherit;
+  opacity: 0.7;
+}
+
+/* The list */
+
+.rv-list {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 4px 8px 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.rv-list__note {
+  padding: 14px 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.rv-list__note p {
+  margin: 0 0 10px;
+}
+
+.rv-list__bone {
+  display: block;
+  height: 12px;
+  margin: 18px 10px;
+  border-radius: 6px;
+  background: var(--raised);
+  animation: rv-skeleton 1.6s ease-in-out infinite;
+}
+
+.rv-list__rows {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rv-row {
+  display: grid;
+  gap: 3px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 13.5px;
+  text-decoration: none;
+}
+
+.rv-row:hover {
+  background: var(--raised);
+}
+
+.rv-row[aria-current="page"] {
+  background: var(--raised);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.rv-row__line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rv-row__term {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 55%;
+  overflow: hidden;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.rv-row__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Under the term, past the status dot. */
+.rv-row__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding-left: 15px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.rv-row__demand {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.rv-list__more {
+  display: flex;
+  margin: 12px auto 0;
+}
+
+.rv-list__more:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+/* The entry */
+
+.rv-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: var(--column);
+  padding: 20px 28px 48px;
+}
+
+.rv-detail__bone {
+  display: block;
+  height: 14px;
+  border-radius: 7px;
+  background: var(--raised);
+  animation: rv-skeleton 1.6s ease-in-out infinite;
+}
+
+.rv-detail__missing {
+  padding: 16vh 0 0;
+  text-align: center;
+}
+
+.rv-detail__missing p {
+  margin: 0 0 8px;
+}
+
+.rv-detail__missing .pill {
+  margin-top: 8px;
+}
+
+.rv-detail__head {
+  display: grid;
+  gap: 4px;
+}
+
+.rv-detail__titles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rv-detail__term {
+  min-width: 0;
+  margin: 0 4px 0 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+/* The heading takes focus only so a narrow page does not lose it; it is not a control. */
+.rv-detail__term:focus {
+  outline: none;
+}
+
+.rv-status {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 6px;
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.rv-status--approved {
+  border-color: transparent;
+  background: var(--good-soft);
+}
+
+.rv-status--rejected {
+  color: var(--muted);
+}
+
+.rv-detail__label {
+  margin: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.rv-detail__meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.rv-detail__said-note {
+  margin: 4px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.rv-detail__about {
+  display: grid;
+  gap: 4px;
+}
+
+.rv-detail__about p {
+  margin: 0;
+}
+
+.rv-detail__definition {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--raised);
+  font: 400 13px/1.6 var(--mono);
+  overflow-wrap: anywhere;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.rv-section {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.rv-section__title {
+  margin: 0;
+  color: var(--muted);
+  font: 500 10.5px/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.rv-section__hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+/* A gap: what the data lacks, what someone would have to record */
+
+.rv-listed {
+  display: grid;
+  gap: 4px;
+}
+
+.rv-listed__title {
+  margin: 0;
+}
+
+.rv-listed__items {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding-left: 18px;
+  overflow-wrap: anywhere;
+}
+
+/* A default: what users picked */
+
+.rv-bars {
+  display: grid;
+  gap: 6px;
+  max-width: 560px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rv-bars__row {
+  display: grid;
+  grid-template-columns: minmax(0, 14em) minmax(40px, 1fr) minmax(2.5em, auto);
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.rv-bars__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rv-bars__track {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--raised);
+  overflow: hidden;
+}
+
+.rv-bars__bar {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 4px;
+  background: var(--accent);
+}
+
+.rv-bars__count {
+  font: 500 12px/1 var(--mono);
+  text-align: right;
+}
+
+/* Label and words */
+
+.rv-field {
+  display: grid;
+  gap: 4px;
+  max-width: 420px;
+}
+
+.rv-field__name {
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.rv-field__error {
+  margin: 0;
+  color: var(--bad);
+  font-size: 12.5px;
+}
+
+.rv-input {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-small);
+  background: var(--ground);
+  font-size: 13.5px;
+}
+
+.rv-input[aria-invalid="true"] {
+  border-color: var(--bad);
+}
+
+.rv-input:disabled {
+  color: var(--muted);
+}
+
+.rv-input--note {
+  max-width: 560px;
+  height: auto;
+  min-height: 56px;
+  padding: 8px 12px;
+  resize: vertical;
+}
+
+.rv-input::placeholder {
+  color: var(--muted);
+}
+
+.rv-words {
+  display: grid;
+  gap: 8px;
+}
+
+.rv-words__row {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+
+.rv-words__locale {
+  padding-top: 6px;
+  color: var(--muted);
+  font: 500 11px/1.2 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rv-words__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rv-words__item {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 100%;
+}
+
+.rv-word {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  min-height: 26px;
+  padding: 0 3px 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--raised);
+  font-size: 13px;
+}
+
+.rv-word__text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rv-word--clash {
+  border-color: var(--bad);
+  background: var(--bad-soft);
+}
+
+.rv-word__remove {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+}
+
+.rv-word__remove:hover:not(:disabled) {
+  background: var(--line);
+  color: var(--ink);
+}
+
+.rv-word__remove:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.rv-words__clash {
+  max-width: 24em;
+  padding-left: 4px;
+  color: var(--bad);
+  font-size: 12px;
+}
+
+.rv-words__input {
+  width: 9.5em;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px dashed var(--edge);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 13px;
+}
+
+.rv-words__input:focus {
+  border-style: solid;
+}
+
+.rv-words__input::placeholder {
+  color: var(--muted);
+}
+
+/* The review: note, notices, actions */
+
+.rv-notice,
+.rv-banner {
+  max-width: 560px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--warn);
+  border-radius: var(--radius-small);
+  background: var(--warn-soft);
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.rv-banner {
+  border-color: var(--bad);
+  background: var(--bad-soft);
+}
+
+.rv-detail__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  max-width: 560px;
+}
+
+.rv-detail__edits {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.rv-detail__said {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+/* A live region stays in the page, and in the accessibility tree, while it has nothing to say;
+   out of the flow then, it takes no room and opens no gap. */
+.rv-live:empty {
+  position: absolute;
+}
+
+/* The runs that used the entry */
+
+.rv-runs {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rv-runs__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13.5px;
+}
+
+.rv-runs__row:last-child {
+  border-bottom: 0;
+}
+
+.rv-runs__question {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+}
+
+.rv-runs__question:hover {
+  text-decoration-color: currentColor;
+}
+
+.rv-runs__rating {
+  display: inline-flex;
+  flex: none;
+  color: var(--muted);
+}
+
+.rv-runs__rating--up {
+  color: var(--good);
+}
+
+.rv-runs__rating--down {
+  color: var(--bad);
+}
+
+.rv-runs__time {
+  flex: none;
+  min-width: 4.5em;
+  color: var(--muted);
+  font: 400 11.5px/1 var(--mono);
+  text-align: right;
+}
+
+@keyframes rv-skeleton {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (max-width: 759.98px) {
+  .rv-detail {
+    padding: 16px 16px 40px;
+  }
+
+  .rv-bars__row {
+    grid-template-columns: minmax(0, 1fr) minmax(40px, 0.8fr) minmax(2.5em, auto);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-list__bone,
+  .rv-detail__bone {
+    animation: none;
+  }
+}

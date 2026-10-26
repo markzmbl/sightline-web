@@ -1,0 +1,855 @@
+{
+  "slug": "energy",
+  "workspace": "manufacturing",
+  "question": "Which lines use the most energy per 1,000 good units?",
+  "final_status": "complete",
+  "continuation": null,
+  "stages": [
+    {
+      "phase": "understand",
+      "stage": "situate",
+      "ms": 2358
+    },
+    {
+      "phase": "understand",
+      "stage": "abstract",
+      "ms": 197754
+    },
+    {
+      "phase": "understand",
+      "stage": "bind",
+      "ms": 7
+    },
+    {
+      "phase": "analyse",
+      "stage": "enrich",
+      "ms": 5
+    },
+    {
+      "phase": "analyse",
+      "stage": "derive",
+      "ms": 10
+    },
+    {
+      "phase": "analyse",
+      "stage": "query",
+      "ms": 12
+    },
+    {
+      "phase": "present",
+      "stage": "idiom",
+      "ms": 327
+    },
+    {
+      "phase": "present",
+      "stage": "render",
+      "ms": 172
+    },
+    {
+      "phase": "present",
+      "stage": "perceive",
+      "ms": 7330
+    },
+    {
+      "phase": "present",
+      "stage": "validate",
+      "ms": 1083
+    }
+  ],
+  "restatement": null,
+  "card": {
+    "blocking": false,
+    "points": [
+      {
+        "id": "grain",
+        "step": "meaning",
+        "question": "In which time steps?",
+        "options": [
+          {
+            "id": "month",
+            "label": "per month",
+            "hint": ""
+          },
+          {
+            "id": "none",
+            "label": "no time steps",
+            "hint": ""
+          }
+        ],
+        "chosen": "month",
+        "default": "month",
+        "by": "s2",
+        "confidence": 0.49,
+        "why": "Claude settled what System 1 left open",
+        "open": false,
+        "stage": "abstract"
+      },
+      {
+        "id": "reading",
+        "step": "form",
+        "question": "What do you want to read from it?",
+        "options": [
+          {
+            "id": "none",
+            "label": "it does not run over time",
+            "hint": ""
+          },
+          {
+            "id": "comparison",
+            "label": "two or three series against each other, period by period",
+            "hint": "columns side by side"
+          },
+          {
+            "id": "amounts",
+            "label": "how much each period holds, read one by one",
+            "hint": "columns, each with its value"
+          }
+        ],
+        "chosen": "comparison",
+        "default": "none",
+        "by": "s1",
+        "confidence": 0.56,
+        "why": "",
+        "open": false,
+        "stage": "abstract"
+      }
+    ]
+  },
+  "clarify": null,
+  "result": {
+    "sql": "SELECT \"dim_line\".\"line_name\" AS \"line_name\", (1000.0 * (COALESCE(SUM(\"f\".\"energy_kwh\"), 0)) / NULLIF((COALESCE(SUM(\"f\".\"good_qty\"), 0)), 0)) AS \"energy_per_thousand_good_units\" FROM \"main\".\"mart_line_performance_month\" AS \"f\" JOIN \"main\".\"dim_line\" AS \"dim_line\" ON \"f\".\"line_code\" = \"dim_line\".\"line_code\" GROUP BY \"dim_line\".\"line_name\" HAVING (COUNT(*) + COUNT(*)) > 0 ORDER BY \"energy_per_thousand_good_units\" DESC LIMIT 10000",
+    "columns": [
+      {
+        "name": "line_name",
+        "type": "nominal"
+      },
+      {
+        "name": "energy_per_thousand_good_units",
+        "type": "q_ratio"
+      }
+    ],
+    "rows": [
+      [
+        "Linz assembly",
+        1551.690714
+      ],
+      [
+        "Brno assembly",
+        1164.61578
+      ],
+      [
+        "Brno welding",
+        848.443621
+      ],
+      [
+        "Augsburg assembly",
+        686.562868
+      ],
+      [
+        "Linz laser bending",
+        473.145855
+      ],
+      [
+        "Augsburg moulding 2",
+        462.39951
+      ],
+      [
+        "Augsburg moulding 1",
+        331.828123
+      ],
+      [
+        "Brno stamping",
+        82.942237
+      ],
+      [
+        "Linz stamping",
+        78.135214
+      ]
+    ],
+    "row_count": 9,
+    "truncated": false,
+    "chart": {
+      "chart": "horizontal_bar",
+      "label": "ranked bars",
+      "spec": {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "description": "horizontal_bar (deterministic fallback); rules: CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO, VIS-TASK-FIT",
+        "data": {
+          "values": [
+            {
+              "line_name": "Linz assembly",
+              "energy_per_thousand_good_units": 1551.690714,
+              "__name": "Linz assembly",
+              "__tip": "1,552 kWh",
+              "__rest": false
+            },
+            {
+              "line_name": "Brno assembly",
+              "energy_per_thousand_good_units": 1164.61578,
+              "__name": "Brno assembly",
+              "__tip": "1,165 kWh",
+              "__rest": false
+            },
+            {
+              "line_name": "Brno welding",
+              "energy_per_thousand_good_units": 848.443621,
+              "__name": "Brno welding",
+              "__tip": "848 kWh",
+              "__rest": false
+            },
+            {
+              "line_name": "Augsburg assembly",
+              "energy_per_thousand_good_units": 686.562868,
+              "__name": "Augsburg assembly",
+              "__tip": "687 kWh",
+              "__rest": false
+            },
+            {
+              "line_name": "Linz laser bending",
+              "energy_per_thousand_good_units": 473.145855,
+              "__name": "Linz laser bending",
+              "__tip": "473 kWh",
+              "__rest": false
+            },
+            {
+              "line_name": "Augsburg moulding 2",
+              "energy_per_thousand_good_units": 462.39951,
+              "__name": "Augsburg moulding 2",
+              "__tip": "462 kWh",
+              "__rest": false
+            },
+            {
+              "line_name": "Augsburg moulding 1",
+              "energy_per_thousand_good_units": 331.828123,
+              "__name": "Augsburg moulding 1",
+              "__tip": "332 kWh",
+              "__rest": false
+            },
+            {
+              "line_name": "Brno stamping",
+              "energy_per_thousand_good_units": 82.942237,
+              "__name": "Brno stamping",
+              "__tip": "83 kWh",
+              "__rest": false
+            },
+            {
+              "line_name": "Linz stamping",
+              "energy_per_thousand_good_units": 78.135214,
+              "__name": "Linz stamping",
+              "__tip": "78 kWh",
+              "__rest": false
+            }
+          ]
+        },
+        "height": {
+          "step": 26
+        },
+        "layer": [
+          {
+            "params": [
+              {
+                "name": "hover",
+                "select": {
+                  "type": "point",
+                  "on": "mouseover",
+                  "clear": "mouseout"
+                }
+              }
+            ],
+            "mark": {
+              "type": "bar",
+              "cornerRadiusEnd": 5,
+              "height": {
+                "band": 0.72
+              }
+            },
+            "encoding": {
+              "x": {
+                "field": "energy_per_thousand_good_units",
+                "type": "quantitative",
+                "title": "kwh per 1,000 good units",
+                "scale": {
+                  "domain": [
+                    0,
+                    1551.690714
+                  ]
+                }
+              },
+              "color": {
+                "condition": {
+                  "test": "datum.__rest",
+                  "value": "#BCC0C6"
+                },
+                "value": {
+                  "gradient": "linear",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 1,
+                  "y2": 0,
+                  "stops": [
+                    {
+                      "offset": 0,
+                      "color": "#1227FD"
+                    },
+                    {
+                      "offset": 1,
+                      "color": "#4F7BFF"
+                    }
+                  ]
+                }
+              },
+              "opacity": {
+                "condition": {
+                  "param": "hover",
+                  "value": 1
+                },
+                "value": 0.72
+              },
+              "tooltip": [
+                {
+                  "field": "__name",
+                  "type": "nominal",
+                  "title": "line"
+                },
+                {
+                  "field": "__tip",
+                  "type": "nominal",
+                  "title": "kWh per 1,000 good units"
+                }
+              ],
+              "y": {
+                "field": "__name",
+                "type": "nominal",
+                "sort": [
+                  "Linz assembly",
+                  "Brno assembly",
+                  "Brno welding",
+                  "Augsburg assembly",
+                  "Linz laser bending",
+                  "Augsburg moulding 2",
+                  "Augsburg moulding 1",
+                  "Brno stamping",
+                  "Linz stamping"
+                ],
+                "title": null,
+                "axis": {
+                  "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                  "labelLimit": 300,
+                  "ticks": false,
+                  "labelPadding": 8,
+                  "domain": false,
+                  "grid": false
+                }
+              }
+            }
+          }
+        ],
+        "title": {
+          "text": "Top lines by kWh per 1,000 good units"
+        },
+        "usermeta": {
+          "theme": "pattern-perspectives"
+        },
+        "config": {
+          "background": "#FFFFFF",
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+          "padding": {
+            "left": 20,
+            "right": 24,
+            "top": 20,
+            "bottom": 18
+          },
+          "view": {
+            "stroke": null
+          },
+          "title": {
+            "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "fontSize": 16,
+            "fontWeight": 600,
+            "color": "#191C1F",
+            "anchor": "start",
+            "offset": 16,
+            "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "subtitleColor": "#5F6368",
+            "subtitleFontSize": 12.5,
+            "subtitleFontWeight": 400,
+            "subtitlePadding": 6,
+            "subtitleLineHeight": 17
+          },
+          "axis": {
+            "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "labelFontSize": 10.5,
+            "labelColor": "#5F6368",
+            "labelPadding": 8,
+            "labelSeparation": 6,
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "titlePadding": 12,
+            "domainColor": "#C9C9CD",
+            "tickColor": "#C9C9CD",
+            "gridColor": "#E2E2E7",
+            "gridWidth": 1
+          },
+          "axisX": {
+            "grid": false,
+            "ticks": true,
+            "tickSize": 4,
+            "domain": true
+          },
+          "axisY": {
+            "domain": false,
+            "ticks": false,
+            "grid": true
+          },
+          "axisBand": {
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelColor": "#191C1F",
+            "labelFontSize": 11,
+            "labelPadding": 10
+          },
+          "legend": {
+            "orient": "bottom",
+            "direction": "horizontal",
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelFontSize": 12,
+            "labelColor": "#191C1F",
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "symbolType": "circle",
+            "symbolSize": 110,
+            "symbolStrokeWidth": 0,
+            "columnPadding": 16,
+            "padding": 4,
+            "offset": 16
+          },
+          "range": {
+            "category": [
+              "#1227FD",
+              "#00967A",
+              "#8B5CF6",
+              "#B07800",
+              "#46277A",
+              "#4F7BFF",
+              "#191C1F"
+            ],
+            "ramp": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "heatmap": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "diverging": [
+              "#E23B4A",
+              "#F4F4F6",
+              "#1227FD"
+            ]
+          },
+          "mark": {
+            "color": "#1227FD"
+          },
+          "line": {
+            "color": "#1227FD",
+            "strokeWidth": 2.5,
+            "strokeCap": "round",
+            "strokeJoin": "round"
+          },
+          "point": {
+            "color": "#1227FD",
+            "size": 56,
+            "filled": true
+          },
+          "area": {
+            "color": "#1227FD",
+            "opacity": 0.16
+          },
+          "bar": {
+            "color": "#1227FD",
+            "cornerRadiusEnd": 5
+          },
+          "arc": {
+            "stroke": "#FFFFFF",
+            "strokeWidth": 2
+          },
+          "rect": {
+            "color": "#1227FD"
+          },
+          "rule": {
+            "color": "#C9C9CD"
+          },
+          "text": {
+            "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "fontSize": 11,
+            "color": "#191C1F"
+          }
+        }
+      },
+      "png_url": null,
+      "alternatives": [
+        {
+          "chart": "point",
+          "label": "ranked dots",
+          "hint": "see which categories are the largest and how far apart they are"
+        },
+        {
+          "chart": "bar",
+          "label": "columns",
+          "hint": null
+        },
+        {
+          "chart": "table",
+          "label": "a table",
+          "hint": null
+        }
+      ]
+    },
+    "findings": []
+  },
+  "charts": {
+    "horizontal_bar": {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "description": "horizontal_bar (deterministic fallback); rules: CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO, VIS-TASK-FIT",
+      "data": {
+        "values": [
+          {
+            "line_name": "Linz assembly",
+            "energy_per_thousand_good_units": 1551.690714,
+            "__name": "Linz assembly",
+            "__tip": "1,552 kWh",
+            "__rest": false
+          },
+          {
+            "line_name": "Brno assembly",
+            "energy_per_thousand_good_units": 1164.61578,
+            "__name": "Brno assembly",
+            "__tip": "1,165 kWh",
+            "__rest": false
+          },
+          {
+            "line_name": "Brno welding",
+            "energy_per_thousand_good_units": 848.443621,
+            "__name": "Brno welding",
+            "__tip": "848 kWh",
+            "__rest": false
+          },
+          {
+            "line_name": "Augsburg assembly",
+            "energy_per_thousand_good_units": 686.562868,
+            "__name": "Augsburg assembly",
+            "__tip": "687 kWh",
+            "__rest": false
+          },
+          {
+            "line_name": "Linz laser bending",
+            "energy_per_thousand_good_units": 473.145855,
+            "__name": "Linz laser bending",
+            "__tip": "473 kWh",
+            "__rest": false
+          },
+          {
+            "line_name": "Augsburg moulding 2",
+            "energy_per_thousand_good_units": 462.39951,
+            "__name": "Augsburg moulding 2",
+            "__tip": "462 kWh",
+            "__rest": false
+          },
+          {
+            "line_name": "Augsburg moulding 1",
+            "energy_per_thousand_good_units": 331.828123,
+            "__name": "Augsburg moulding 1",
+            "__tip": "332 kWh",
+            "__rest": false
+          },
+          {
+            "line_name": "Brno stamping",
+            "energy_per_thousand_good_units": 82.942237,
+            "__name": "Brno stamping",
+            "__tip": "83 kWh",
+            "__rest": false
+          },
+          {
+            "line_name": "Linz stamping",
+            "energy_per_thousand_good_units": 78.135214,
+            "__name": "Linz stamping",
+            "__tip": "78 kWh",
+            "__rest": false
+          }
+        ]
+      },
+      "height": {
+        "step": 26
+      },
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "hover",
+              "select": {
+                "type": "point",
+                "on": "mouseover",
+                "clear": "mouseout"
+              }
+            }
+          ],
+          "mark": {
+            "type": "bar",
+            "cornerRadiusEnd": 5,
+            "height": {
+              "band": 0.72
+            }
+          },
+          "encoding": {
+            "x": {
+              "field": "energy_per_thousand_good_units",
+              "type": "quantitative",
+              "title": "kwh per 1,000 good units",
+              "scale": {
+                "domain": [
+                  0,
+                  1551.690714
+                ]
+              }
+            },
+            "color": {
+              "condition": {
+                "test": "datum.__rest",
+                "value": "#BCC0C6"
+              },
+              "value": {
+                "gradient": "linear",
+                "x1": 0,
+                "y1": 0,
+                "x2": 1,
+                "y2": 0,
+                "stops": [
+                  {
+                    "offset": 0,
+                    "color": "#1227FD"
+                  },
+                  {
+                    "offset": 1,
+                    "color": "#4F7BFF"
+                  }
+                ]
+              }
+            },
+            "opacity": {
+              "condition": {
+                "param": "hover",
+                "value": 1
+              },
+              "value": 0.72
+            },
+            "tooltip": [
+              {
+                "field": "__name",
+                "type": "nominal",
+                "title": "line"
+              },
+              {
+                "field": "__tip",
+                "type": "nominal",
+                "title": "kWh per 1,000 good units"
+              }
+            ],
+            "y": {
+              "field": "__name",
+              "type": "nominal",
+              "sort": [
+                "Linz assembly",
+                "Brno assembly",
+                "Brno welding",
+                "Augsburg assembly",
+                "Linz laser bending",
+                "Augsburg moulding 2",
+                "Augsburg moulding 1",
+                "Brno stamping",
+                "Linz stamping"
+              ],
+              "title": null,
+              "axis": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                "labelLimit": 300,
+                "ticks": false,
+                "labelPadding": 8,
+                "domain": false,
+                "grid": false
+              }
+            }
+          }
+        }
+      ],
+      "title": {
+        "text": "Top lines by kWh per 1,000 good units"
+      },
+      "usermeta": {
+        "theme": "pattern-perspectives"
+      },
+      "config": {
+        "background": "#FFFFFF",
+        "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+        "padding": {
+          "left": 20,
+          "right": 24,
+          "top": 20,
+          "bottom": 18
+        },
+        "view": {
+          "stroke": null
+        },
+        "title": {
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "fontSize": 16,
+          "fontWeight": 600,
+          "color": "#191C1F",
+          "anchor": "start",
+          "offset": 16,
+          "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "subtitleColor": "#5F6368",
+          "subtitleFontSize": 12.5,
+          "subtitleFontWeight": 400,
+          "subtitlePadding": 6,
+          "subtitleLineHeight": 17
+        },
+        "axis": {
+          "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "labelFontSize": 10.5,
+          "labelColor": "#5F6368",
+          "labelPadding": 8,
+          "labelSeparation": 6,
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "titlePadding": 12,
+          "domainColor": "#C9C9CD",
+          "tickColor": "#C9C9CD",
+          "gridColor": "#E2E2E7",
+          "gridWidth": 1
+        },
+        "axisX": {
+          "grid": false,
+          "ticks": true,
+          "tickSize": 4,
+          "domain": true
+        },
+        "axisY": {
+          "domain": false,
+          "ticks": false,
+          "grid": true
+        },
+        "axisBand": {
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelColor": "#191C1F",
+          "labelFontSize": 11,
+          "labelPadding": 10
+        },
+        "legend": {
+          "orient": "bottom",
+          "direction": "horizontal",
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelFontSize": 12,
+          "labelColor": "#191C1F",
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "symbolType": "circle",
+          "symbolSize": 110,
+          "symbolStrokeWidth": 0,
+          "columnPadding": 16,
+          "padding": 4,
+          "offset": 16
+        },
+        "range": {
+          "category": [
+            "#1227FD",
+            "#00967A",
+            "#8B5CF6",
+            "#B07800",
+            "#46277A",
+            "#4F7BFF",
+            "#191C1F"
+          ],
+          "ramp": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "heatmap": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "diverging": [
+            "#E23B4A",
+            "#F4F4F6",
+            "#1227FD"
+          ]
+        },
+        "mark": {
+          "color": "#1227FD"
+        },
+        "line": {
+          "color": "#1227FD",
+          "strokeWidth": 2.5,
+          "strokeCap": "round",
+          "strokeJoin": "round"
+        },
+        "point": {
+          "color": "#1227FD",
+          "size": 56,
+          "filled": true
+        },
+        "area": {
+          "color": "#1227FD",
+          "opacity": 0.16
+        },
+        "bar": {
+          "color": "#1227FD",
+          "cornerRadiusEnd": 5
+        },
+        "arc": {
+          "stroke": "#FFFFFF",
+          "strokeWidth": 2
+        },
+        "rect": {
+          "color": "#1227FD"
+        },
+        "rule": {
+          "color": "#C9C9CD"
+        },
+        "text": {
+          "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "fontSize": 11,
+          "color": "#191C1F"
+        }
+      }
+    }
+  },
+  "chart_options": [
+    {
+      "chart": "horizontal_bar",
+      "label": "ranked bars",
+      "hint": "see which categories are the largest and how far apart they are"
+    },
+    {
+      "chart": "point",
+      "label": "ranked dots",
+      "hint": "see which categories are the largest and how far apart they are"
+    },
+    {
+      "chart": "bar",
+      "label": "columns",
+      "hint": null
+    },
+    {
+      "chart": "table",
+      "label": "a table",
+      "hint": null
+    }
+  ]
+}

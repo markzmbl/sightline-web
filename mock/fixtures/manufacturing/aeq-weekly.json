@@ -1,0 +1,2619 @@
+{
+  "slug": "aeq-weekly",
+  "workspace": "manufacturing",
+  "question": "How did availability, effectiveness and quality ratio develop per week in Q4 2025?",
+  "final_status": "complete",
+  "continuation": null,
+  "stages": [
+    {
+      "phase": "understand",
+      "stage": "situate",
+      "ms": 126
+    },
+    {
+      "phase": "understand",
+      "stage": "recall",
+      "ms": 19
+    },
+    {
+      "phase": "understand",
+      "stage": "define",
+      "ms": 14
+    },
+    {
+      "phase": "understand",
+      "stage": "ground",
+      "ms": 180
+    },
+    {
+      "phase": "understand",
+      "stage": "abstract",
+      "ms": 4285
+    },
+    {
+      "phase": "understand",
+      "stage": "bind",
+      "ms": 15
+    },
+    {
+      "phase": "analyse",
+      "stage": "enrich",
+      "ms": 9
+    },
+    {
+      "phase": "analyse",
+      "stage": "derive",
+      "ms": 91
+    },
+    {
+      "phase": "analyse",
+      "stage": "query",
+      "ms": 24
+    },
+    {
+      "phase": "present",
+      "stage": "idiom",
+      "ms": 729
+    },
+    {
+      "phase": "present",
+      "stage": "render",
+      "ms": 163
+    },
+    {
+      "phase": "present",
+      "stage": "perceive",
+      "ms": 25609
+    },
+    {
+      "phase": "present",
+      "stage": "validate",
+      "ms": 1916
+    }
+  ],
+  "restatement": "You want to see how availability, quality ratio and effectiveness developed per week, from 1 Oct 2025 to 31 Dec 2025. Defined as: availability is a proposed definition from sightline's KPI library (ISO 22400-2:2014, key performance indicators for manufacturing operations management), not yet approved: actual production time (run hours) over planned busy time (planned busy hours). Defined as: quality ratio is a proposed definition from sightline's KPI library (ISO 22400-2:2014, key performance indicators for manufacturing operations management), not yet approved: good quantity over produced quantity. Defined as: effectiveness is a proposed definition from sightline's KPI library (ISO 22400-2:2014, key performance indicators for manufacturing operations management), not yet approved: ideal production time (ideal hours) over actual production time (run hours).",
+  "card": {
+    "blocking": false,
+    "points": [
+      {
+        "id": "scope",
+        "step": "detail",
+        "question": "What should happen to the incomplete periods?",
+        "options": [
+          {
+            "id": "marked",
+            "label": "shown lighter and marked with a star",
+            "hint": ""
+          },
+          {
+            "id": "left_out",
+            "label": "left out",
+            "hint": ""
+          }
+        ],
+        "chosen": "marked",
+        "default": "marked",
+        "by": "s1",
+        "confidence": 0.36,
+        "why": "the System 1 model was not sure (0.36 below 0.50)",
+        "open": true,
+        "stage": "idiom"
+      }
+    ]
+  },
+  "clarify": null,
+  "result": {
+    "sql": "SELECT DATE_TRUNC('WEEK', \"f\".\"shift_date\") AS \"week\", (100 * ((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"planned_busy_minutes\" / 60.0), 0)), 0)) AS \"availability\", (100 * ((COALESCE(SUM(\"f\".\"good_qty\"), 0))) / NULLIF((COALESCE(SUM(\"f\".\"produced_qty\"), 0)), 0)) AS \"quality_ratio\", (100 * ((COALESCE(SUM(\"f\".\"ideal_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0)), 0)) AS \"effectiveness\" FROM \"main\".\"fct_production_shifts\" AS \"f\" WHERE \"f\".\"shift_date\" >= CAST('2025-10-01' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-31' AS DATE) GROUP BY DATE_TRUNC('WEEK', \"f\".\"shift_date\") ORDER BY \"week\" ASC LIMIT 10000",
+    "columns": [
+      {
+        "name": "week",
+        "type": "temporal"
+      },
+      {
+        "name": "availability",
+        "type": "q_ratio"
+      },
+      {
+        "name": "quality_ratio",
+        "type": "q_ratio"
+      },
+      {
+        "name": "effectiveness",
+        "type": "q_ratio"
+      }
+    ],
+    "rows": [
+      [
+        "2025-09-29T00:00:00",
+        89.117247,
+        98.581857,
+        83.598833
+      ],
+      [
+        "2025-10-06T00:00:00",
+        90.215769,
+        98.333483,
+        84.364921
+      ],
+      [
+        "2025-10-13T00:00:00",
+        90.357863,
+        98.269794,
+        84.294689
+      ],
+      [
+        "2025-10-20T00:00:00",
+        89.834829,
+        98.366285,
+        84.48574
+      ],
+      [
+        "2025-10-27T00:00:00",
+        90.000726,
+        98.331955,
+        84.421854
+      ],
+      [
+        "2025-11-03T00:00:00",
+        92.166026,
+        98.322349,
+        84.128069
+      ],
+      [
+        "2025-11-10T00:00:00",
+        92.672479,
+        98.409148,
+        84.272917
+      ],
+      [
+        "2025-11-17T00:00:00",
+        92.83093,
+        98.333422,
+        84.264514
+      ],
+      [
+        "2025-11-24T00:00:00",
+        92.861624,
+        98.283635,
+        84.283155
+      ],
+      [
+        "2025-12-01T00:00:00",
+        92.144444,
+        98.282147,
+        84.41519
+      ],
+      [
+        "2025-12-08T00:00:00",
+        91.675646,
+        98.352058,
+        84.242786
+      ],
+      [
+        "2025-12-15T00:00:00",
+        92.231026,
+        98.292593,
+        84.135742
+      ],
+      [
+        "2025-12-22T00:00:00",
+        91.722115,
+        98.347341,
+        84.523785
+      ]
+    ],
+    "row_count": 13,
+    "truncated": false,
+    "chart": {
+      "chart": "line",
+      "label": "lines",
+      "spec": {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "description": "line (deterministic fallback); rules: CH-Q-POS, CH-T-POS, FORM-RECOGNISED, INTENT-AFFINITY, VIS-TASK-FIT, VIS-TEMPORAL-X",
+        "data": {
+          "values": [
+            {
+              "week": "2025-09-29T00:00:00",
+              "__series": "availability",
+              "__value": 89.117247,
+              "__unit": "%",
+              "__partial": true,
+              "__tip": "89.1%"
+            },
+            {
+              "week": "2025-10-06T00:00:00",
+              "__series": "availability",
+              "__value": 90.215769,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "90.2%"
+            },
+            {
+              "week": "2025-10-13T00:00:00",
+              "__series": "availability",
+              "__value": 90.357863,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "90.4%"
+            },
+            {
+              "week": "2025-10-20T00:00:00",
+              "__series": "availability",
+              "__value": 89.834829,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "89.8%"
+            },
+            {
+              "week": "2025-10-27T00:00:00",
+              "__series": "availability",
+              "__value": 90.000726,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "90.0%"
+            },
+            {
+              "week": "2025-11-03T00:00:00",
+              "__series": "availability",
+              "__value": 92.166026,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "92.2%"
+            },
+            {
+              "week": "2025-11-10T00:00:00",
+              "__series": "availability",
+              "__value": 92.672479,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "92.7%"
+            },
+            {
+              "week": "2025-11-17T00:00:00",
+              "__series": "availability",
+              "__value": 92.83093,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "92.8%"
+            },
+            {
+              "week": "2025-11-24T00:00:00",
+              "__series": "availability",
+              "__value": 92.861624,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "92.9%"
+            },
+            {
+              "week": "2025-12-01T00:00:00",
+              "__series": "availability",
+              "__value": 92.144444,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "92.1%"
+            },
+            {
+              "week": "2025-12-08T00:00:00",
+              "__series": "availability",
+              "__value": 91.675646,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "91.7%"
+            },
+            {
+              "week": "2025-12-15T00:00:00",
+              "__series": "availability",
+              "__value": 92.231026,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "92.2%"
+            },
+            {
+              "week": "2025-12-22T00:00:00",
+              "__series": "availability",
+              "__value": 91.722115,
+              "__unit": "%",
+              "__partial": true,
+              "__tip": "91.7%"
+            },
+            {
+              "week": "2025-09-29T00:00:00",
+              "__series": "effectiveness",
+              "__value": 83.598833,
+              "__unit": "%",
+              "__partial": true,
+              "__tip": "83.6%"
+            },
+            {
+              "week": "2025-10-06T00:00:00",
+              "__series": "effectiveness",
+              "__value": 84.364921,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "84.4%"
+            },
+            {
+              "week": "2025-10-13T00:00:00",
+              "__series": "effectiveness",
+              "__value": 84.294689,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "84.3%"
+            },
+            {
+              "week": "2025-10-20T00:00:00",
+              "__series": "effectiveness",
+              "__value": 84.48574,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "84.5%"
+            },
+            {
+              "week": "2025-10-27T00:00:00",
+              "__series": "effectiveness",
+              "__value": 84.421854,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "84.4%"
+            },
+            {
+              "week": "2025-11-03T00:00:00",
+              "__series": "effectiveness",
+              "__value": 84.128069,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "84.1%"
+            },
+            {
+              "week": "2025-11-10T00:00:00",
+              "__series": "effectiveness",
+              "__value": 84.272917,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "84.3%"
+            },
+            {
+              "week": "2025-11-17T00:00:00",
+              "__series": "effectiveness",
+              "__value": 84.264514,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "84.3%"
+            },
+            {
+              "week": "2025-11-24T00:00:00",
+              "__series": "effectiveness",
+              "__value": 84.283155,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "84.3%"
+            },
+            {
+              "week": "2025-12-01T00:00:00",
+              "__series": "effectiveness",
+              "__value": 84.41519,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "84.4%"
+            },
+            {
+              "week": "2025-12-08T00:00:00",
+              "__series": "effectiveness",
+              "__value": 84.242786,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "84.2%"
+            },
+            {
+              "week": "2025-12-15T00:00:00",
+              "__series": "effectiveness",
+              "__value": 84.135742,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "84.1%"
+            },
+            {
+              "week": "2025-12-22T00:00:00",
+              "__series": "effectiveness",
+              "__value": 84.523785,
+              "__unit": "%",
+              "__partial": true,
+              "__tip": "84.5%"
+            },
+            {
+              "week": "2025-09-29T00:00:00",
+              "__series": "quality ratio",
+              "__value": 98.581857,
+              "__unit": "%",
+              "__partial": true,
+              "__tip": "98.6%"
+            },
+            {
+              "week": "2025-10-06T00:00:00",
+              "__series": "quality ratio",
+              "__value": 98.333483,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "98.3%"
+            },
+            {
+              "week": "2025-10-13T00:00:00",
+              "__series": "quality ratio",
+              "__value": 98.269794,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "98.3%"
+            },
+            {
+              "week": "2025-10-20T00:00:00",
+              "__series": "quality ratio",
+              "__value": 98.366285,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "98.4%"
+            },
+            {
+              "week": "2025-10-27T00:00:00",
+              "__series": "quality ratio",
+              "__value": 98.331955,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "98.3%"
+            },
+            {
+              "week": "2025-11-03T00:00:00",
+              "__series": "quality ratio",
+              "__value": 98.322349,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "98.3%"
+            },
+            {
+              "week": "2025-11-10T00:00:00",
+              "__series": "quality ratio",
+              "__value": 98.409148,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "98.4%"
+            },
+            {
+              "week": "2025-11-17T00:00:00",
+              "__series": "quality ratio",
+              "__value": 98.333422,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "98.3%"
+            },
+            {
+              "week": "2025-11-24T00:00:00",
+              "__series": "quality ratio",
+              "__value": 98.283635,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "98.3%"
+            },
+            {
+              "week": "2025-12-01T00:00:00",
+              "__series": "quality ratio",
+              "__value": 98.282147,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "98.3%"
+            },
+            {
+              "week": "2025-12-08T00:00:00",
+              "__series": "quality ratio",
+              "__value": 98.352058,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "98.4%"
+            },
+            {
+              "week": "2025-12-15T00:00:00",
+              "__series": "quality ratio",
+              "__value": 98.292593,
+              "__unit": "%",
+              "__partial": false,
+              "__tip": "98.3%"
+            },
+            {
+              "week": "2025-12-22T00:00:00",
+              "__series": "quality ratio",
+              "__value": 98.347341,
+              "__unit": "%",
+              "__partial": true,
+              "__tip": "98.3%"
+            }
+          ]
+        },
+        "height": 320,
+        "layer": [
+          {
+            "transform": [
+              {
+                "filter": "!datum.__partial"
+              }
+            ],
+            "mark": {
+              "type": "line",
+              "strokeWidth": 2.5,
+              "strokeCap": "round",
+              "strokeJoin": "round"
+            },
+            "encoding": {
+              "x": {
+                "field": "week",
+                "type": "temporal",
+                "title": null,
+                "axis": {
+                  "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                  "labelOverlap": true,
+                  "format": "%-d %b",
+                  "values": [
+                    {
+                      "year": 2025,
+                      "month": 9,
+                      "date": 29
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 6
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 13
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 20
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 27
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 3
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 10
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 17
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 24
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 8
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 15
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 22
+                    }
+                  ],
+                  "labelExpr": "timeFormat(datum.value, \"%-d %b\") + (indexof([\"2025-09-29\", \"2025-12-22\"], timeFormat(datum.value, '%Y-%m-%d')) >= 0 ? '*' : '')"
+                },
+                "scale": {
+                  "padding": 14
+                }
+              },
+              "y": {
+                "field": "__value",
+                "type": "quantitative",
+                "title": null,
+                "axis": {
+                  "labelExpr": "datum.label ? datum.label + '%' : ''"
+                },
+                "scale": {
+                  "zero": false,
+                  "nice": true
+                }
+              },
+              "color": {
+                "field": "__series",
+                "type": "nominal",
+                "scale": {
+                  "domain": [
+                    "availability",
+                    "quality ratio",
+                    "effectiveness"
+                  ],
+                  "range": [
+                    "#1227FD",
+                    "#007A62",
+                    "#6B4FF0"
+                  ]
+                },
+                "legend": null
+              }
+            }
+          },
+          {
+            "data": {
+              "values": [
+                {
+                  "week": "2025-09-29T00:00:00",
+                  "__series": "availability",
+                  "__value": 89.117247,
+                  "__unit": "%",
+                  "__partial": true,
+                  "__tip": "89.1%",
+                  "__bridge": "availability:0"
+                },
+                {
+                  "week": "2025-10-06T00:00:00",
+                  "__series": "availability",
+                  "__value": 90.215769,
+                  "__unit": "%",
+                  "__partial": false,
+                  "__tip": "90.2%",
+                  "__bridge": "availability:0"
+                },
+                {
+                  "week": "2025-12-15T00:00:00",
+                  "__series": "availability",
+                  "__value": 92.231026,
+                  "__unit": "%",
+                  "__partial": false,
+                  "__tip": "92.2%",
+                  "__bridge": "availability:11"
+                },
+                {
+                  "week": "2025-12-22T00:00:00",
+                  "__series": "availability",
+                  "__value": 91.722115,
+                  "__unit": "%",
+                  "__partial": true,
+                  "__tip": "91.7%",
+                  "__bridge": "availability:11"
+                },
+                {
+                  "week": "2025-09-29T00:00:00",
+                  "__series": "effectiveness",
+                  "__value": 83.598833,
+                  "__unit": "%",
+                  "__partial": true,
+                  "__tip": "83.6%",
+                  "__bridge": "effectiveness:0"
+                },
+                {
+                  "week": "2025-10-06T00:00:00",
+                  "__series": "effectiveness",
+                  "__value": 84.364921,
+                  "__unit": "%",
+                  "__partial": false,
+                  "__tip": "84.4%",
+                  "__bridge": "effectiveness:0"
+                },
+                {
+                  "week": "2025-12-15T00:00:00",
+                  "__series": "effectiveness",
+                  "__value": 84.135742,
+                  "__unit": "%",
+                  "__partial": false,
+                  "__tip": "84.1%",
+                  "__bridge": "effectiveness:11"
+                },
+                {
+                  "week": "2025-12-22T00:00:00",
+                  "__series": "effectiveness",
+                  "__value": 84.523785,
+                  "__unit": "%",
+                  "__partial": true,
+                  "__tip": "84.5%",
+                  "__bridge": "effectiveness:11"
+                },
+                {
+                  "week": "2025-09-29T00:00:00",
+                  "__series": "quality ratio",
+                  "__value": 98.581857,
+                  "__unit": "%",
+                  "__partial": true,
+                  "__tip": "98.6%",
+                  "__bridge": "quality ratio:0"
+                },
+                {
+                  "week": "2025-10-06T00:00:00",
+                  "__series": "quality ratio",
+                  "__value": 98.333483,
+                  "__unit": "%",
+                  "__partial": false,
+                  "__tip": "98.3%",
+                  "__bridge": "quality ratio:0"
+                },
+                {
+                  "week": "2025-12-15T00:00:00",
+                  "__series": "quality ratio",
+                  "__value": 98.292593,
+                  "__unit": "%",
+                  "__partial": false,
+                  "__tip": "98.3%",
+                  "__bridge": "quality ratio:11"
+                },
+                {
+                  "week": "2025-12-22T00:00:00",
+                  "__series": "quality ratio",
+                  "__value": 98.347341,
+                  "__unit": "%",
+                  "__partial": true,
+                  "__tip": "98.3%",
+                  "__bridge": "quality ratio:11"
+                }
+              ]
+            },
+            "mark": {
+              "type": "line",
+              "strokeWidth": 1.9,
+              "strokeDash": [
+                4,
+                3
+              ],
+              "strokeCap": "round",
+              "strokeJoin": "round"
+            },
+            "encoding": {
+              "x": {
+                "field": "week",
+                "type": "temporal",
+                "title": null,
+                "axis": {
+                  "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                  "labelOverlap": true,
+                  "format": "%-d %b",
+                  "values": [
+                    {
+                      "year": 2025,
+                      "month": 9,
+                      "date": 29
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 6
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 13
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 20
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 27
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 3
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 10
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 17
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 24
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 8
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 15
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 22
+                    }
+                  ],
+                  "labelExpr": "timeFormat(datum.value, \"%-d %b\") + (indexof([\"2025-09-29\", \"2025-12-22\"], timeFormat(datum.value, '%Y-%m-%d')) >= 0 ? '*' : '')"
+                },
+                "scale": {
+                  "padding": 14
+                }
+              },
+              "y": {
+                "field": "__value",
+                "type": "quantitative",
+                "title": null,
+                "axis": {
+                  "labelExpr": "datum.label ? datum.label + '%' : ''"
+                },
+                "scale": {
+                  "zero": false,
+                  "nice": true
+                }
+              },
+              "detail": {
+                "field": "__bridge",
+                "type": "nominal"
+              },
+              "color": {
+                "field": "__series",
+                "type": "nominal",
+                "scale": {
+                  "domain": [
+                    "availability",
+                    "quality ratio",
+                    "effectiveness"
+                  ],
+                  "range": [
+                    "#1227FD",
+                    "#007A62",
+                    "#6B4FF0"
+                  ]
+                },
+                "legend": null
+              }
+            }
+          },
+          {
+            "transform": [
+              {
+                "filter": "!datum.__partial"
+              }
+            ],
+            "mark": {
+              "type": "point",
+              "filled": true,
+              "size": 56,
+              "opacity": 1,
+              "stroke": "#FFFFFF",
+              "strokeWidth": 1.25
+            },
+            "encoding": {
+              "x": {
+                "field": "week",
+                "type": "temporal",
+                "title": null,
+                "axis": {
+                  "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                  "labelOverlap": true,
+                  "format": "%-d %b",
+                  "values": [
+                    {
+                      "year": 2025,
+                      "month": 9,
+                      "date": 29
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 6
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 13
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 20
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 27
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 3
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 10
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 17
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 24
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 8
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 15
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 22
+                    }
+                  ],
+                  "labelExpr": "timeFormat(datum.value, \"%-d %b\") + (indexof([\"2025-09-29\", \"2025-12-22\"], timeFormat(datum.value, '%Y-%m-%d')) >= 0 ? '*' : '')"
+                },
+                "scale": {
+                  "padding": 14
+                }
+              },
+              "y": {
+                "field": "__value",
+                "type": "quantitative",
+                "title": null,
+                "axis": {
+                  "labelExpr": "datum.label ? datum.label + '%' : ''"
+                },
+                "scale": {
+                  "zero": false,
+                  "nice": true
+                }
+              },
+              "tooltip": [
+                {
+                  "field": "week",
+                  "type": "temporal",
+                  "title": "week",
+                  "format": "%-d %b %Y"
+                },
+                {
+                  "field": "__series",
+                  "type": "nominal",
+                  "title": "series"
+                },
+                {
+                  "field": "__tip",
+                  "type": "nominal",
+                  "title": "value"
+                }
+              ],
+              "color": {
+                "field": "__series",
+                "type": "nominal",
+                "scale": {
+                  "domain": [
+                    "availability",
+                    "quality ratio",
+                    "effectiveness"
+                  ],
+                  "range": [
+                    "#1227FD",
+                    "#007A62",
+                    "#6B4FF0"
+                  ]
+                },
+                "legend": null
+              }
+            }
+          },
+          {
+            "transform": [
+              {
+                "filter": "datum.__partial"
+              }
+            ],
+            "mark": {
+              "type": "point",
+              "filled": true,
+              "fill": "white",
+              "size": 54,
+              "strokeWidth": 2,
+              "opacity": 1
+            },
+            "encoding": {
+              "x": {
+                "field": "week",
+                "type": "temporal",
+                "title": null,
+                "axis": {
+                  "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                  "labelOverlap": true,
+                  "format": "%-d %b",
+                  "values": [
+                    {
+                      "year": 2025,
+                      "month": 9,
+                      "date": 29
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 6
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 13
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 20
+                    },
+                    {
+                      "year": 2025,
+                      "month": 10,
+                      "date": 27
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 3
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 10
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 17
+                    },
+                    {
+                      "year": 2025,
+                      "month": 11,
+                      "date": 24
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 1
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 8
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 15
+                    },
+                    {
+                      "year": 2025,
+                      "month": 12,
+                      "date": 22
+                    }
+                  ],
+                  "labelExpr": "timeFormat(datum.value, \"%-d %b\") + (indexof([\"2025-09-29\", \"2025-12-22\"], timeFormat(datum.value, '%Y-%m-%d')) >= 0 ? '*' : '')"
+                },
+                "scale": {
+                  "padding": 14
+                }
+              },
+              "y": {
+                "field": "__value",
+                "type": "quantitative",
+                "title": null,
+                "axis": {
+                  "labelExpr": "datum.label ? datum.label + '%' : ''"
+                },
+                "scale": {
+                  "zero": false,
+                  "nice": true
+                }
+              },
+              "tooltip": [
+                {
+                  "field": "week",
+                  "type": "temporal",
+                  "title": "week",
+                  "format": "%-d %b %Y"
+                },
+                {
+                  "field": "__series",
+                  "type": "nominal",
+                  "title": "series"
+                },
+                {
+                  "field": "__tip",
+                  "type": "nominal",
+                  "title": "value"
+                }
+              ],
+              "stroke": {
+                "field": "__series",
+                "type": "nominal",
+                "scale": {
+                  "domain": [
+                    "availability",
+                    "quality ratio",
+                    "effectiveness"
+                  ],
+                  "range": [
+                    "#1227FD",
+                    "#007A62",
+                    "#6B4FF0"
+                  ]
+                },
+                "legend": null
+              }
+            }
+          },
+          {
+            "data": {
+              "values": [
+                {
+                  "__series": "effectiveness",
+                  "__x": "2025-12-22T00:00:00",
+                  "__y": 84.523785
+                },
+                {
+                  "__series": "availability",
+                  "__x": "2025-12-22T00:00:00",
+                  "__y": 91.722115
+                },
+                {
+                  "__series": "quality ratio",
+                  "__x": "2025-12-22T00:00:00",
+                  "__y": 98.347341
+                }
+              ]
+            },
+            "mark": {
+              "type": "text",
+              "align": "left",
+              "baseline": "middle",
+              "dx": 8,
+              "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+              "fontSize": 12,
+              "fontWeight": 600
+            },
+            "encoding": {
+              "x": {
+                "field": "__x",
+                "type": "temporal"
+              },
+              "y": {
+                "field": "__y",
+                "type": "quantitative"
+              },
+              "text": {
+                "field": "__series"
+              },
+              "color": {
+                "field": "__series",
+                "type": "nominal",
+                "scale": {
+                  "domain": [
+                    "availability",
+                    "quality ratio",
+                    "effectiveness"
+                  ],
+                  "range": [
+                    "#1227FD",
+                    "#007A62",
+                    "#6B4FF0"
+                  ]
+                },
+                "legend": null
+              }
+            }
+          }
+        ],
+        "padding": {
+          "left": 20,
+          "top": 20,
+          "bottom": 18,
+          "right": 119.10000000000001
+        },
+        "title": {
+          "text": "Availability, quality ratio and effectiveness per week",
+          "subtitle": [
+            "Oct–Dec 2025",
+            "* incomplete weeks: the data shown starts on 1 Oct 2025 and ends on 23 Dec 2025"
+          ]
+        },
+        "usermeta": {
+          "theme": "pattern-perspectives"
+        },
+        "config": {
+          "background": "#FFFFFF",
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+          "padding": {
+            "left": 20,
+            "right": 24,
+            "top": 20,
+            "bottom": 18
+          },
+          "view": {
+            "stroke": null
+          },
+          "title": {
+            "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "fontSize": 16,
+            "fontWeight": 600,
+            "color": "#191C1F",
+            "anchor": "start",
+            "offset": 16,
+            "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "subtitleColor": "#5F6368",
+            "subtitleFontSize": 12.5,
+            "subtitleFontWeight": 400,
+            "subtitlePadding": 6,
+            "subtitleLineHeight": 17
+          },
+          "axis": {
+            "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "labelFontSize": 10.5,
+            "labelColor": "#5F6368",
+            "labelPadding": 8,
+            "labelSeparation": 6,
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "titlePadding": 12,
+            "domainColor": "#C9C9CD",
+            "tickColor": "#C9C9CD",
+            "gridColor": "#E2E2E7",
+            "gridWidth": 1
+          },
+          "axisX": {
+            "grid": false,
+            "ticks": true,
+            "tickSize": 4,
+            "domain": true
+          },
+          "axisY": {
+            "domain": false,
+            "ticks": false,
+            "grid": true
+          },
+          "axisBand": {
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelColor": "#191C1F",
+            "labelFontSize": 11,
+            "labelPadding": 10
+          },
+          "legend": {
+            "orient": "bottom",
+            "direction": "horizontal",
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelFontSize": 12,
+            "labelColor": "#191C1F",
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "symbolType": "circle",
+            "symbolSize": 110,
+            "symbolStrokeWidth": 0,
+            "columnPadding": 16,
+            "padding": 4,
+            "offset": 16
+          },
+          "range": {
+            "category": [
+              "#1227FD",
+              "#00967A",
+              "#8B5CF6",
+              "#B07800",
+              "#46277A",
+              "#4F7BFF",
+              "#191C1F"
+            ],
+            "ramp": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "heatmap": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "diverging": [
+              "#E23B4A",
+              "#F4F4F6",
+              "#1227FD"
+            ]
+          },
+          "mark": {
+            "color": "#1227FD"
+          },
+          "line": {
+            "color": "#1227FD",
+            "strokeWidth": 2.5,
+            "strokeCap": "round",
+            "strokeJoin": "round"
+          },
+          "point": {
+            "color": "#1227FD",
+            "size": 56,
+            "filled": true
+          },
+          "area": {
+            "color": "#1227FD",
+            "opacity": 0.16
+          },
+          "bar": {
+            "color": "#1227FD",
+            "cornerRadiusEnd": 5
+          },
+          "arc": {
+            "stroke": "#FFFFFF",
+            "strokeWidth": 2
+          },
+          "rect": {
+            "color": "#1227FD"
+          },
+          "rule": {
+            "color": "#C9C9CD"
+          },
+          "text": {
+            "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "fontSize": 11,
+            "color": "#191C1F"
+          }
+        }
+      },
+      "png_url": null,
+      "alternatives": [
+        {
+          "chart": "table",
+          "label": "a table",
+          "hint": null
+        }
+      ]
+    },
+    "findings": []
+  },
+  "charts": {
+    "line": {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "description": "line (deterministic fallback); rules: CH-Q-POS, CH-T-POS, FORM-RECOGNISED, INTENT-AFFINITY, VIS-TASK-FIT, VIS-TEMPORAL-X",
+      "data": {
+        "values": [
+          {
+            "week": "2025-09-29T00:00:00",
+            "__series": "availability",
+            "__value": 89.117247,
+            "__unit": "%",
+            "__partial": true,
+            "__tip": "89.1%"
+          },
+          {
+            "week": "2025-10-06T00:00:00",
+            "__series": "availability",
+            "__value": 90.215769,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "90.2%"
+          },
+          {
+            "week": "2025-10-13T00:00:00",
+            "__series": "availability",
+            "__value": 90.357863,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "90.4%"
+          },
+          {
+            "week": "2025-10-20T00:00:00",
+            "__series": "availability",
+            "__value": 89.834829,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "89.8%"
+          },
+          {
+            "week": "2025-10-27T00:00:00",
+            "__series": "availability",
+            "__value": 90.000726,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "90.0%"
+          },
+          {
+            "week": "2025-11-03T00:00:00",
+            "__series": "availability",
+            "__value": 92.166026,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "92.2%"
+          },
+          {
+            "week": "2025-11-10T00:00:00",
+            "__series": "availability",
+            "__value": 92.672479,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "92.7%"
+          },
+          {
+            "week": "2025-11-17T00:00:00",
+            "__series": "availability",
+            "__value": 92.83093,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "92.8%"
+          },
+          {
+            "week": "2025-11-24T00:00:00",
+            "__series": "availability",
+            "__value": 92.861624,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "92.9%"
+          },
+          {
+            "week": "2025-12-01T00:00:00",
+            "__series": "availability",
+            "__value": 92.144444,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "92.1%"
+          },
+          {
+            "week": "2025-12-08T00:00:00",
+            "__series": "availability",
+            "__value": 91.675646,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "91.7%"
+          },
+          {
+            "week": "2025-12-15T00:00:00",
+            "__series": "availability",
+            "__value": 92.231026,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "92.2%"
+          },
+          {
+            "week": "2025-12-22T00:00:00",
+            "__series": "availability",
+            "__value": 91.722115,
+            "__unit": "%",
+            "__partial": true,
+            "__tip": "91.7%"
+          },
+          {
+            "week": "2025-09-29T00:00:00",
+            "__series": "effectiveness",
+            "__value": 83.598833,
+            "__unit": "%",
+            "__partial": true,
+            "__tip": "83.6%"
+          },
+          {
+            "week": "2025-10-06T00:00:00",
+            "__series": "effectiveness",
+            "__value": 84.364921,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "84.4%"
+          },
+          {
+            "week": "2025-10-13T00:00:00",
+            "__series": "effectiveness",
+            "__value": 84.294689,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "84.3%"
+          },
+          {
+            "week": "2025-10-20T00:00:00",
+            "__series": "effectiveness",
+            "__value": 84.48574,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "84.5%"
+          },
+          {
+            "week": "2025-10-27T00:00:00",
+            "__series": "effectiveness",
+            "__value": 84.421854,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "84.4%"
+          },
+          {
+            "week": "2025-11-03T00:00:00",
+            "__series": "effectiveness",
+            "__value": 84.128069,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "84.1%"
+          },
+          {
+            "week": "2025-11-10T00:00:00",
+            "__series": "effectiveness",
+            "__value": 84.272917,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "84.3%"
+          },
+          {
+            "week": "2025-11-17T00:00:00",
+            "__series": "effectiveness",
+            "__value": 84.264514,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "84.3%"
+          },
+          {
+            "week": "2025-11-24T00:00:00",
+            "__series": "effectiveness",
+            "__value": 84.283155,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "84.3%"
+          },
+          {
+            "week": "2025-12-01T00:00:00",
+            "__series": "effectiveness",
+            "__value": 84.41519,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "84.4%"
+          },
+          {
+            "week": "2025-12-08T00:00:00",
+            "__series": "effectiveness",
+            "__value": 84.242786,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "84.2%"
+          },
+          {
+            "week": "2025-12-15T00:00:00",
+            "__series": "effectiveness",
+            "__value": 84.135742,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "84.1%"
+          },
+          {
+            "week": "2025-12-22T00:00:00",
+            "__series": "effectiveness",
+            "__value": 84.523785,
+            "__unit": "%",
+            "__partial": true,
+            "__tip": "84.5%"
+          },
+          {
+            "week": "2025-09-29T00:00:00",
+            "__series": "quality ratio",
+            "__value": 98.581857,
+            "__unit": "%",
+            "__partial": true,
+            "__tip": "98.6%"
+          },
+          {
+            "week": "2025-10-06T00:00:00",
+            "__series": "quality ratio",
+            "__value": 98.333483,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "98.3%"
+          },
+          {
+            "week": "2025-10-13T00:00:00",
+            "__series": "quality ratio",
+            "__value": 98.269794,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "98.3%"
+          },
+          {
+            "week": "2025-10-20T00:00:00",
+            "__series": "quality ratio",
+            "__value": 98.366285,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "98.4%"
+          },
+          {
+            "week": "2025-10-27T00:00:00",
+            "__series": "quality ratio",
+            "__value": 98.331955,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "98.3%"
+          },
+          {
+            "week": "2025-11-03T00:00:00",
+            "__series": "quality ratio",
+            "__value": 98.322349,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "98.3%"
+          },
+          {
+            "week": "2025-11-10T00:00:00",
+            "__series": "quality ratio",
+            "__value": 98.409148,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "98.4%"
+          },
+          {
+            "week": "2025-11-17T00:00:00",
+            "__series": "quality ratio",
+            "__value": 98.333422,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "98.3%"
+          },
+          {
+            "week": "2025-11-24T00:00:00",
+            "__series": "quality ratio",
+            "__value": 98.283635,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "98.3%"
+          },
+          {
+            "week": "2025-12-01T00:00:00",
+            "__series": "quality ratio",
+            "__value": 98.282147,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "98.3%"
+          },
+          {
+            "week": "2025-12-08T00:00:00",
+            "__series": "quality ratio",
+            "__value": 98.352058,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "98.4%"
+          },
+          {
+            "week": "2025-12-15T00:00:00",
+            "__series": "quality ratio",
+            "__value": 98.292593,
+            "__unit": "%",
+            "__partial": false,
+            "__tip": "98.3%"
+          },
+          {
+            "week": "2025-12-22T00:00:00",
+            "__series": "quality ratio",
+            "__value": 98.347341,
+            "__unit": "%",
+            "__partial": true,
+            "__tip": "98.3%"
+          }
+        ]
+      },
+      "height": 320,
+      "layer": [
+        {
+          "transform": [
+            {
+              "filter": "!datum.__partial"
+            }
+          ],
+          "mark": {
+            "type": "line",
+            "strokeWidth": 2.5,
+            "strokeCap": "round",
+            "strokeJoin": "round"
+          },
+          "encoding": {
+            "x": {
+              "field": "week",
+              "type": "temporal",
+              "title": null,
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelOverlap": true,
+                "format": "%-d %b",
+                "values": [
+                  {
+                    "year": 2025,
+                    "month": 9,
+                    "date": 29
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 6
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 13
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 20
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 27
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 3
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 10
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 17
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 24
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 8
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 15
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 22
+                  }
+                ],
+                "labelExpr": "timeFormat(datum.value, \"%-d %b\") + (indexof([\"2025-09-29\", \"2025-12-22\"], timeFormat(datum.value, '%Y-%m-%d')) >= 0 ? '*' : '')"
+              },
+              "scale": {
+                "padding": 14
+              }
+            },
+            "y": {
+              "field": "__value",
+              "type": "quantitative",
+              "title": null,
+              "axis": {
+                "labelExpr": "datum.label ? datum.label + '%' : ''"
+              },
+              "scale": {
+                "zero": false,
+                "nice": true
+              }
+            },
+            "color": {
+              "field": "__series",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "availability",
+                  "quality ratio",
+                  "effectiveness"
+                ],
+                "range": [
+                  "#1227FD",
+                  "#007A62",
+                  "#6B4FF0"
+                ]
+              },
+              "legend": null
+            }
+          }
+        },
+        {
+          "data": {
+            "values": [
+              {
+                "week": "2025-09-29T00:00:00",
+                "__series": "availability",
+                "__value": 89.117247,
+                "__unit": "%",
+                "__partial": true,
+                "__tip": "89.1%",
+                "__bridge": "availability:0"
+              },
+              {
+                "week": "2025-10-06T00:00:00",
+                "__series": "availability",
+                "__value": 90.215769,
+                "__unit": "%",
+                "__partial": false,
+                "__tip": "90.2%",
+                "__bridge": "availability:0"
+              },
+              {
+                "week": "2025-12-15T00:00:00",
+                "__series": "availability",
+                "__value": 92.231026,
+                "__unit": "%",
+                "__partial": false,
+                "__tip": "92.2%",
+                "__bridge": "availability:11"
+              },
+              {
+                "week": "2025-12-22T00:00:00",
+                "__series": "availability",
+                "__value": 91.722115,
+                "__unit": "%",
+                "__partial": true,
+                "__tip": "91.7%",
+                "__bridge": "availability:11"
+              },
+              {
+                "week": "2025-09-29T00:00:00",
+                "__series": "effectiveness",
+                "__value": 83.598833,
+                "__unit": "%",
+                "__partial": true,
+                "__tip": "83.6%",
+                "__bridge": "effectiveness:0"
+              },
+              {
+                "week": "2025-10-06T00:00:00",
+                "__series": "effectiveness",
+                "__value": 84.364921,
+                "__unit": "%",
+                "__partial": false,
+                "__tip": "84.4%",
+                "__bridge": "effectiveness:0"
+              },
+              {
+                "week": "2025-12-15T00:00:00",
+                "__series": "effectiveness",
+                "__value": 84.135742,
+                "__unit": "%",
+                "__partial": false,
+                "__tip": "84.1%",
+                "__bridge": "effectiveness:11"
+              },
+              {
+                "week": "2025-12-22T00:00:00",
+                "__series": "effectiveness",
+                "__value": 84.523785,
+                "__unit": "%",
+                "__partial": true,
+                "__tip": "84.5%",
+                "__bridge": "effectiveness:11"
+              },
+              {
+                "week": "2025-09-29T00:00:00",
+                "__series": "quality ratio",
+                "__value": 98.581857,
+                "__unit": "%",
+                "__partial": true,
+                "__tip": "98.6%",
+                "__bridge": "quality ratio:0"
+              },
+              {
+                "week": "2025-10-06T00:00:00",
+                "__series": "quality ratio",
+                "__value": 98.333483,
+                "__unit": "%",
+                "__partial": false,
+                "__tip": "98.3%",
+                "__bridge": "quality ratio:0"
+              },
+              {
+                "week": "2025-12-15T00:00:00",
+                "__series": "quality ratio",
+                "__value": 98.292593,
+                "__unit": "%",
+                "__partial": false,
+                "__tip": "98.3%",
+                "__bridge": "quality ratio:11"
+              },
+              {
+                "week": "2025-12-22T00:00:00",
+                "__series": "quality ratio",
+                "__value": 98.347341,
+                "__unit": "%",
+                "__partial": true,
+                "__tip": "98.3%",
+                "__bridge": "quality ratio:11"
+              }
+            ]
+          },
+          "mark": {
+            "type": "line",
+            "strokeWidth": 1.9,
+            "strokeDash": [
+              4,
+              3
+            ],
+            "strokeCap": "round",
+            "strokeJoin": "round"
+          },
+          "encoding": {
+            "x": {
+              "field": "week",
+              "type": "temporal",
+              "title": null,
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelOverlap": true,
+                "format": "%-d %b",
+                "values": [
+                  {
+                    "year": 2025,
+                    "month": 9,
+                    "date": 29
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 6
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 13
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 20
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 27
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 3
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 10
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 17
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 24
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 8
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 15
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 22
+                  }
+                ],
+                "labelExpr": "timeFormat(datum.value, \"%-d %b\") + (indexof([\"2025-09-29\", \"2025-12-22\"], timeFormat(datum.value, '%Y-%m-%d')) >= 0 ? '*' : '')"
+              },
+              "scale": {
+                "padding": 14
+              }
+            },
+            "y": {
+              "field": "__value",
+              "type": "quantitative",
+              "title": null,
+              "axis": {
+                "labelExpr": "datum.label ? datum.label + '%' : ''"
+              },
+              "scale": {
+                "zero": false,
+                "nice": true
+              }
+            },
+            "detail": {
+              "field": "__bridge",
+              "type": "nominal"
+            },
+            "color": {
+              "field": "__series",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "availability",
+                  "quality ratio",
+                  "effectiveness"
+                ],
+                "range": [
+                  "#1227FD",
+                  "#007A62",
+                  "#6B4FF0"
+                ]
+              },
+              "legend": null
+            }
+          }
+        },
+        {
+          "transform": [
+            {
+              "filter": "!datum.__partial"
+            }
+          ],
+          "mark": {
+            "type": "point",
+            "filled": true,
+            "size": 56,
+            "opacity": 1,
+            "stroke": "#FFFFFF",
+            "strokeWidth": 1.25
+          },
+          "encoding": {
+            "x": {
+              "field": "week",
+              "type": "temporal",
+              "title": null,
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelOverlap": true,
+                "format": "%-d %b",
+                "values": [
+                  {
+                    "year": 2025,
+                    "month": 9,
+                    "date": 29
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 6
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 13
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 20
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 27
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 3
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 10
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 17
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 24
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 8
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 15
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 22
+                  }
+                ],
+                "labelExpr": "timeFormat(datum.value, \"%-d %b\") + (indexof([\"2025-09-29\", \"2025-12-22\"], timeFormat(datum.value, '%Y-%m-%d')) >= 0 ? '*' : '')"
+              },
+              "scale": {
+                "padding": 14
+              }
+            },
+            "y": {
+              "field": "__value",
+              "type": "quantitative",
+              "title": null,
+              "axis": {
+                "labelExpr": "datum.label ? datum.label + '%' : ''"
+              },
+              "scale": {
+                "zero": false,
+                "nice": true
+              }
+            },
+            "tooltip": [
+              {
+                "field": "week",
+                "type": "temporal",
+                "title": "week",
+                "format": "%-d %b %Y"
+              },
+              {
+                "field": "__series",
+                "type": "nominal",
+                "title": "series"
+              },
+              {
+                "field": "__tip",
+                "type": "nominal",
+                "title": "value"
+              }
+            ],
+            "color": {
+              "field": "__series",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "availability",
+                  "quality ratio",
+                  "effectiveness"
+                ],
+                "range": [
+                  "#1227FD",
+                  "#007A62",
+                  "#6B4FF0"
+                ]
+              },
+              "legend": null
+            }
+          }
+        },
+        {
+          "transform": [
+            {
+              "filter": "datum.__partial"
+            }
+          ],
+          "mark": {
+            "type": "point",
+            "filled": true,
+            "fill": "white",
+            "size": 54,
+            "strokeWidth": 2,
+            "opacity": 1
+          },
+          "encoding": {
+            "x": {
+              "field": "week",
+              "type": "temporal",
+              "title": null,
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelOverlap": true,
+                "format": "%-d %b",
+                "values": [
+                  {
+                    "year": 2025,
+                    "month": 9,
+                    "date": 29
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 6
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 13
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 20
+                  },
+                  {
+                    "year": 2025,
+                    "month": 10,
+                    "date": 27
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 3
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 10
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 17
+                  },
+                  {
+                    "year": 2025,
+                    "month": 11,
+                    "date": 24
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 1
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 8
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 15
+                  },
+                  {
+                    "year": 2025,
+                    "month": 12,
+                    "date": 22
+                  }
+                ],
+                "labelExpr": "timeFormat(datum.value, \"%-d %b\") + (indexof([\"2025-09-29\", \"2025-12-22\"], timeFormat(datum.value, '%Y-%m-%d')) >= 0 ? '*' : '')"
+              },
+              "scale": {
+                "padding": 14
+              }
+            },
+            "y": {
+              "field": "__value",
+              "type": "quantitative",
+              "title": null,
+              "axis": {
+                "labelExpr": "datum.label ? datum.label + '%' : ''"
+              },
+              "scale": {
+                "zero": false,
+                "nice": true
+              }
+            },
+            "tooltip": [
+              {
+                "field": "week",
+                "type": "temporal",
+                "title": "week",
+                "format": "%-d %b %Y"
+              },
+              {
+                "field": "__series",
+                "type": "nominal",
+                "title": "series"
+              },
+              {
+                "field": "__tip",
+                "type": "nominal",
+                "title": "value"
+              }
+            ],
+            "stroke": {
+              "field": "__series",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "availability",
+                  "quality ratio",
+                  "effectiveness"
+                ],
+                "range": [
+                  "#1227FD",
+                  "#007A62",
+                  "#6B4FF0"
+                ]
+              },
+              "legend": null
+            }
+          }
+        },
+        {
+          "data": {
+            "values": [
+              {
+                "__series": "effectiveness",
+                "__x": "2025-12-22T00:00:00",
+                "__y": 84.523785
+              },
+              {
+                "__series": "availability",
+                "__x": "2025-12-22T00:00:00",
+                "__y": 91.722115
+              },
+              {
+                "__series": "quality ratio",
+                "__x": "2025-12-22T00:00:00",
+                "__y": 98.347341
+              }
+            ]
+          },
+          "mark": {
+            "type": "text",
+            "align": "left",
+            "baseline": "middle",
+            "dx": 8,
+            "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+            "fontSize": 12,
+            "fontWeight": 600
+          },
+          "encoding": {
+            "x": {
+              "field": "__x",
+              "type": "temporal"
+            },
+            "y": {
+              "field": "__y",
+              "type": "quantitative"
+            },
+            "text": {
+              "field": "__series"
+            },
+            "color": {
+              "field": "__series",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "availability",
+                  "quality ratio",
+                  "effectiveness"
+                ],
+                "range": [
+                  "#1227FD",
+                  "#007A62",
+                  "#6B4FF0"
+                ]
+              },
+              "legend": null
+            }
+          }
+        }
+      ],
+      "padding": {
+        "left": 20,
+        "top": 20,
+        "bottom": 18,
+        "right": 119.10000000000001
+      },
+      "title": {
+        "text": "Availability, quality ratio and effectiveness per week",
+        "subtitle": [
+          "Oct–Dec 2025",
+          "* incomplete weeks: the data shown starts on 1 Oct 2025 and ends on 23 Dec 2025"
+        ]
+      },
+      "usermeta": {
+        "theme": "pattern-perspectives"
+      },
+      "config": {
+        "background": "#FFFFFF",
+        "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+        "padding": {
+          "left": 20,
+          "right": 24,
+          "top": 20,
+          "bottom": 18
+        },
+        "view": {
+          "stroke": null
+        },
+        "title": {
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "fontSize": 16,
+          "fontWeight": 600,
+          "color": "#191C1F",
+          "anchor": "start",
+          "offset": 16,
+          "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "subtitleColor": "#5F6368",
+          "subtitleFontSize": 12.5,
+          "subtitleFontWeight": 400,
+          "subtitlePadding": 6,
+          "subtitleLineHeight": 17
+        },
+        "axis": {
+          "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "labelFontSize": 10.5,
+          "labelColor": "#5F6368",
+          "labelPadding": 8,
+          "labelSeparation": 6,
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "titlePadding": 12,
+          "domainColor": "#C9C9CD",
+          "tickColor": "#C9C9CD",
+          "gridColor": "#E2E2E7",
+          "gridWidth": 1
+        },
+        "axisX": {
+          "grid": false,
+          "ticks": true,
+          "tickSize": 4,
+          "domain": true
+        },
+        "axisY": {
+          "domain": false,
+          "ticks": false,
+          "grid": true
+        },
+        "axisBand": {
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelColor": "#191C1F",
+          "labelFontSize": 11,
+          "labelPadding": 10
+        },
+        "legend": {
+          "orient": "bottom",
+          "direction": "horizontal",
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelFontSize": 12,
+          "labelColor": "#191C1F",
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "symbolType": "circle",
+          "symbolSize": 110,
+          "symbolStrokeWidth": 0,
+          "columnPadding": 16,
+          "padding": 4,
+          "offset": 16
+        },
+        "range": {
+          "category": [
+            "#1227FD",
+            "#00967A",
+            "#8B5CF6",
+            "#B07800",
+            "#46277A",
+            "#4F7BFF",
+            "#191C1F"
+          ],
+          "ramp": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "heatmap": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "diverging": [
+            "#E23B4A",
+            "#F4F4F6",
+            "#1227FD"
+          ]
+        },
+        "mark": {
+          "color": "#1227FD"
+        },
+        "line": {
+          "color": "#1227FD",
+          "strokeWidth": 2.5,
+          "strokeCap": "round",
+          "strokeJoin": "round"
+        },
+        "point": {
+          "color": "#1227FD",
+          "size": 56,
+          "filled": true
+        },
+        "area": {
+          "color": "#1227FD",
+          "opacity": 0.16
+        },
+        "bar": {
+          "color": "#1227FD",
+          "cornerRadiusEnd": 5
+        },
+        "arc": {
+          "stroke": "#FFFFFF",
+          "strokeWidth": 2
+        },
+        "rect": {
+          "color": "#1227FD"
+        },
+        "rule": {
+          "color": "#C9C9CD"
+        },
+        "text": {
+          "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "fontSize": 11,
+          "color": "#191C1F"
+        }
+      }
+    }
+  },
+  "chart_options": [
+    {
+      "chart": "line",
+      "label": "lines",
+      "hint": "follow the direction of each series and compare them"
+    },
+    {
+      "chart": "table",
+      "label": "a table",
+      "hint": null
+    }
+  ]
+}

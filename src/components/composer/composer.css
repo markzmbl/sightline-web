@@ -1,0 +1,88 @@
+.composer {
+  width: 100%;
+}
+
+.composer__box {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 10px 10px 10px 16px;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.composer__box:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), var(--shadow);
+}
+
+.composer__box--disabled {
+  opacity: 0.6;
+}
+
+.composer__input {
+  flex: 1;
+  min-width: 0;
+  /* One line to about ten, then it scrolls. */
+  min-height: 32px;
+  max-height: calc(10 * 22px + 10px);
+  padding: 5px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 22px;
+  resize: none;
+  overflow-y: auto;
+  outline: none;
+}
+
+/* The box carries the focus ring, so the text area does not draw its own. */
+.composer__input:focus-visible {
+  outline: none;
+}
+
+.composer__input::placeholder {
+  color: var(--muted);
+}
+
+.composer__action {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--ground);
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.composer__action:hover:not(:disabled) {
+  opacity: 0.86;
+}
+
+.composer__action:disabled {
+  background: var(--raised);
+  color: var(--muted);
+  cursor: default;
+}
+
+.composer__hint {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer__box,
+  .composer__action {
+    transition: none;
+  }
+}

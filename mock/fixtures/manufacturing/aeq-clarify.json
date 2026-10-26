@@ -1,0 +1,96 @@
+{
+  "slug": "aeq-clarify",
+  "workspace": "manufacturing",
+  "question": "How did availability, effectiveness and quality ratio develop per week in Q4 2025?",
+  "final_status": "clarify",
+  "continuation": null,
+  "stages": [
+    {
+      "phase": "understand",
+      "stage": "situate",
+      "ms": 141
+    },
+    {
+      "phase": "understand",
+      "stage": "abstract",
+      "ms": 158148
+    },
+    {
+      "phase": "understand",
+      "stage": "bind",
+      "ms": 17
+    },
+    {
+      "phase": "understand",
+      "stage": "clarify",
+      "ms": 5
+    }
+  ],
+  "restatement": null,
+  "card": null,
+  "clarify": {
+    "gaps": [
+      {
+        "slot": "measure:availability",
+        "requested": "availability",
+        "reason": "no measure on this star matches this term",
+        "suggestions": [
+          "mart_supplier_scorecard_month.scorecard_spend",
+          "mart_supplier_scorecard_month.scorecard_defect_reports",
+          "mart_supplier_scorecard_month.scorecard_defect_downtime"
+        ]
+      },
+      {
+        "slot": "measure:effectiveness",
+        "requested": "effectiveness",
+        "reason": "no measure on this star matches this term",
+        "suggestions": [
+          "mart_supplier_scorecard_month.scorecard_spend",
+          "mart_supplier_scorecard_month.scorecard_defect_reports",
+          "mart_supplier_scorecard_month.scorecard_defect_downtime"
+        ]
+      },
+      {
+        "slot": "measure:quality_ratio",
+        "requested": "quality ratio",
+        "reason": "no measure on this star matches this term; dim_stop_reason.reason would match on the fct_downtime_events star - one question binds one fact star",
+        "suggestions": [
+          "mart_supplier_scorecard_month.scorecard_spend",
+          "mart_supplier_scorecard_month.scorecard_defect_reports",
+          "mart_supplier_scorecard_month.scorecard_defect_downtime"
+        ]
+      }
+    ],
+    "missing": [],
+    "record": [],
+    "nearest": [],
+    "warnings": [
+      "availability: mart_supplier_scorecard_month.month_start has no data 2024-01-02..2024-01-31",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2024-02-02..2024-02-29",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2024-03-02..2024-03-31",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2024-04-02..2024-04-30",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2024-05-02..2024-05-31",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2024-06-02..2024-06-30",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2024-07-02..2024-07-31",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2024-08-02..2024-08-31",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2024-09-02..2024-09-30",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2024-10-02..2024-10-31",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2024-11-02..2024-11-30",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2024-12-02..2024-12-31",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2025-01-02..2025-01-31",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2025-02-02..2025-02-28",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2025-03-02..2025-03-31",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2025-04-02..2025-04-30",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2025-05-02..2025-05-31",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2025-06-02..2025-06-30",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2025-07-02..2025-07-31",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2025-08-02..2025-08-31",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2025-09-02..2025-09-30",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2025-10-02..2025-10-31",
+      "availability: mart_supplier_scorecard_month.month_start has no data 2025-11-02..2025-11-30"
+    ]
+  },
+  "result": null,
+  "charts": {},
+  "chart_options": []
+}

@@ -1,0 +1,84 @@
+/* Pattern Perspectives tokens, from metraglyph/site/src/lib/brand.ts and site.css.
+   Dark is the brand default; with no explicit choice the system setting decides. */
+
+:root {
+  --brand: #46277a;
+  --brand-deep: #351c5c;
+  --brand-ink: #1f1137;
+  --brand-mid: #7a60af;
+  --brand-light: #aa9ad1;
+  --brand-mist: #dad2ef;
+  --blue: #1227fd;
+  --sky: #6fa0ff;
+  --violet: #6b4ff0;
+
+  /* The logo cube, lit from the top left: top, left and right face. */
+  --cube-top: #aa9ad1;
+  --cube-left: #7a60af;
+  --cube-right: #46277a;
+
+  --sans: "Geist Variable", Geist, Inter, "Helvetica Neue", Arial, system-ui, sans-serif;
+  --mono: "Geist Mono Variable", "Geist Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --radius: 16px;
+  --radius-small: 10px;
+  --sidebar: 264px;
+  --column: 760px;
+
+  color-scheme: dark;
+  --ground: #0f1012;
+  --surface: #191c1f;
+  --raised: #23262b;
+  --line: rgba(255, 255, 255, 0.1);
+  --edge: rgba(255, 255, 255, 0.24);
+  --ink: #f4f4f4;
+  --muted: #9aa0a6;
+  --accent: #8fb3ff;
+  --on: #ffffff;
+  --good: #13d1a3;
+  --good-soft: #0f2a24;
+  --warn: #ffd60a;
+  --warn-soft: #2e2a0f;
+  --bad: #ff5363;
+  --bad-soft: #351a1f;
+  --shadow: 0 10px 34px rgba(0, 0, 0, 0.45);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --ground: #f4f4f6;
+    --surface: #ffffff;
+    --raised: #f7f7f9;
+    --line: #e2e2e7;
+    --edge: #c9c9cd;
+    --ink: #191c1f;
+    --muted: #5f6368;
+    --accent: #1227fd;
+    --good: #00ae84;
+    --good-soft: #dff6ef;
+    --warn: #7a5200;
+    --warn-soft: #fff3c4;
+    --bad: #e23b4a;
+    --bad-soft: #fde1e4;
+    --shadow: 0 10px 30px rgba(25, 28, 31, 0.12);
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ground: #f4f4f6;
+  --surface: #ffffff;
+  --raised: #f7f7f9;
+  --line: #e2e2e7;
+  --edge: #c9c9cd;
+  --ink: #191c1f;
+  --muted: #5f6368;
+  --accent: #1227fd;
+  --good: #00ae84;
+  --good-soft: #dff6ef;
+  --warn: #7a5200;
+  --warn-soft: #fff3c4;
+  --bad: #e23b4a;
+  --bad-soft: #fde1e4;
+  --shadow: 0 10px 30px rgba(25, 28, 31, 0.12);
+}

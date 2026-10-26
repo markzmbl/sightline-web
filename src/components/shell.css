@@ -1,0 +1,108 @@
+/* The app shell: sidebar | main, and the few pieces every page inside it shares. */
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar) minmax(0, 1fr);
+  height: 100%;
+  transition: grid-template-columns 0.2s ease;
+}
+
+.shell--hidden:not(.shell--narrow) {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+
+.shell__sidebar {
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.shell__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ground);
+}
+
+/* Narrow: the sidebar is a drawer over the page. */
+.shell--narrow {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.shell--narrow .shell__sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 20;
+  width: min(var(--sidebar), 86vw);
+  box-shadow: var(--shadow);
+  /* Visible at once when opening (so it can take focus), hidden only after sliding out. */
+  transition: transform 0.2s ease, visibility 0s linear 0s;
+}
+
+.shell--narrow .sidebar {
+  width: 100%;
+}
+
+.shell--narrow.shell--hidden .shell__sidebar {
+  visibility: hidden;
+  box-shadow: none;
+  transform: translateX(-100%);
+  transition: transform 0.2s ease, visibility 0s linear 0.2s;
+}
+
+.shell__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  /* The page's own ground, so the veil follows the theme. */
+  background: color-mix(in srgb, var(--ground) 60%, transparent);
+}
+
+/* A page's top row: the sidebar button when the sidebar is away, then the page's title. */
+.shell__bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 10px 12px;
+}
+
+.icon-button {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.icon-button:hover {
+  background: var(--raised);
+  color: var(--ink);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell,
+  .shell .shell__sidebar {
+    transition: none;
+  }
+}

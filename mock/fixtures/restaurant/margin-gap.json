@@ -1,0 +1,55 @@
+{
+  "slug": "margin-gap",
+  "workspace": "restaurant",
+  "question": "What is the profit margin per branch?",
+  "final_status": "clarify",
+  "continuation": null,
+  "stages": [
+    {
+      "phase": "understand",
+      "stage": "situate",
+      "ms": 27
+    },
+    {
+      "phase": "understand",
+      "stage": "recall",
+      "ms": 5
+    },
+    {
+      "phase": "understand",
+      "stage": "define",
+      "ms": 18
+    },
+    {
+      "phase": "understand",
+      "stage": "ground",
+      "ms": 11
+    },
+    {
+      "phase": "understand",
+      "stage": "clarify",
+      "ms": 5
+    }
+  ],
+  "restatement": null,
+  "card": null,
+  "clarify": {
+    "gaps": [],
+    "missing": [
+      "Gross profit margin is not possible yet: the warehouse holds no cost of goods sold"
+    ],
+    "record": [
+      "the cost of the goods sold per sale or per period, from the costing or the general ledger"
+    ],
+    "nearest": [
+      "What is the revenue per branch?"
+    ],
+    "warnings": [
+      "dim_menu_item.ingredient_cost for cost of goods sold: a measure of each dim menu item, not summed over fact order lines",
+      "dim_menu_item.ingredient_cost for cost of goods sold: a measure of each dim menu item, not summed over fact recipes"
+    ]
+  },
+  "result": null,
+  "charts": {},
+  "chart_options": []
+}

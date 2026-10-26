@@ -1,0 +1,97 @@
+.cube {
+  display: inline-block;
+  flex: none;
+  overflow: visible;
+}
+
+.cube--pulse {
+  animation: cube-pulse 2s ease-in-out infinite;
+}
+
+@keyframes cube-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+  font-size: 14px;
+}
+
+.status__verb {
+  font-weight: 500;
+  color: var(--brand-light);
+}
+
+:root[data-theme="light"] .status__verb {
+  color: var(--brand-mid);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .status__verb {
+    color: var(--brand-mid);
+  }
+}
+
+.status--asking .status__verb {
+  color: var(--warn);
+}
+
+/* Claude's verb shimmers; ours carries the brand gradient across it. */
+.status__verb--shine {
+  background: linear-gradient(90deg, var(--brand-light) 0%, var(--brand-light) 35%, var(--sky) 50%, var(--brand-light) 65%, var(--brand-light) 100%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: verb-shine 2.4s linear infinite;
+}
+
+@keyframes verb-shine {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+.status__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.status__meta > * + *::before {
+  content: "·";
+  margin-right: 8px;
+}
+
+.status__phase {
+  font: 500 10.5px/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.status__stop {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+.status__stop:hover {
+  color: var(--ink);
+}
+
+.status__stop kbd {
+  font-size: 11px;
+}

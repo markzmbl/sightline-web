@@ -1,0 +1,39 @@
+.notfound {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 24px 16px;
+}
+
+/* Inside the shell: the page's top row (the sidebar button), then the note in the space left. */
+.notfound--page {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+.notfound__note {
+  max-width: 420px;
+  text-align: center;
+}
+
+.notfound--page .notfound__note {
+  margin: auto;
+  padding: 24px 16px;
+}
+
+.notfound__note h1 {
+  margin: 18px 0 6px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.notfound__note p {
+  margin: 0 0 18px;
+}
+
+.notfound__note .pill {
+  text-decoration: none;
+}

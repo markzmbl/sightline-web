@@ -1,0 +1,117 @@
+.thread {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.thread__title {
+  flex: 1;
+  min-width: 0;
+  margin: 0 0 0 4px;
+  overflow: hidden;
+  font-size: 14.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.thread__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.thread__content {
+  width: 100%;
+  max-width: var(--column);
+  margin: 0 auto;
+  padding: 8px 24px 28px;
+}
+
+.thread__foot {
+  flex: none;
+  width: 100%;
+  max-width: var(--column);
+  margin: 0 auto;
+  padding: 0 24px 14px;
+}
+
+.thread__status {
+  padding: 0 4px 8px;
+}
+
+.thread__banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 6px 6px 6px 14px;
+  border: 1px solid var(--bad);
+  border-radius: var(--radius-small);
+  background: var(--bad-soft);
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.thread__banner .icon-button {
+  width: 26px;
+  height: 26px;
+}
+
+.thread__skeleton {
+  display: grid;
+  gap: 14px;
+  padding-top: 24px;
+}
+
+.thread__bone {
+  display: block;
+  height: 14px;
+  border-radius: 7px;
+  background: var(--raised);
+  animation: thread-skeleton 1.6s ease-in-out infinite;
+}
+
+/* The first bone stands for the user's question, on the right like its bubble. */
+.thread__bone--prompt {
+  justify-self: end;
+  height: 36px;
+  border-radius: var(--radius);
+}
+
+@keyframes thread-skeleton {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.thread__missing {
+  padding: 18vh 0 0;
+  text-align: center;
+}
+
+.thread__missing p {
+  margin: 0 0 8px;
+}
+
+.thread__missing .pill {
+  margin-top: 10px;
+  text-decoration: none;
+}
+
+@media (max-width: 759.98px) {
+  .thread__content,
+  .thread__foot {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thread__bone {
+    animation: none;
+  }
+}

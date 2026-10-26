@@ -1,0 +1,21 @@
+.index {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 24px 16px;
+}
+
+.index__note {
+  max-width: 420px;
+  text-align: center;
+}
+
+.index__note h1 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.index__note p {
+  margin: 0 0 16px;
+}

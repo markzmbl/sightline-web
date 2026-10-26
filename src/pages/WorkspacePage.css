@@ -1,0 +1,80 @@
+.workspace {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.workspace__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: var(--column);
+  margin: 0 auto;
+  padding: 0 24px 12vh;
+}
+
+.workspace__hero {
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.workspace__hero h1 {
+  margin: 18px 0 4px;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.workspace__hero p {
+  margin: 0;
+}
+
+.workspace__error {
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-small);
+  background: var(--bad-soft);
+  color: var(--bad);
+  font-size: 13px;
+}
+
+.workspace__recent {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.workspace__recent .pill {
+  max-width: 100%;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.workspace__recent .pill:hover {
+  color: var(--ink);
+}
+
+.workspace__recent .pill span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workspace__missing {
+  text-align: center;
+}
+
+.workspace__missing a {
+  color: var(--accent);
+}
+
+@media (max-width: 759.98px) {
+  .workspace__body {
+    padding: 0 16px 8vh;
+  }
+}

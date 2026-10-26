@@ -1,0 +1,906 @@
+# Provisional contract, transcribed from the sightline-backend session's draft
+# (2026-10-24, "Draft API contract"), the frontend's asks, and the backend's
+# answers (superseded runs, the not-possible-yet clarify, decision points as the
+# core has them, no auth in v1, Problem codes, the key-user registry).
+# Delete this file once sightline-backend publishes contract/openapi.json;
+# scripts/gen-api.mjs prefers that file automatically.
+openapi: 3.1.0
+info:
+  title: sightline API (frontend draft)
+  version: 0.0.1-draft
+  description: >
+    Ask a question of a workspace's warehouse, revise it by prompt, and follow
+    the run live. A thread is one question plus its revisions; each revision is
+    one run. Runs are asynchronous: creating one answers 202 with its id, and
+    progress arrives on the run's event stream. Stages are not monotonic: a
+    reconsider loop can start abstract again after validate, with the phase back
+    at understand, and side states (clarify, ask, reconsider, restore) can appear
+    as a stage. A run can go from complete back to queued under the same id
+    (an answer to a beside-the-chart card, a chart switch); a run.status queued
+    after running means a worker restarted it. There is no auth in v1: calls are
+    same-origin and carry no header.
+servers:
+  - url: /
+paths:
+  /healthz:
+    get:
+      operationId: health
+      security: []
+      responses:
+        "200":
+          description: The service is up.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Health" }
+  /api/v1/me:
+    get:
+      operationId: getMe
+      responses:
+        "200":
+          description: The caller and the workspaces they may use.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Me" }
+  /api/v1/workspaces/{ws}/threads:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+    get:
+      operationId: listThreads
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      responses:
+        "200":
+          description: Threads, most recently updated first.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ThreadPage" }
+        "404": { $ref: "#/components/responses/Problem" }
+    post:
+      operationId: createThread
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateThread" }
+      responses:
+        "202":
+          description: The thread exists and its first run is queued.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunCreated" }
+        "422": { $ref: "#/components/responses/Problem" }
+  /api/v1/workspaces/{ws}/threads/{thread_id}:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+      - $ref: "#/components/parameters/ThreadId"
+    get:
+      operationId: getThread
+      responses:
+        "200":
+          description: The thread with all its runs, oldest first.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Thread" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /api/v1/workspaces/{ws}/threads/{thread_id}/revisions:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+      - $ref: "#/components/parameters/ThreadId"
+    post:
+      operationId: reviseThread
+      description: >
+        Revise the question by prompt. Post it directly, never /cancel first: a
+        run of this thread still active is superseded (it ends with status
+        superseded). Cancel is cooperative at stage boundaries, so the old run
+        may emit events for up to a minute; clients drop events of runs that are
+        not the thread's active run.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Revise" }
+      responses:
+        "202":
+          description: The revision's run is queued.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunCreated" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /api/v1/workspaces/{ws}/threads/{thread_id}/revisions/{n}:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+      - $ref: "#/components/parameters/ThreadId"
+      - name: n
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    delete:
+      operationId: takeBackRevision
+      responses:
+        "202":
+          description: The revision is taken back and the thread runs again without it.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunCreated" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /api/v1/workspaces/{ws}/runs/{run_id}:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+      - $ref: "#/components/parameters/RunId"
+    get:
+      operationId: getRun
+      responses:
+        "200":
+          description: The run as it stands.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunView" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /api/v1/workspaces/{ws}/runs/{run_id}/events:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+      - $ref: "#/components/parameters/RunId"
+    get:
+      operationId: runEvents
+      description: >
+        Server-sent events. Each frame is `id: <n>`, `event: <type>` and
+        `data: <RunEvent as JSON>`; ids increase per run. Reconnect with
+        `Last-Event-ID` to get only the frames after it (ids are per-run integers
+        from 1, the same counter as RunView.last_event_id). A comment line
+        `: ping` comes every 15 s. The stream ends after a terminal run.status
+        (complete, clarify, failed, cancelled, superseded) or after asking.
+      parameters:
+        - name: Last-Event-ID
+          in: header
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: The event stream.
+          content:
+            text/event-stream:
+              schema: { $ref: "#/components/schemas/RunEvent" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /api/v1/workspaces/{ws}/runs/{run_id}/answers:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+      - $ref: "#/components/parameters/RunId"
+    post:
+      operationId: answerCard
+      description: >
+        Answer the choice card. A null answer means "decide for me". Free text
+        becomes a revision of the thread, which starts a new run.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Answers" }
+      responses:
+        "202":
+          description: The run resumes (same run_id) or a revision starts (new run_id).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunCreated" }
+        "409": { $ref: "#/components/responses/Problem" }
+  /api/v1/workspaces/{ws}/runs/{run_id}/cancel:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+      - $ref: "#/components/parameters/RunId"
+    post:
+      operationId: cancelRun
+      responses:
+        "202":
+          description: Cancelling; the event stream reports when it has stopped.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunCreated" }
+  /api/v1/workspaces/{ws}/runs/{run_id}/chart:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+      - $ref: "#/components/parameters/RunId"
+    post:
+      operationId: pickChart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChartPick" }
+      responses:
+        "202":
+          description: The run presents again with the chosen chart.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunCreated" }
+        "409": { $ref: "#/components/responses/Problem" }
+  /api/v1/workspaces/{ws}/runs/{run_id}/feedback:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+      - $ref: "#/components/parameters/RunId"
+    post:
+      operationId: giveFeedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Feedback" }
+      responses:
+        "204":
+          description: Recorded.
+  /api/v1/workspaces/{ws}/schema:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+    get:
+      operationId: getSchema
+      responses:
+        "200":
+          description: The workspace's warehouse schema (shape not yet drafted).
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+  /api/v1/workspaces/{ws}/registry/entries:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+    get:
+      operationId: listRegistryEntries
+      description: What sightline proposes for the key user to review, most recently asked first.
+      parameters:
+        - name: kind
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/RegistryKind" }
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/RegistryStatus" }
+        - name: cursor
+          in: query
+          required: false
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      responses:
+        "200":
+          description: A page of entries, and the proposed counts per kind.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegistryPage" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /api/v1/workspaces/{ws}/registry/entries/{entry_id}:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+      - $ref: "#/components/parameters/EntryId"
+    get:
+      operationId: getRegistryEntry
+      responses:
+        "200":
+          description: The entry with the runs that used it.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegistryEntryDetail" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /api/v1/workspaces/{ws}/registry/entries/{entry_id}/review:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+      - $ref: "#/components/parameters/EntryId"
+    post:
+      operationId: reviewRegistryEntry
+      description: >
+        Approve, reject, reopen or edit an entry. The request carries the
+        version the key user saw: 409 with code version_conflict means someone
+        reviewed it first. An edit changes only the label and the words per
+        locale; 422 with an error of type word_collision (loc pointing at the
+        word, ctx {word, collides_with}) means a word belongs to another term.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Review" }
+      responses:
+        "200":
+          description: The entry at its new version.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegistryEntryDetail" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+        "422": { $ref: "#/components/responses/Problem" }
+components:
+  parameters:
+    Workspace:
+      name: ws
+      in: path
+      required: true
+      schema: { type: string }
+    ThreadId:
+      name: thread_id
+      in: path
+      required: true
+      schema: { type: string }
+    RunId:
+      name: run_id
+      in: path
+      required: true
+      schema: { type: string }
+    EntryId:
+      name: entry_id
+      in: path
+      required: true
+      schema: { type: string }
+  responses:
+    Problem:
+      description: An error.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Problem" }
+  schemas:
+    Problem:
+      type: object
+      required: [detail]
+      description: Every error, the backend's own and FastAPI's validation errors alike.
+      properties:
+        detail: { type: string }
+        code:
+          type: string
+          description: For 409s, one of not_latest, not_answerable, stale_run, version_conflict.
+        errors:
+          type: array
+          items: { $ref: "#/components/schemas/ErrorItem" }
+    ErrorItem:
+      type: object
+      required: [loc, msg, type]
+      description: FastAPI's error shape; a word collision is type word_collision with ctx {word, collides_with}.
+      properties:
+        loc:
+          type: array
+          items:
+            type: [string, integer]
+        msg: { type: string }
+        type: { type: string }
+        ctx:
+          type: object
+          additionalProperties: true
+    Health:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+        version: { type: string }
+    User:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: [string, "null"] }
+    Workspace:
+      type: object
+      required: [id, name, pack]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        pack: { type: string, description: "The core pack (dataset) behind the workspace." }
+    Me:
+      type: object
+      required: [user, workspaces]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        workspaces:
+          type: array
+          items: { $ref: "#/components/schemas/Workspace" }
+    RunStatus:
+      type: string
+      description: superseded ends a run that a newer revision replaced; it is terminal.
+      enum: [queued, running, asking, complete, clarify, failed, cancelled, superseded]
+    AskPolicy:
+      type: string
+      enum: [never, unsure, always]
+    ThreadSummary:
+      type: object
+      required: [id, question, restatement, status, active_run_id, revisions, updated_at]
+      properties:
+        id: { type: string }
+        question: { type: string }
+        restatement: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/RunStatus" }
+        active_run_id:
+          type: [string, "null"]
+          description: The run still queued, running or asking, if any.
+        revisions: { type: integer, description: "How many revisions follow the question." }
+        updated_at: { type: string, format: date-time }
+    ThreadPage:
+      type: object
+      required: [items, next_cursor]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/ThreadSummary" }
+        next_cursor: { type: [string, "null"] }
+    Thread:
+      type: object
+      required: [id, question, created_at, updated_at, runs]
+      properties:
+        id: { type: string }
+        question: { type: string }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        runs:
+          type: array
+          description: One run per revision, oldest first (the question is revision 0).
+          items: { $ref: "#/components/schemas/RunView" }
+    StageTiming:
+      type: object
+      required: [phase, stage, started_at, elapsed_ms]
+      properties:
+        phase: { type: string }
+        stage: { type: string }
+        started_at: { type: string, format: date-time }
+        elapsed_ms: { type: [number, "null"], description: "Null while the stage runs." }
+    Option:
+      type: object
+      required: [id, label, hint]
+      properties:
+        id: { type: string }
+        label: { type: string }
+        hint: { type: string, description: "Empty when there is none." }
+    DecidedBy:
+      type: string
+      enum: [rules, s1, s2, user]
+    DecisionPoint:
+      type: object
+      required: [id, step, question, options, chosen, default, by, confidence, why, open, stage]
+      properties:
+        id: { type: string }
+        step:
+          type: string
+          description: meaning, terms, form, point or detail; meaning and terms block a run.
+        question: { type: string }
+        options:
+          type: array
+          items: { $ref: "#/components/schemas/Option" }
+        chosen: { type: [string, "null"] }
+        default: { type: [string, "null"], description: "What the rules alone choose." }
+        by: { $ref: "#/components/schemas/DecidedBy" }
+        confidence: { type: [number, "null"], description: "The System 1 model's confidence, when it answered." }
+        why: { type: string, description: "Why it is open, or what settled it; empty when nothing to say." }
+        open:
+          type: boolean
+          description: Nobody was sure; these are the points the user is asked.
+        stage: { type: string, description: "The pipeline stage that applies the answer." }
+    Card:
+      type: object
+      required: [blocking, points]
+      properties:
+        blocking:
+          type: boolean
+          description: True when the run waits for an answer; otherwise the card sits beside the chart.
+        points:
+          type: array
+          items: { $ref: "#/components/schemas/DecisionPoint" }
+    Gap:
+      type: object
+      required: [slot, requested, reason, suggestions]
+      properties:
+        slot: { type: string }
+        requested: { type: string }
+        reason: { type: string }
+        suggestions:
+          type: array
+          items: { type: string }
+    Clarify:
+      type: object
+      required: [gaps, missing, record, nearest, warnings]
+      description: >
+        Why a run ended in clarify, from the core's ClarificationReport. gaps are
+        terms that matched nothing in the data. missing, record and nearest are
+        the data-gap ending: the KPI is not possible yet, here is what the
+        warehouse lacks, what would have to be recorded, and the nearest
+        questions it can answer instead. sightline never answers with a silent proxy.
+      properties:
+        gaps:
+          type: array
+          items: { $ref: "#/components/schemas/Gap" }
+        missing:
+          type: array
+          items: { type: string }
+        record:
+          type: array
+          items: { type: string }
+        nearest:
+          type: array
+          description: Answerable questions, offered as revisions.
+          items: { type: string }
+        warnings:
+          type: array
+          items: { type: string }
+    Column:
+      type: object
+      required: [name, type]
+      properties:
+        name: { type: string }
+        type: { type: [string, "null"], description: "The attribute type, e.g. nominal or q_ratio." }
+    ChartOption:
+      type: object
+      required: [chart, label, hint]
+      properties:
+        chart: { type: string }
+        label: { type: string, description: "The form's name, or the humanised chart class." }
+        hint: { type: [string, "null"], description: "What it lets you read (the core's candidates[].reads)." }
+    ChartView:
+      type: object
+      required: [chart, label, spec, png_url, alternatives]
+      properties:
+        chart: { type: string, description: "The chart class, e.g. horizontal_bar." }
+        label: { type: string, description: "The form's name, or the humanised chart class." }
+        spec:
+          type: object
+          additionalProperties: true
+          description: Vega-Lite v5, already carrying the Pattern Perspectives theme config.
+        png_url: { type: [string, "null"], description: "Set only when perception rendered a PNG." }
+        alternatives:
+          type: array
+          description: The other admissible charts, for the switcher.
+          items: { $ref: "#/components/schemas/ChartOption" }
+    Cell:
+      type: [string, number, boolean, "null"]
+    Result:
+      type: object
+      required: [sql, columns, rows, row_count, truncated, chart, findings]
+      properties:
+        sql: { type: [string, "null"] }
+        columns:
+          type: array
+          items: { $ref: "#/components/schemas/Column" }
+        rows:
+          type: array
+          description: At most the first 200 rows.
+          items:
+            type: array
+            items: { $ref: "#/components/schemas/Cell" }
+        row_count: { type: integer }
+        truncated:
+          type: boolean
+          description: The core truncated, or row_count exceeds the rows sent.
+        chart:
+          oneOf:
+            - $ref: "#/components/schemas/ChartView"
+            - type: "null"
+        findings:
+          type: array
+          description: The analysis' findings in words (the core's plan.findings[].text).
+          items: { type: string }
+    RunError:
+      type: object
+      required: [message, stage]
+      properties:
+        message: { type: string }
+        stage: { type: [string, "null"] }
+    Rating:
+      type: string
+      enum: [up, down]
+    RunView:
+      type: object
+      required:
+        - id
+        - thread_id
+        - revision
+        - prompt
+        - status
+        - phase
+        - stage
+        - started_at
+        - finished_at
+        - restatement
+        - card
+        - clarify
+        - result
+        - timings
+        - error
+        - feedback
+        - last_event_id
+      properties:
+        id: { type: string }
+        thread_id: { type: string }
+        revision: { type: integer, description: "0 for the question, n for the nth revision." }
+        prompt: { type: string, description: "What the user typed for this run." }
+        status: { $ref: "#/components/schemas/RunStatus" }
+        phase: { type: [string, "null"] }
+        stage: { type: [string, "null"] }
+        started_at: { type: [string, "null"], format: date-time }
+        finished_at: { type: [string, "null"], format: date-time }
+        restatement: { type: [string, "null"] }
+        card:
+          oneOf:
+            - $ref: "#/components/schemas/Card"
+            - type: "null"
+        clarify:
+          oneOf:
+            - $ref: "#/components/schemas/Clarify"
+            - type: "null"
+        result:
+          oneOf:
+            - $ref: "#/components/schemas/Result"
+            - type: "null"
+        timings:
+          type: array
+          items: { $ref: "#/components/schemas/StageTiming" }
+        error:
+          oneOf:
+            - $ref: "#/components/schemas/RunError"
+            - type: "null"
+        feedback:
+          oneOf:
+            - $ref: "#/components/schemas/Rating"
+            - type: "null"
+        last_event_id:
+          type: integer
+          description: The id of the last event folded into this view; open the stream after it.
+    CreateThread:
+      type: object
+      required: [question]
+      properties:
+        question: { type: string, minLength: 1 }
+        ask: { $ref: "#/components/schemas/AskPolicy" }
+    RunCreated:
+      type: object
+      required: [thread_id, run_id]
+      properties:
+        thread_id: { type: string }
+        run_id: { type: string }
+    Revise:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string, minLength: 1 }
+    Answers:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: object
+          additionalProperties: { type: [string, "null"] }
+        text: { type: [string, "null"] }
+    ChartPick:
+      type: object
+      required: [chart]
+      properties:
+        chart: { type: string }
+    Feedback:
+      type: object
+      required: [rating]
+      properties:
+        rating: { $ref: "#/components/schemas/Rating" }
+    RegistryKind:
+      type: string
+      description: measure, a proposed measure; default, a learned default (e.g. "best plant" means OEE); gap, data the warehouse lacks.
+      enum: [measure, default, gap]
+    RegistryStatus:
+      type: string
+      enum: [proposed, approved, rejected]
+    EntrySource:
+      type: object
+      required: [kind, text]
+      properties:
+        kind:
+          type: string
+          enum: [library, drafted, learned]
+        text:
+          type: string
+          description: In words, e.g. "from sightline's KPI library (ISO 22400-2)" or "drafted by sightline".
+    Demand:
+      type: object
+      required: [runs, first_asked, last_asked]
+      properties:
+        runs: { type: integer }
+        first_asked: { type: [string, "null"], format: date-time }
+        last_asked: { type: [string, "null"], format: date-time }
+    EntryGap:
+      type: object
+      required: [missing, record]
+      description: For kind gap, in the same words as Clarify.missing and Clarify.record.
+      properties:
+        missing:
+          type: array
+          items: { type: string }
+        record:
+          type: array
+          items: { type: string }
+    EntryChoice:
+      type: object
+      required: [option, label, count]
+      description: For kind default, what users picked on the card for this criterion.
+      properties:
+        option: { type: string }
+        label: { type: string }
+        count: { type: integer }
+    RegistryEntry:
+      type: object
+      required: [id, kind, term, label, source, status, demand, words, definition, note, version, updated_at, reviewed_by]
+      properties:
+        id: { type: string }
+        kind: { $ref: "#/components/schemas/RegistryKind" }
+        term: { type: string }
+        label: { type: string }
+        source: { $ref: "#/components/schemas/EntrySource" }
+        status: { $ref: "#/components/schemas/RegistryStatus" }
+        demand: { $ref: "#/components/schemas/Demand" }
+        words:
+          type: object
+          description: The words that name the term, per locale, e.g. {en:[...], de:[...]}.
+          additionalProperties:
+            type: array
+            items: { type: string }
+        definition:
+          type: [string, "null"]
+          description: The formula or meaning in words; for a default, the label of the chosen measure.
+        note: { type: [string, "null"] }
+        version: { type: integer }
+        updated_at: { type: string, format: date-time }
+        reviewed_by: { type: [string, "null"] }
+        gap:
+          oneOf:
+            - $ref: "#/components/schemas/EntryGap"
+            - type: "null"
+        choices:
+          oneOf:
+            - type: array
+              items: { $ref: "#/components/schemas/EntryChoice" }
+            - type: "null"
+    EntryRun:
+      type: object
+      required: [run_id, thread_id, question, rating, at]
+      properties:
+        run_id: { type: string }
+        thread_id: { type: string }
+        question: { type: string }
+        rating:
+          oneOf:
+            - $ref: "#/components/schemas/Rating"
+            - type: "null"
+        at: { type: string, format: date-time }
+    RegistryEntryDetail:
+      allOf:
+        - $ref: "#/components/schemas/RegistryEntry"
+        - type: object
+          required: [runs]
+          properties:
+            runs:
+              type: array
+              items: { $ref: "#/components/schemas/EntryRun" }
+    RegistryCounts:
+      type: object
+      required: [measure, default, gap]
+      description: Proposed entries per kind, regardless of the page's filters (drives the badge).
+      properties:
+        measure: { type: integer }
+        default: { type: integer }
+        gap: { type: integer }
+    RegistryPage:
+      type: object
+      required: [items, next_cursor, counts]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/RegistryEntry" }
+        next_cursor: { type: [string, "null"] }
+        counts: { $ref: "#/components/schemas/RegistryCounts" }
+    ReviewAction:
+      type: string
+      enum: [approve, reject, reopen, edit]
+    ReviewChanges:
+      type: object
+      properties:
+        label: { type: string }
+        words:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+    Review:
+      type: object
+      required: [action, version]
+      properties:
+        action: { $ref: "#/components/schemas/ReviewAction" }
+        version: { type: integer, description: "The version the key user saw." }
+        note: { type: string }
+        changes: { $ref: "#/components/schemas/ReviewChanges" }
+    RunStatusEvent:
+      type: object
+      required: [type, run_id, status]
+      properties:
+        type: { const: run.status }
+        run_id: { type: string }
+        status: { $ref: "#/components/schemas/RunStatus" }
+    StageStartedEvent:
+      type: object
+      required: [type, run_id, phase, stage, at]
+      properties:
+        type: { const: stage.started }
+        run_id: { type: string }
+        phase: { type: string }
+        stage: { type: string }
+        at: { type: string, format: date-time }
+    StageFinishedEvent:
+      type: object
+      required: [type, run_id, phase, stage, at, elapsed_ms]
+      properties:
+        type: { const: stage.finished }
+        run_id: { type: string }
+        phase: { type: string }
+        stage: { type: string }
+        at: { type: string, format: date-time }
+        elapsed_ms: { type: number }
+    RestatementEvent:
+      type: object
+      required: [type, run_id, text]
+      properties:
+        type: { const: restatement }
+        run_id: { type: string }
+        text: { type: string }
+    CardEvent:
+      type: object
+      required: [type, run_id, card]
+      properties:
+        type: { const: card }
+        run_id: { type: string }
+        card: { $ref: "#/components/schemas/Card" }
+    ClarifyEvent:
+      type: object
+      required: [type, run_id, clarify]
+      properties:
+        type: { const: clarify }
+        run_id: { type: string }
+        clarify: { $ref: "#/components/schemas/Clarify" }
+    ChartEvent:
+      type: object
+      required: [type, run_id, chart]
+      properties:
+        type: { const: chart }
+        run_id: { type: string }
+        chart: { $ref: "#/components/schemas/ChartView" }
+    ResultEvent:
+      type: object
+      required: [type, run_id, result]
+      properties:
+        type: { const: result }
+        run_id: { type: string }
+        result: { $ref: "#/components/schemas/Result" }
+    ErrorEvent:
+      type: object
+      required: [type, run_id, message, stage]
+      properties:
+        type: { const: error }
+        run_id: { type: string }
+        message: { type: string }
+        stage: { type: [string, "null"] }
+    RunEvent:
+      oneOf:
+        - $ref: "#/components/schemas/RunStatusEvent"
+        - $ref: "#/components/schemas/StageStartedEvent"
+        - $ref: "#/components/schemas/StageFinishedEvent"
+        - $ref: "#/components/schemas/RestatementEvent"
+        - $ref: "#/components/schemas/CardEvent"
+        - $ref: "#/components/schemas/ClarifyEvent"
+        - $ref: "#/components/schemas/ChartEvent"
+        - $ref: "#/components/schemas/ResultEvent"
+        - $ref: "#/components/schemas/ErrorEvent"
+      discriminator:
+        propertyName: type
+        mapping:
+          run.status: "#/components/schemas/RunStatusEvent"
+          stage.started: "#/components/schemas/StageStartedEvent"
+          stage.finished: "#/components/schemas/StageFinishedEvent"
+          restatement: "#/components/schemas/RestatementEvent"
+          card: "#/components/schemas/CardEvent"
+          clarify: "#/components/schemas/ClarifyEvent"
+          chart: "#/components/schemas/ChartEvent"
+          result: "#/components/schemas/ResultEvent"
+          error: "#/components/schemas/ErrorEvent"

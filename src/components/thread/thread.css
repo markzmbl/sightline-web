@@ -1,0 +1,925 @@
+/* The thread transcript: user turns, run turns and what a run shows.
+   Everything sits under the tx- prefix. */
+
+.tx {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.tx-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Shared bits */
+
+.tx-chevron {
+  flex: none;
+  transition: transform 0.15s ease;
+}
+
+[aria-expanded="true"] > .tx-chevron {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tx-chevron {
+    transition: none;
+  }
+}
+
+.tx-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 12.5px;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+}
+
+.tx-link:hover:not(:disabled) {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
+
+.tx-link:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.tx-button {
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 13px;
+}
+
+.tx-button:hover:not(:disabled) {
+  background: var(--raised);
+}
+
+.tx-button--primary {
+  border-color: transparent;
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.tx-button--primary:hover:not(:disabled) {
+  background: var(--ink);
+  opacity: 0.88;
+}
+
+.tx-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.tx-input {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-small);
+  background: var(--ground);
+}
+
+.tx-chip {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.tx-chip--mono {
+  background: var(--raised);
+  color: var(--ink);
+  font-family: var(--mono);
+}
+
+/* User turn */
+
+.tx-user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.tx-user__bubble {
+  max-width: 85%;
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  background: var(--raised);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Run turn */
+
+.tx-run {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.tx-run__headline {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.tx-run__collapse {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+}
+
+.tx-run__collapse:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.tx-restatement {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.tx-restatement--pending {
+  color: var(--muted);
+}
+
+.tx-fold {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: calc(100% + 16px);
+  min-width: 0;
+  margin: 0 -8px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: none;
+  color: var(--muted);
+  text-align: left;
+}
+
+.tx-fold:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.tx-fold__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tx-fold__status {
+  flex: none;
+  font-size: 12.5px;
+}
+
+.tx-fold__status--failed {
+  color: var(--bad);
+}
+
+.tx-fold__status--asking,
+.tx-fold__status--clarify {
+  color: var(--warn);
+}
+
+.tx-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.tx-run__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.tx-error {
+  padding: 10px 14px;
+  border-radius: var(--radius-small);
+  background: var(--bad-soft);
+}
+
+.tx-error p {
+  margin: 0;
+}
+
+.tx-error__title {
+  color: var(--bad);
+  font-weight: 500;
+}
+
+.tx-error__message {
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+
+.tx-stopped {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Clarify note */
+
+.tx-clarify {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--warn);
+  border-radius: var(--radius-small);
+  background: var(--surface);
+}
+
+.tx-clarify p {
+  margin: 0;
+}
+
+.tx-clarify__gaps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tx-clarify__gaps li {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.tx-clarify__reason {
+  color: var(--muted);
+}
+
+/* The suggestions take their own line under the term, so they wrap within the column. */
+.tx-clarify__suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+  margin-top: 4px;
+}
+
+/* Suggestions are dotted names longer than a phone's column: they break anywhere. */
+.tx-clarify .tx-chip {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  height: auto;
+  min-height: 20px;
+  padding: 1px 8px;
+  border-radius: 6px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Not possible yet: what the data lacks, what to record, what it can answer instead */
+
+.tx-clarify__title {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.tx-clarify__part {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tx-clarify__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding-left: 18px;
+  overflow-wrap: anywhere;
+}
+
+.tx-clarify__nearest {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tx-clarify__nearest li {
+  max-width: 100%;
+}
+
+.tx-clarify__ask {
+  max-width: 100%;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  background: var(--raised);
+  font-size: 13.5px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.tx-clarify__ask:hover:not(:disabled) {
+  border-color: var(--edge);
+}
+
+.tx-clarify__ask:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.tx-clarify__notes {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.tx-clarify__notes summary {
+  width: fit-content;
+  cursor: pointer;
+}
+
+.tx-clarify__notes summary:hover {
+  color: var(--ink);
+}
+
+.tx-clarify__notes .tx-clarify__list {
+  margin-top: 4px;
+}
+
+/* Stage trace: one row per phase, like Claude's tool-call rows */
+
+.tx-trace {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13.5px;
+}
+
+.tx-trace__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: calc(100% + 16px);
+  margin: 0 -8px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: none;
+  color: var(--muted);
+  text-align: left;
+}
+
+.tx-trace__row:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.tx-trace__label {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.tx-trace__phase--running .tx-trace__label {
+  color: var(--accent);
+}
+
+.tx-trace__summary {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The running phase's cube sits at the row's end, above the stages' clock column,
+   and stays there from stage to stage so it turns without a break. */
+.tx-trace__mark {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  margin-left: auto;
+}
+
+.tx-trace__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 2px 0 10px 5px;
+  padding-left: 17px;
+  border-left: 1px solid var(--line);
+}
+
+.tx-trace__stages {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tx-trace__stage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  font-size: 12.5px;
+}
+
+.tx-trace__name {
+  font-family: var(--mono);
+}
+
+.tx-trace__stage--running .tx-trace__name {
+  color: var(--accent);
+}
+
+.tx-trace__verb {
+  color: var(--muted);
+}
+
+.tx-trace__time {
+  margin-left: auto;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* SQL */
+
+.tx-sql {
+  --tx-fn: var(--brand-light);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  background: var(--ground);
+}
+
+:root[data-theme="light"] .tx-sql {
+  --tx-fn: var(--brand-mid);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .tx-sql {
+    --tx-fn: var(--brand-mid);
+  }
+}
+
+.tx-sql__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font: 500 10.5px/1.4 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tx-sql__bar .tx-link {
+  font-family: var(--sans);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.tx-sql__code {
+  margin: 0;
+  padding: 10px 0;
+  overflow-x: auto;
+  font: 12.5px/1.65 var(--mono);
+}
+
+.tx-sql__code code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+}
+
+.tx-sql__line {
+  display: block;
+  padding-right: 16px;
+  white-space: pre;
+}
+
+.tx-sql__ln {
+  display: inline-block;
+  width: 4ch;
+  margin-right: 14px;
+  color: var(--muted);
+  opacity: 0.6;
+  text-align: right;
+  user-select: none;
+}
+
+.tx-sql__keyword {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.tx-sql__function {
+  color: var(--tx-fn);
+}
+
+.tx-sql__string {
+  color: var(--good);
+}
+
+.tx-sql__number {
+  color: var(--warn);
+}
+
+.tx-sql__comment {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Rows */
+
+.tx-rows {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+}
+
+.tx-rows__scroll {
+  max-height: 360px;
+  overflow: auto;
+}
+
+.tx-rows table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tx-rows th,
+.tx-rows td {
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tx-rows th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.tx-rows tbody tr:hover {
+  background: var(--surface);
+}
+
+.tx-rows .tx-rows__num {
+  text-align: right;
+}
+
+.tx-rows__null {
+  color: var(--muted);
+}
+
+.tx-rows__caption {
+  margin: 0;
+  padding: 6px 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Chart. The core's theme paints every chart on white paper, and the spec's own
+   background (set inline) wins; the frame only matches it. */
+
+.tx-chart {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.tx-chart__canvas {
+  min-height: 120px;
+  padding: 16px;
+}
+
+.tx-chart__canvas .vega-embed {
+  display: block;
+  width: 100%;
+}
+
+.tx-chart__error {
+  padding: 14px 16px;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.tx-chart__error p {
+  margin: 0 0 8px;
+}
+
+.tx-chart__error pre {
+  max-height: 320px;
+  overflow: auto;
+  font-size: 12px;
+}
+
+/* Choice card */
+
+.tx-choice {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.tx-choice:focus {
+  outline: none;
+}
+
+.tx-choice--blocking {
+  border-color: var(--warn);
+}
+
+.tx-choice__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--warn-soft);
+  color: var(--warn);
+  font: 500 11px/1.2 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.tx-choice__cube {
+  display: inline-flex;
+}
+
+.tx-choice__point {
+  padding: 16px 16px 2px;
+}
+
+.tx-choice__question {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tx-choice__options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tx-choice__option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  background: var(--raised);
+  text-align: left;
+}
+
+.tx-choice__option:hover:not(:disabled) {
+  border-color: var(--edge);
+}
+
+.tx-choice__option[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.tx-choice__option:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.tx-choice__key {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  margin-top: 1px;
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  color: var(--muted);
+  font: 500 11px/1 var(--mono);
+}
+
+.tx-choice__option[aria-pressed="true"] .tx-choice__key {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tx-choice__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tx-choice__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-weight: 600;
+}
+
+.tx-choice__hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.tx-choice__pick {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--good-soft);
+  color: var(--good);
+  font: 500 10.5px/1 var(--mono);
+  letter-spacing: 0.04em;
+}
+
+.tx-choice__why {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.tx-choice__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 16px;
+}
+
+.tx-choice__other {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 16px;
+}
+
+/* The choices sightline made, under the chart */
+
+.tx-choice--made,
+.tx-choice--asked {
+  background: transparent;
+}
+
+.tx-choice__title {
+  margin: 0;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.tx-made {
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+}
+
+.tx-made__point {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.tx-made__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+}
+
+.tx-made__question {
+  color: var(--muted);
+}
+
+.tx-made__answer {
+  font-weight: 500;
+}
+
+.tx-made__by {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.tx-made__line .tx-link {
+  margin-left: auto;
+}
+
+.tx-made__why {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.tx-made__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tx-made__options .pill {
+  height: 26px;
+  padding: 0 11px;
+  font-size: 12.5px;
+}
+
+/* Footer: feedback and the chart switcher */
+
+.tx-feedback {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.tx-feedback__button {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+}
+
+.tx-feedback__button:hover {
+  background: var(--raised);
+  color: var(--ink);
+}
+
+.tx-feedback__button[aria-pressed="true"] {
+  background: var(--raised);
+  color: var(--accent);
+}
+
+.tx-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tx-switcher .pill {
+  height: 26px;
+  padding: 0 11px;
+  font-size: 12.5px;
+}
+
+.tx-switcher .pill:disabled,
+.tx-made__options .pill:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

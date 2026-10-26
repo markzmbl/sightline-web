@@ -1,0 +1,99 @@
+.cubepage {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 48px 16px 80px;
+}
+
+.cubepage h1 {
+  margin: 10px 0 8px;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.cubepage header p.muted {
+  max-width: 64ch;
+  margin: 0 0 28px;
+}
+
+.cubepage__card {
+  margin-top: 20px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.cubepage__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 12.5px;
+}
+
+.cubepage__status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius-small);
+  background: var(--ground);
+}
+
+.cubepage__stages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  font: 500 11.5px/1 var(--mono);
+}
+
+.cubepage__stages li {
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+}
+
+.cubepage__stages li.done {
+  color: var(--ink);
+}
+
+.cubepage__stages li.now {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.cubepage__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.cubepage__group {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.cubepage__grid {
+  border-collapse: collapse;
+}
+
+.cubepage__grid th {
+  padding: 6px 18px 6px 0;
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+}
+
+.cubepage__grid td {
+  padding: 10px 28px 10px 0;
+  vertical-align: middle;
+}

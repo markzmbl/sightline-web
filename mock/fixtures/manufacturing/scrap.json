@@ -1,0 +1,987 @@
+{
+  "slug": "scrap",
+  "workspace": "manufacturing",
+  "question": "Which production orders had the most scrap against plan in 2025?",
+  "final_status": "complete",
+  "continuation": null,
+  "stages": [
+    {
+      "phase": "understand",
+      "stage": "situate",
+      "ms": 2333
+    },
+    {
+      "phase": "understand",
+      "stage": "abstract",
+      "ms": 1463
+    },
+    {
+      "phase": "understand",
+      "stage": "bind",
+      "ms": 84
+    },
+    {
+      "phase": "analyse",
+      "stage": "enrich",
+      "ms": 184
+    },
+    {
+      "phase": "analyse",
+      "stage": "derive",
+      "ms": 1900
+    },
+    {
+      "phase": "analyse",
+      "stage": "query",
+      "ms": 126
+    },
+    {
+      "phase": "present",
+      "stage": "idiom",
+      "ms": 855
+    },
+    {
+      "phase": "present",
+      "stage": "render",
+      "ms": 201
+    },
+    {
+      "phase": "present",
+      "stage": "perceive",
+      "ms": 21997
+    },
+    {
+      "phase": "present",
+      "stage": "validate",
+      "ms": 1332
+    }
+  ],
+  "restatement": null,
+  "card": {
+    "blocking": false,
+    "points": [
+      {
+        "id": "grain",
+        "step": "meaning",
+        "question": "In which time steps?",
+        "options": [
+          {
+            "id": "none",
+            "label": "no time steps",
+            "hint": ""
+          },
+          {
+            "id": "year",
+            "label": "per year",
+            "hint": ""
+          },
+          {
+            "id": "event",
+            "label": "every single event",
+            "hint": ""
+          }
+        ],
+        "chosen": "none",
+        "default": "none",
+        "by": "s1",
+        "confidence": 0.53,
+        "why": "",
+        "open": false,
+        "stage": "abstract"
+      },
+      {
+        "id": "labels",
+        "step": "detail",
+        "question": "Should every mark carry its value?",
+        "options": [
+          {
+            "id": "all",
+            "label": "every mark carries its value",
+            "hint": ""
+          },
+          {
+            "id": "none",
+            "label": "values are read off the axis",
+            "hint": ""
+          }
+        ],
+        "chosen": "all",
+        "default": "all",
+        "by": "s1",
+        "confidence": 0.34,
+        "why": "the System 1 model was not sure (0.34 below 0.50)",
+        "open": true,
+        "stage": "idiom"
+      }
+    ]
+  },
+  "clarify": null,
+  "result": {
+    "sql": "SELECT \"f\".\"production_order\" AS \"production_order\", ((COALESCE(SUM(\"f\".\"scrap_qty\"), 0)) / NULLIF((COALESCE(SUM(\"f\".\"planned_scrap_qty\"), 0)), 0)) AS \"actual_to_planned_scrap\" FROM \"main\".\"fct_production_shifts\" AS \"f\" WHERE \"f\".\"shift_date\" >= CAST('2025-01-01' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-31' AS DATE) GROUP BY \"f\".\"production_order\" HAVING (COUNT(*) + COUNT(*)) > 0 ORDER BY \"actual_to_planned_scrap\" DESC LIMIT 10",
+    "columns": [
+      {
+        "name": "production_order",
+        "type": "nominal"
+      },
+      {
+        "name": "actual_to_planned_scrap",
+        "type": "q_ratio"
+      }
+    ],
+    "rows": [
+      [
+        "PO302168",
+        4.375
+      ],
+      [
+        "PO301657",
+        3.870968
+      ],
+      [
+        "PO302171",
+        3.863636
+      ],
+      [
+        "PO302415",
+        3.764706
+      ],
+      [
+        "PO302164",
+        3.609865
+      ],
+      [
+        "PO301661",
+        3.383459
+      ],
+      [
+        "PO301391",
+        3.291139
+      ],
+      [
+        "PO301665",
+        3.247496
+      ],
+      [
+        "PO301900",
+        3.218884
+      ],
+      [
+        "PO301398",
+        3.058824
+      ]
+    ],
+    "row_count": 10,
+    "truncated": false,
+    "chart": {
+      "chart": "horizontal_bar",
+      "label": "ranked bars",
+      "spec": {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "description": "horizontal_bar (deterministic fallback); rules: CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO, VIS-TASK-FIT",
+        "data": {
+          "values": [
+            {
+              "production_order": "PO302168",
+              "actual_to_planned_scrap": 4.375,
+              "__name": "PO302168",
+              "__tip": "4.38 x",
+              "__rest": false
+            },
+            {
+              "production_order": "PO301657",
+              "actual_to_planned_scrap": 3.870968,
+              "__name": "PO301657",
+              "__tip": "3.87 x",
+              "__rest": false
+            },
+            {
+              "production_order": "PO302171",
+              "actual_to_planned_scrap": 3.863636,
+              "__name": "PO302171",
+              "__tip": "3.86 x",
+              "__rest": false
+            },
+            {
+              "production_order": "PO302415",
+              "actual_to_planned_scrap": 3.764706,
+              "__name": "PO302415",
+              "__tip": "3.76 x",
+              "__rest": false
+            },
+            {
+              "production_order": "PO302164",
+              "actual_to_planned_scrap": 3.609865,
+              "__name": "PO302164",
+              "__tip": "3.61 x",
+              "__rest": false
+            },
+            {
+              "production_order": "PO301661",
+              "actual_to_planned_scrap": 3.383459,
+              "__name": "PO301661",
+              "__tip": "3.38 x",
+              "__rest": false
+            },
+            {
+              "production_order": "PO301391",
+              "actual_to_planned_scrap": 3.291139,
+              "__name": "PO301391",
+              "__tip": "3.29 x",
+              "__rest": false
+            },
+            {
+              "production_order": "PO301665",
+              "actual_to_planned_scrap": 3.247496,
+              "__name": "PO301665",
+              "__tip": "3.25 x",
+              "__rest": false
+            },
+            {
+              "production_order": "PO301900",
+              "actual_to_planned_scrap": 3.218884,
+              "__name": "PO301900",
+              "__tip": "3.22 x",
+              "__rest": false
+            },
+            {
+              "production_order": "PO301398",
+              "actual_to_planned_scrap": 3.058824,
+              "__name": "PO301398",
+              "__tip": "3.06 x",
+              "__rest": false
+            }
+          ]
+        },
+        "height": {
+          "step": 26
+        },
+        "layer": [
+          {
+            "params": [
+              {
+                "name": "hover",
+                "select": {
+                  "type": "point",
+                  "on": "mouseover",
+                  "clear": "mouseout"
+                }
+              }
+            ],
+            "mark": {
+              "type": "bar",
+              "cornerRadiusEnd": 5,
+              "height": {
+                "band": 0.72
+              }
+            },
+            "encoding": {
+              "x": {
+                "field": "actual_to_planned_scrap",
+                "type": "quantitative",
+                "title": "actual to planned scrap (x)",
+                "scale": {
+                  "domain": [
+                    0,
+                    4.80333984375
+                  ]
+                },
+                "axis": null
+              },
+              "color": {
+                "condition": {
+                  "test": "datum.__rest",
+                  "value": "#BCC0C6"
+                },
+                "value": {
+                  "gradient": "linear",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 1,
+                  "y2": 0,
+                  "stops": [
+                    {
+                      "offset": 0,
+                      "color": "#1227FD"
+                    },
+                    {
+                      "offset": 1,
+                      "color": "#4F7BFF"
+                    }
+                  ]
+                }
+              },
+              "opacity": {
+                "condition": {
+                  "param": "hover",
+                  "value": 1
+                },
+                "value": 0.72
+              },
+              "tooltip": [
+                {
+                  "field": "__name",
+                  "type": "nominal",
+                  "title": "production order"
+                },
+                {
+                  "field": "__tip",
+                  "type": "nominal",
+                  "title": "actual to planned scrap"
+                }
+              ],
+              "y": {
+                "field": "__name",
+                "type": "nominal",
+                "sort": [
+                  "PO302168",
+                  "PO301657",
+                  "PO302171",
+                  "PO302415",
+                  "PO302164",
+                  "PO301661",
+                  "PO301391",
+                  "PO301665",
+                  "PO301900",
+                  "PO301398"
+                ],
+                "title": null,
+                "axis": {
+                  "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                  "labelLimit": 300,
+                  "ticks": false,
+                  "labelPadding": 8,
+                  "domain": false,
+                  "grid": false
+                }
+              }
+            }
+          },
+          {
+            "transform": [
+              {
+                "filter": "datum[\"actual_to_planned_scrap\"] >= 0"
+              }
+            ],
+            "mark": {
+              "type": "text",
+              "align": "left",
+              "baseline": "middle",
+              "dx": 7,
+              "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+              "fontSize": 11.5,
+              "color": "#191C1F",
+              "fontWeight": 500
+            },
+            "encoding": {
+              "y": {
+                "field": "__name",
+                "type": "nominal",
+                "sort": [
+                  "PO302168",
+                  "PO301657",
+                  "PO302171",
+                  "PO302415",
+                  "PO302164",
+                  "PO301661",
+                  "PO301391",
+                  "PO301665",
+                  "PO301900",
+                  "PO301398"
+                ],
+                "title": null,
+                "axis": {
+                  "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                  "labelLimit": 300,
+                  "ticks": false,
+                  "labelPadding": 8,
+                  "domain": false,
+                  "grid": false
+                }
+              },
+              "x": {
+                "field": "actual_to_planned_scrap",
+                "type": "quantitative"
+              },
+              "text": {
+                "field": "__tip"
+              }
+            }
+          }
+        ],
+        "title": {
+          "text": "Top 10 production orders by actual to planned scrap",
+          "subtitle": [
+            "2025",
+            "Top 10 of 10,370 production orders"
+          ]
+        },
+        "usermeta": {
+          "theme": "pattern-perspectives"
+        },
+        "config": {
+          "background": "#FFFFFF",
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+          "padding": {
+            "left": 20,
+            "right": 24,
+            "top": 20,
+            "bottom": 18
+          },
+          "view": {
+            "stroke": null
+          },
+          "title": {
+            "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "fontSize": 16,
+            "fontWeight": 600,
+            "color": "#191C1F",
+            "anchor": "start",
+            "offset": 16,
+            "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "subtitleColor": "#5F6368",
+            "subtitleFontSize": 12.5,
+            "subtitleFontWeight": 400,
+            "subtitlePadding": 6,
+            "subtitleLineHeight": 17
+          },
+          "axis": {
+            "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "labelFontSize": 10.5,
+            "labelColor": "#5F6368",
+            "labelPadding": 8,
+            "labelSeparation": 6,
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "titlePadding": 12,
+            "domainColor": "#C9C9CD",
+            "tickColor": "#C9C9CD",
+            "gridColor": "#E2E2E7",
+            "gridWidth": 1
+          },
+          "axisX": {
+            "grid": false,
+            "ticks": true,
+            "tickSize": 4,
+            "domain": true
+          },
+          "axisY": {
+            "domain": false,
+            "ticks": false,
+            "grid": true
+          },
+          "axisBand": {
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelColor": "#191C1F",
+            "labelFontSize": 11,
+            "labelPadding": 10
+          },
+          "legend": {
+            "orient": "bottom",
+            "direction": "horizontal",
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelFontSize": 12,
+            "labelColor": "#191C1F",
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "symbolType": "circle",
+            "symbolSize": 110,
+            "symbolStrokeWidth": 0,
+            "columnPadding": 16,
+            "padding": 4,
+            "offset": 16
+          },
+          "range": {
+            "category": [
+              "#1227FD",
+              "#00967A",
+              "#8B5CF6",
+              "#B07800",
+              "#46277A",
+              "#4F7BFF",
+              "#191C1F"
+            ],
+            "ramp": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "heatmap": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "diverging": [
+              "#E23B4A",
+              "#F4F4F6",
+              "#1227FD"
+            ]
+          },
+          "mark": {
+            "color": "#1227FD"
+          },
+          "line": {
+            "color": "#1227FD",
+            "strokeWidth": 2.5,
+            "strokeCap": "round",
+            "strokeJoin": "round"
+          },
+          "point": {
+            "color": "#1227FD",
+            "size": 56,
+            "filled": true
+          },
+          "area": {
+            "color": "#1227FD",
+            "opacity": 0.16
+          },
+          "bar": {
+            "color": "#1227FD",
+            "cornerRadiusEnd": 5
+          },
+          "arc": {
+            "stroke": "#FFFFFF",
+            "strokeWidth": 2
+          },
+          "rect": {
+            "color": "#1227FD"
+          },
+          "rule": {
+            "color": "#C9C9CD"
+          },
+          "text": {
+            "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "fontSize": 11,
+            "color": "#191C1F"
+          }
+        }
+      },
+      "png_url": null,
+      "alternatives": [
+        {
+          "chart": "point",
+          "label": "ranked dots",
+          "hint": "see which categories are the largest and how far apart they are"
+        },
+        {
+          "chart": "bar",
+          "label": "columns",
+          "hint": null
+        },
+        {
+          "chart": "table",
+          "label": "a table",
+          "hint": null
+        }
+      ]
+    },
+    "findings": []
+  },
+  "charts": {
+    "horizontal_bar": {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "description": "horizontal_bar (deterministic fallback); rules: CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO, VIS-TASK-FIT",
+      "data": {
+        "values": [
+          {
+            "production_order": "PO302168",
+            "actual_to_planned_scrap": 4.375,
+            "__name": "PO302168",
+            "__tip": "4.38 x",
+            "__rest": false
+          },
+          {
+            "production_order": "PO301657",
+            "actual_to_planned_scrap": 3.870968,
+            "__name": "PO301657",
+            "__tip": "3.87 x",
+            "__rest": false
+          },
+          {
+            "production_order": "PO302171",
+            "actual_to_planned_scrap": 3.863636,
+            "__name": "PO302171",
+            "__tip": "3.86 x",
+            "__rest": false
+          },
+          {
+            "production_order": "PO302415",
+            "actual_to_planned_scrap": 3.764706,
+            "__name": "PO302415",
+            "__tip": "3.76 x",
+            "__rest": false
+          },
+          {
+            "production_order": "PO302164",
+            "actual_to_planned_scrap": 3.609865,
+            "__name": "PO302164",
+            "__tip": "3.61 x",
+            "__rest": false
+          },
+          {
+            "production_order": "PO301661",
+            "actual_to_planned_scrap": 3.383459,
+            "__name": "PO301661",
+            "__tip": "3.38 x",
+            "__rest": false
+          },
+          {
+            "production_order": "PO301391",
+            "actual_to_planned_scrap": 3.291139,
+            "__name": "PO301391",
+            "__tip": "3.29 x",
+            "__rest": false
+          },
+          {
+            "production_order": "PO301665",
+            "actual_to_planned_scrap": 3.247496,
+            "__name": "PO301665",
+            "__tip": "3.25 x",
+            "__rest": false
+          },
+          {
+            "production_order": "PO301900",
+            "actual_to_planned_scrap": 3.218884,
+            "__name": "PO301900",
+            "__tip": "3.22 x",
+            "__rest": false
+          },
+          {
+            "production_order": "PO301398",
+            "actual_to_planned_scrap": 3.058824,
+            "__name": "PO301398",
+            "__tip": "3.06 x",
+            "__rest": false
+          }
+        ]
+      },
+      "height": {
+        "step": 26
+      },
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "hover",
+              "select": {
+                "type": "point",
+                "on": "mouseover",
+                "clear": "mouseout"
+              }
+            }
+          ],
+          "mark": {
+            "type": "bar",
+            "cornerRadiusEnd": 5,
+            "height": {
+              "band": 0.72
+            }
+          },
+          "encoding": {
+            "x": {
+              "field": "actual_to_planned_scrap",
+              "type": "quantitative",
+              "title": "actual to planned scrap (x)",
+              "scale": {
+                "domain": [
+                  0,
+                  4.80333984375
+                ]
+              },
+              "axis": null
+            },
+            "color": {
+              "condition": {
+                "test": "datum.__rest",
+                "value": "#BCC0C6"
+              },
+              "value": {
+                "gradient": "linear",
+                "x1": 0,
+                "y1": 0,
+                "x2": 1,
+                "y2": 0,
+                "stops": [
+                  {
+                    "offset": 0,
+                    "color": "#1227FD"
+                  },
+                  {
+                    "offset": 1,
+                    "color": "#4F7BFF"
+                  }
+                ]
+              }
+            },
+            "opacity": {
+              "condition": {
+                "param": "hover",
+                "value": 1
+              },
+              "value": 0.72
+            },
+            "tooltip": [
+              {
+                "field": "__name",
+                "type": "nominal",
+                "title": "production order"
+              },
+              {
+                "field": "__tip",
+                "type": "nominal",
+                "title": "actual to planned scrap"
+              }
+            ],
+            "y": {
+              "field": "__name",
+              "type": "nominal",
+              "sort": [
+                "PO302168",
+                "PO301657",
+                "PO302171",
+                "PO302415",
+                "PO302164",
+                "PO301661",
+                "PO301391",
+                "PO301665",
+                "PO301900",
+                "PO301398"
+              ],
+              "title": null,
+              "axis": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                "labelLimit": 300,
+                "ticks": false,
+                "labelPadding": 8,
+                "domain": false,
+                "grid": false
+              }
+            }
+          }
+        },
+        {
+          "transform": [
+            {
+              "filter": "datum[\"actual_to_planned_scrap\"] >= 0"
+            }
+          ],
+          "mark": {
+            "type": "text",
+            "align": "left",
+            "baseline": "middle",
+            "dx": 7,
+            "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "fontSize": 11.5,
+            "color": "#191C1F",
+            "fontWeight": 500
+          },
+          "encoding": {
+            "y": {
+              "field": "__name",
+              "type": "nominal",
+              "sort": [
+                "PO302168",
+                "PO301657",
+                "PO302171",
+                "PO302415",
+                "PO302164",
+                "PO301661",
+                "PO301391",
+                "PO301665",
+                "PO301900",
+                "PO301398"
+              ],
+              "title": null,
+              "axis": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                "labelLimit": 300,
+                "ticks": false,
+                "labelPadding": 8,
+                "domain": false,
+                "grid": false
+              }
+            },
+            "x": {
+              "field": "actual_to_planned_scrap",
+              "type": "quantitative"
+            },
+            "text": {
+              "field": "__tip"
+            }
+          }
+        }
+      ],
+      "title": {
+        "text": "Top 10 production orders by actual to planned scrap",
+        "subtitle": [
+          "2025",
+          "Top 10 of 10,370 production orders"
+        ]
+      },
+      "usermeta": {
+        "theme": "pattern-perspectives"
+      },
+      "config": {
+        "background": "#FFFFFF",
+        "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+        "padding": {
+          "left": 20,
+          "right": 24,
+          "top": 20,
+          "bottom": 18
+        },
+        "view": {
+          "stroke": null
+        },
+        "title": {
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "fontSize": 16,
+          "fontWeight": 600,
+          "color": "#191C1F",
+          "anchor": "start",
+          "offset": 16,
+          "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "subtitleColor": "#5F6368",
+          "subtitleFontSize": 12.5,
+          "subtitleFontWeight": 400,
+          "subtitlePadding": 6,
+          "subtitleLineHeight": 17
+        },
+        "axis": {
+          "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "labelFontSize": 10.5,
+          "labelColor": "#5F6368",
+          "labelPadding": 8,
+          "labelSeparation": 6,
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "titlePadding": 12,
+          "domainColor": "#C9C9CD",
+          "tickColor": "#C9C9CD",
+          "gridColor": "#E2E2E7",
+          "gridWidth": 1
+        },
+        "axisX": {
+          "grid": false,
+          "ticks": true,
+          "tickSize": 4,
+          "domain": true
+        },
+        "axisY": {
+          "domain": false,
+          "ticks": false,
+          "grid": true
+        },
+        "axisBand": {
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelColor": "#191C1F",
+          "labelFontSize": 11,
+          "labelPadding": 10
+        },
+        "legend": {
+          "orient": "bottom",
+          "direction": "horizontal",
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelFontSize": 12,
+          "labelColor": "#191C1F",
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "symbolType": "circle",
+          "symbolSize": 110,
+          "symbolStrokeWidth": 0,
+          "columnPadding": 16,
+          "padding": 4,
+          "offset": 16
+        },
+        "range": {
+          "category": [
+            "#1227FD",
+            "#00967A",
+            "#8B5CF6",
+            "#B07800",
+            "#46277A",
+            "#4F7BFF",
+            "#191C1F"
+          ],
+          "ramp": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "heatmap": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "diverging": [
+            "#E23B4A",
+            "#F4F4F6",
+            "#1227FD"
+          ]
+        },
+        "mark": {
+          "color": "#1227FD"
+        },
+        "line": {
+          "color": "#1227FD",
+          "strokeWidth": 2.5,
+          "strokeCap": "round",
+          "strokeJoin": "round"
+        },
+        "point": {
+          "color": "#1227FD",
+          "size": 56,
+          "filled": true
+        },
+        "area": {
+          "color": "#1227FD",
+          "opacity": 0.16
+        },
+        "bar": {
+          "color": "#1227FD",
+          "cornerRadiusEnd": 5
+        },
+        "arc": {
+          "stroke": "#FFFFFF",
+          "strokeWidth": 2
+        },
+        "rect": {
+          "color": "#1227FD"
+        },
+        "rule": {
+          "color": "#C9C9CD"
+        },
+        "text": {
+          "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "fontSize": 11,
+          "color": "#191C1F"
+        }
+      }
+    }
+  },
+  "chart_options": [
+    {
+      "chart": "horizontal_bar",
+      "label": "ranked bars",
+      "hint": "see which categories are the largest and how far apart they are"
+    },
+    {
+      "chart": "point",
+      "label": "ranked dots",
+      "hint": "see which categories are the largest and how far apart they are"
+    },
+    {
+      "chart": "bar",
+      "label": "columns",
+      "hint": null
+    },
+    {
+      "chart": "table",
+      "label": "a table",
+      "hint": null
+    }
+  ]
+}

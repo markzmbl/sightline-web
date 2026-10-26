@@ -1,0 +1,808 @@
+{
+  "slug": "tips",
+  "workspace": "restaurant",
+  "question": "What is the average tip by payment method?",
+  "final_status": "complete",
+  "continuation": null,
+  "stages": [
+    {
+      "phase": "understand",
+      "stage": "situate",
+      "ms": 704
+    },
+    {
+      "phase": "understand",
+      "stage": "abstract",
+      "ms": 868
+    },
+    {
+      "phase": "understand",
+      "stage": "bind",
+      "ms": 8
+    },
+    {
+      "phase": "analyse",
+      "stage": "enrich",
+      "ms": 153
+    },
+    {
+      "phase": "analyse",
+      "stage": "derive",
+      "ms": 264
+    },
+    {
+      "phase": "analyse",
+      "stage": "query",
+      "ms": 64
+    },
+    {
+      "phase": "present",
+      "stage": "idiom",
+      "ms": 543
+    },
+    {
+      "phase": "present",
+      "stage": "render",
+      "ms": 151
+    },
+    {
+      "phase": "present",
+      "stage": "perceive",
+      "ms": 5978
+    },
+    {
+      "phase": "present",
+      "stage": "validate",
+      "ms": 1267
+    }
+  ],
+  "restatement": null,
+  "card": {
+    "blocking": false,
+    "points": [
+      {
+        "id": "idiom",
+        "step": "form",
+        "question": "How do you want to see it?",
+        "options": [
+          {
+            "id": "horizontal_bar",
+            "label": "ranked bars",
+            "hint": "to see which categories are the largest and how far apart they are"
+          },
+          {
+            "id": "bar",
+            "label": "columns",
+            "hint": ""
+          },
+          {
+            "id": "point",
+            "label": "ranked dots",
+            "hint": "to see which categories are the largest and how far apart they are"
+          },
+          {
+            "id": "table",
+            "label": "a table",
+            "hint": ""
+          }
+        ],
+        "chosen": "horizontal_bar",
+        "default": "horizontal_bar",
+        "by": "s1",
+        "confidence": 0.37,
+        "why": "the System 1 model was not sure (0.37 below 0.50)",
+        "open": true,
+        "stage": "idiom"
+      },
+      {
+        "id": "labels",
+        "step": "detail",
+        "question": "Should every mark carry its value?",
+        "options": [
+          {
+            "id": "all",
+            "label": "every mark carries its value",
+            "hint": ""
+          },
+          {
+            "id": "none",
+            "label": "values are read off the axis",
+            "hint": ""
+          }
+        ],
+        "chosen": "all",
+        "default": "all",
+        "by": "s1",
+        "confidence": 0.32,
+        "why": "the System 1 model was not sure (0.32 below 0.50)",
+        "open": true,
+        "stage": "idiom"
+      }
+    ]
+  },
+  "clarify": null,
+  "result": {
+    "sql": "SELECT \"f\".\"payment_method\" AS \"payment_method\", AVG(\"f\".\"tip_amount\") AS \"tip_amount\" FROM \"fact_payments\" AS \"f\" GROUP BY \"f\".\"payment_method\" ORDER BY \"tip_amount\" DESC LIMIT 10000",
+    "columns": [
+      {
+        "name": "payment_method",
+        "type": "nominal"
+      },
+      {
+        "name": "tip_amount",
+        "type": "q_ratio"
+      }
+    ],
+    "rows": [
+      [
+        "card",
+        1.509664
+      ],
+      [
+        "cash",
+        0
+      ]
+    ],
+    "row_count": 2,
+    "truncated": false,
+    "chart": {
+      "chart": "horizontal_bar",
+      "label": "ranked bars",
+      "spec": {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "description": "horizontal_bar (deterministic fallback); rules: CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO",
+        "data": {
+          "values": [
+            {
+              "payment_method": "card",
+              "tip_amount": 1.509664,
+              "__name": "card",
+              "__tip": "€1.51",
+              "__rest": false
+            },
+            {
+              "payment_method": "cash",
+              "tip_amount": 0,
+              "__name": "cash",
+              "__tip": "€0.00",
+              "__rest": false
+            }
+          ]
+        },
+        "height": {
+          "step": 26
+        },
+        "layer": [
+          {
+            "params": [
+              {
+                "name": "hover",
+                "select": {
+                  "type": "point",
+                  "on": "mouseover",
+                  "clear": "mouseout"
+                }
+              }
+            ],
+            "mark": {
+              "type": "bar",
+              "cornerRadiusEnd": 5,
+              "height": {
+                "band": 0.72
+              }
+            },
+            "encoding": {
+              "x": {
+                "field": "tip_amount",
+                "type": "quantitative",
+                "title": "average tip amount (€)",
+                "axis": null,
+                "scale": {
+                  "domain": [
+                    0,
+                    1.6369239574999999
+                  ]
+                }
+              },
+              "color": {
+                "condition": {
+                  "test": "datum.__rest",
+                  "value": "#BCC0C6"
+                },
+                "value": {
+                  "gradient": "linear",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 1,
+                  "y2": 0,
+                  "stops": [
+                    {
+                      "offset": 0,
+                      "color": "#1227FD"
+                    },
+                    {
+                      "offset": 1,
+                      "color": "#4F7BFF"
+                    }
+                  ]
+                }
+              },
+              "opacity": {
+                "condition": {
+                  "param": "hover",
+                  "value": 1
+                },
+                "value": 0.72
+              },
+              "tooltip": [
+                {
+                  "field": "__name",
+                  "type": "nominal",
+                  "title": "payment method"
+                },
+                {
+                  "field": "__tip",
+                  "type": "nominal",
+                  "title": "average tip amount"
+                }
+              ],
+              "y": {
+                "field": "__name",
+                "type": "nominal",
+                "sort": [
+                  "card",
+                  "cash"
+                ],
+                "title": null,
+                "axis": {
+                  "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                  "labelLimit": 300,
+                  "ticks": false,
+                  "labelPadding": 8,
+                  "domain": false,
+                  "grid": false
+                }
+              }
+            }
+          },
+          {
+            "transform": [
+              {
+                "filter": "datum[\"tip_amount\"] >= 0"
+              }
+            ],
+            "mark": {
+              "type": "text",
+              "align": "left",
+              "baseline": "middle",
+              "dx": 7,
+              "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+              "fontSize": 11.5,
+              "color": "#191C1F",
+              "fontWeight": 500
+            },
+            "encoding": {
+              "y": {
+                "field": "__name",
+                "type": "nominal",
+                "sort": [
+                  "card",
+                  "cash"
+                ],
+                "title": null,
+                "axis": {
+                  "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                  "labelLimit": 300,
+                  "ticks": false,
+                  "labelPadding": 8,
+                  "domain": false,
+                  "grid": false
+                }
+              },
+              "x": {
+                "field": "tip_amount",
+                "type": "quantitative"
+              },
+              "text": {
+                "field": "__tip"
+              }
+            }
+          }
+        ],
+        "title": {
+          "text": "Average tip amount by payment method"
+        },
+        "usermeta": {
+          "theme": "pattern-perspectives"
+        },
+        "config": {
+          "background": "#FFFFFF",
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+          "padding": {
+            "left": 20,
+            "right": 24,
+            "top": 20,
+            "bottom": 18
+          },
+          "view": {
+            "stroke": null
+          },
+          "title": {
+            "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "fontSize": 16,
+            "fontWeight": 600,
+            "color": "#191C1F",
+            "anchor": "start",
+            "offset": 16,
+            "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "subtitleColor": "#5F6368",
+            "subtitleFontSize": 12.5,
+            "subtitleFontWeight": 400,
+            "subtitlePadding": 6,
+            "subtitleLineHeight": 17
+          },
+          "axis": {
+            "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "labelFontSize": 10.5,
+            "labelColor": "#5F6368",
+            "labelPadding": 8,
+            "labelSeparation": 6,
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "titlePadding": 12,
+            "domainColor": "#C9C9CD",
+            "tickColor": "#C9C9CD",
+            "gridColor": "#E2E2E7",
+            "gridWidth": 1
+          },
+          "axisX": {
+            "grid": false,
+            "ticks": true,
+            "tickSize": 4,
+            "domain": true
+          },
+          "axisY": {
+            "domain": false,
+            "ticks": false,
+            "grid": true
+          },
+          "axisBand": {
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelColor": "#191C1F",
+            "labelFontSize": 11,
+            "labelPadding": 10
+          },
+          "legend": {
+            "orient": "bottom",
+            "direction": "horizontal",
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelFontSize": 12,
+            "labelColor": "#191C1F",
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "symbolType": "circle",
+            "symbolSize": 110,
+            "symbolStrokeWidth": 0,
+            "columnPadding": 16,
+            "padding": 4,
+            "offset": 16
+          },
+          "range": {
+            "category": [
+              "#1227FD",
+              "#00967A",
+              "#8B5CF6",
+              "#B07800",
+              "#46277A",
+              "#4F7BFF",
+              "#191C1F"
+            ],
+            "ramp": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "heatmap": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "diverging": [
+              "#E23B4A",
+              "#F4F4F6",
+              "#1227FD"
+            ]
+          },
+          "mark": {
+            "color": "#1227FD"
+          },
+          "line": {
+            "color": "#1227FD",
+            "strokeWidth": 2.5,
+            "strokeCap": "round",
+            "strokeJoin": "round"
+          },
+          "point": {
+            "color": "#1227FD",
+            "size": 56,
+            "filled": true
+          },
+          "area": {
+            "color": "#1227FD",
+            "opacity": 0.16
+          },
+          "bar": {
+            "color": "#1227FD",
+            "cornerRadiusEnd": 5
+          },
+          "arc": {
+            "stroke": "#FFFFFF",
+            "strokeWidth": 2
+          },
+          "rect": {
+            "color": "#1227FD"
+          },
+          "rule": {
+            "color": "#C9C9CD"
+          },
+          "text": {
+            "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "fontSize": 11,
+            "color": "#191C1F"
+          }
+        }
+      },
+      "png_url": null,
+      "alternatives": [
+        {
+          "chart": "bar",
+          "label": "columns",
+          "hint": null
+        },
+        {
+          "chart": "point",
+          "label": "ranked dots",
+          "hint": "see which categories are the largest and how far apart they are"
+        },
+        {
+          "chart": "table",
+          "label": "a table",
+          "hint": null
+        }
+      ]
+    },
+    "findings": []
+  },
+  "charts": {
+    "horizontal_bar": {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "description": "horizontal_bar (deterministic fallback); rules: CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO",
+      "data": {
+        "values": [
+          {
+            "payment_method": "card",
+            "tip_amount": 1.509664,
+            "__name": "card",
+            "__tip": "€1.51",
+            "__rest": false
+          },
+          {
+            "payment_method": "cash",
+            "tip_amount": 0,
+            "__name": "cash",
+            "__tip": "€0.00",
+            "__rest": false
+          }
+        ]
+      },
+      "height": {
+        "step": 26
+      },
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "hover",
+              "select": {
+                "type": "point",
+                "on": "mouseover",
+                "clear": "mouseout"
+              }
+            }
+          ],
+          "mark": {
+            "type": "bar",
+            "cornerRadiusEnd": 5,
+            "height": {
+              "band": 0.72
+            }
+          },
+          "encoding": {
+            "x": {
+              "field": "tip_amount",
+              "type": "quantitative",
+              "title": "average tip amount (€)",
+              "axis": null,
+              "scale": {
+                "domain": [
+                  0,
+                  1.6369239574999999
+                ]
+              }
+            },
+            "color": {
+              "condition": {
+                "test": "datum.__rest",
+                "value": "#BCC0C6"
+              },
+              "value": {
+                "gradient": "linear",
+                "x1": 0,
+                "y1": 0,
+                "x2": 1,
+                "y2": 0,
+                "stops": [
+                  {
+                    "offset": 0,
+                    "color": "#1227FD"
+                  },
+                  {
+                    "offset": 1,
+                    "color": "#4F7BFF"
+                  }
+                ]
+              }
+            },
+            "opacity": {
+              "condition": {
+                "param": "hover",
+                "value": 1
+              },
+              "value": 0.72
+            },
+            "tooltip": [
+              {
+                "field": "__name",
+                "type": "nominal",
+                "title": "payment method"
+              },
+              {
+                "field": "__tip",
+                "type": "nominal",
+                "title": "average tip amount"
+              }
+            ],
+            "y": {
+              "field": "__name",
+              "type": "nominal",
+              "sort": [
+                "card",
+                "cash"
+              ],
+              "title": null,
+              "axis": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                "labelLimit": 300,
+                "ticks": false,
+                "labelPadding": 8,
+                "domain": false,
+                "grid": false
+              }
+            }
+          }
+        },
+        {
+          "transform": [
+            {
+              "filter": "datum[\"tip_amount\"] >= 0"
+            }
+          ],
+          "mark": {
+            "type": "text",
+            "align": "left",
+            "baseline": "middle",
+            "dx": 7,
+            "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "fontSize": 11.5,
+            "color": "#191C1F",
+            "fontWeight": 500
+          },
+          "encoding": {
+            "y": {
+              "field": "__name",
+              "type": "nominal",
+              "sort": [
+                "card",
+                "cash"
+              ],
+              "title": null,
+              "axis": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                "labelLimit": 300,
+                "ticks": false,
+                "labelPadding": 8,
+                "domain": false,
+                "grid": false
+              }
+            },
+            "x": {
+              "field": "tip_amount",
+              "type": "quantitative"
+            },
+            "text": {
+              "field": "__tip"
+            }
+          }
+        }
+      ],
+      "title": {
+        "text": "Average tip amount by payment method"
+      },
+      "usermeta": {
+        "theme": "pattern-perspectives"
+      },
+      "config": {
+        "background": "#FFFFFF",
+        "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+        "padding": {
+          "left": 20,
+          "right": 24,
+          "top": 20,
+          "bottom": 18
+        },
+        "view": {
+          "stroke": null
+        },
+        "title": {
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "fontSize": 16,
+          "fontWeight": 600,
+          "color": "#191C1F",
+          "anchor": "start",
+          "offset": 16,
+          "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "subtitleColor": "#5F6368",
+          "subtitleFontSize": 12.5,
+          "subtitleFontWeight": 400,
+          "subtitlePadding": 6,
+          "subtitleLineHeight": 17
+        },
+        "axis": {
+          "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "labelFontSize": 10.5,
+          "labelColor": "#5F6368",
+          "labelPadding": 8,
+          "labelSeparation": 6,
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "titlePadding": 12,
+          "domainColor": "#C9C9CD",
+          "tickColor": "#C9C9CD",
+          "gridColor": "#E2E2E7",
+          "gridWidth": 1
+        },
+        "axisX": {
+          "grid": false,
+          "ticks": true,
+          "tickSize": 4,
+          "domain": true
+        },
+        "axisY": {
+          "domain": false,
+          "ticks": false,
+          "grid": true
+        },
+        "axisBand": {
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelColor": "#191C1F",
+          "labelFontSize": 11,
+          "labelPadding": 10
+        },
+        "legend": {
+          "orient": "bottom",
+          "direction": "horizontal",
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelFontSize": 12,
+          "labelColor": "#191C1F",
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "symbolType": "circle",
+          "symbolSize": 110,
+          "symbolStrokeWidth": 0,
+          "columnPadding": 16,
+          "padding": 4,
+          "offset": 16
+        },
+        "range": {
+          "category": [
+            "#1227FD",
+            "#00967A",
+            "#8B5CF6",
+            "#B07800",
+            "#46277A",
+            "#4F7BFF",
+            "#191C1F"
+          ],
+          "ramp": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "heatmap": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "diverging": [
+            "#E23B4A",
+            "#F4F4F6",
+            "#1227FD"
+          ]
+        },
+        "mark": {
+          "color": "#1227FD"
+        },
+        "line": {
+          "color": "#1227FD",
+          "strokeWidth": 2.5,
+          "strokeCap": "round",
+          "strokeJoin": "round"
+        },
+        "point": {
+          "color": "#1227FD",
+          "size": 56,
+          "filled": true
+        },
+        "area": {
+          "color": "#1227FD",
+          "opacity": 0.16
+        },
+        "bar": {
+          "color": "#1227FD",
+          "cornerRadiusEnd": 5
+        },
+        "arc": {
+          "stroke": "#FFFFFF",
+          "strokeWidth": 2
+        },
+        "rect": {
+          "color": "#1227FD"
+        },
+        "rule": {
+          "color": "#C9C9CD"
+        },
+        "text": {
+          "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "fontSize": 11,
+          "color": "#191C1F"
+        }
+      }
+    }
+  },
+  "chart_options": [
+    {
+      "chart": "horizontal_bar",
+      "label": "ranked bars",
+      "hint": "see which categories are the largest and how far apart they are"
+    },
+    {
+      "chart": "bar",
+      "label": "columns",
+      "hint": null
+    },
+    {
+      "chart": "point",
+      "label": "ranked dots",
+      "hint": "see which categories are the largest and how far apart they are"
+    },
+    {
+      "chart": "table",
+      "label": "a table",
+      "hint": null
+    }
+  ]
+}

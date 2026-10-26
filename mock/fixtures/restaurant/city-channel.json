@@ -1,0 +1,1375 @@
+{
+  "slug": "city-channel",
+  "workspace": "restaurant",
+  "question": "Revenue by city and channel",
+  "final_status": "complete",
+  "continuation": null,
+  "stages": [
+    {
+      "phase": "understand",
+      "stage": "situate",
+      "ms": 724
+    },
+    {
+      "phase": "understand",
+      "stage": "abstract",
+      "ms": 915
+    },
+    {
+      "phase": "understand",
+      "stage": "bind",
+      "ms": 49
+    },
+    {
+      "phase": "analyse",
+      "stage": "enrich",
+      "ms": 153
+    },
+    {
+      "phase": "analyse",
+      "stage": "derive",
+      "ms": 201
+    },
+    {
+      "phase": "analyse",
+      "stage": "query",
+      "ms": 223
+    },
+    {
+      "phase": "present",
+      "stage": "idiom",
+      "ms": 1306
+    },
+    {
+      "phase": "present",
+      "stage": "render",
+      "ms": 741
+    },
+    {
+      "phase": "present",
+      "stage": "perceive",
+      "ms": 40413
+    },
+    {
+      "phase": "present",
+      "stage": "validate",
+      "ms": 1207
+    }
+  ],
+  "restatement": null,
+  "card": {
+    "blocking": false,
+    "points": [
+      {
+        "id": "idiom",
+        "step": "form",
+        "question": "How do you want to see it?",
+        "options": [
+          {
+            "id": "grouped_bar",
+            "label": "columns side by side",
+            "hint": "to compare a few groups within each category"
+          },
+          {
+            "id": "point",
+            "label": "ranked dots",
+            "hint": "to see which categories are the largest and how far apart they are"
+          },
+          {
+            "id": "heatmap",
+            "label": "a labelled grid",
+            "hint": "to find where the large and the small values sit across two groupings, with every value readable"
+          },
+          {
+            "id": "stacked_bar",
+            "label": "stacked columns",
+            "hint": ""
+          },
+          {
+            "id": "table",
+            "label": "a table",
+            "hint": ""
+          }
+        ],
+        "chosen": "grouped_bar",
+        "default": "grouped_bar",
+        "by": "s1",
+        "confidence": 0.47,
+        "why": "the System 1 model was not sure (0.47 below 0.50)",
+        "open": true,
+        "stage": "idiom"
+      },
+      {
+        "id": "order",
+        "step": "detail",
+        "question": "In which order should the categories stand?",
+        "options": [
+          {
+            "id": "size",
+            "label": "the largest first",
+            "hint": ""
+          },
+          {
+            "id": "name",
+            "label": "by name",
+            "hint": ""
+          }
+        ],
+        "chosen": "size",
+        "default": "size",
+        "by": "s1",
+        "confidence": 0.14,
+        "why": "the System 1 model was not sure (0.14 below 0.50)",
+        "open": true,
+        "stage": "idiom"
+      }
+    ]
+  },
+  "clarify": null,
+  "result": {
+    "sql": "SELECT \"dim_restaurant\".\"city\" AS \"city\", \"dim_channel\".\"channel_name\" AS \"channel_name\", SUM(\"f\".\"line_revenue\") AS \"line_revenue\" FROM \"fact_order_lines\" AS \"f\" JOIN \"dim_channel\" AS \"dim_channel\" ON \"f\".\"channel_key\" = \"dim_channel\".\"channel_key\" JOIN \"dim_restaurant\" AS \"dim_restaurant\" ON \"f\".\"restaurant_key\" = \"dim_restaurant\".\"restaurant_key\" GROUP BY \"dim_restaurant\".\"city\", \"dim_channel\".\"channel_name\" ORDER BY \"line_revenue\" DESC LIMIT 10000",
+    "columns": [
+      {
+        "name": "city",
+        "type": "nominal"
+      },
+      {
+        "name": "channel_name",
+        "type": "nominal"
+      },
+      {
+        "name": "line_revenue",
+        "type": "q_ratio"
+      }
+    ],
+    "rows": [
+      [
+        "Frankfurt",
+        "dine_in",
+        582673.9
+      ],
+      [
+        "Berlin",
+        "dine_in",
+        496559.93
+      ],
+      [
+        "Koeln",
+        "dine_in",
+        452291.82
+      ],
+      [
+        "Frankfurt",
+        "delivery",
+        424109.58
+      ],
+      [
+        "Hamburg",
+        "dine_in",
+        371691.69
+      ],
+      [
+        "Berlin",
+        "delivery",
+        367767.36
+      ],
+      [
+        "Koeln",
+        "delivery",
+        333934.8
+      ],
+      [
+        "Stuttgart",
+        "dine_in",
+        333892.17
+      ],
+      [
+        "Frankfurt",
+        "takeaway",
+        319313.36
+      ],
+      [
+        "Muenchen",
+        "dine_in",
+        301518.79
+      ],
+      [
+        "Berlin",
+        "takeaway",
+        275898.82
+      ],
+      [
+        "Hamburg",
+        "delivery",
+        270258.21
+      ],
+      [
+        "Koeln",
+        "takeaway",
+        255120.13
+      ],
+      [
+        "Dresden",
+        "dine_in",
+        250714.9
+      ],
+      [
+        "Stuttgart",
+        "delivery",
+        245172.82
+      ],
+      [
+        "Heidelberg",
+        "dine_in",
+        228972.62
+      ],
+      [
+        "Muenchen",
+        "delivery",
+        223584.95
+      ],
+      [
+        "Hamburg",
+        "takeaway",
+        201203.9
+      ],
+      [
+        "Dresden",
+        "delivery",
+        183437.29
+      ],
+      [
+        "Stuttgart",
+        "takeaway",
+        181913.32
+      ],
+      [
+        "Heidelberg",
+        "delivery",
+        169481.14
+      ],
+      [
+        "Muenchen",
+        "takeaway",
+        165763.32
+      ],
+      [
+        "Dresden",
+        "takeaway",
+        135448.62
+      ],
+      [
+        "Heidelberg",
+        "takeaway",
+        123413.04
+      ]
+    ],
+    "row_count": 24,
+    "truncated": false,
+    "chart": {
+      "chart": "grouped_bar",
+      "label": "columns side by side",
+      "spec": {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "description": "grouped_bar (deterministic fallback); rules: CH-N-HUE, CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO, VIS-HUE-CARD",
+        "data": {
+          "values": [
+            {
+              "city": "Frankfurt",
+              "channel_name": "dine_in",
+              "line_revenue": 582673.9,
+              "__band": "Frankfurt",
+              "__label": "Frankfurt",
+              "__partial": false,
+              "__series": "dine in",
+              "__tip": "€583k",
+              "__order": 0
+            },
+            {
+              "city": "Berlin",
+              "channel_name": "dine_in",
+              "line_revenue": 496559.93,
+              "__band": "Berlin",
+              "__label": "Berlin",
+              "__partial": false,
+              "__series": "dine in",
+              "__tip": "€497k",
+              "__order": 0
+            },
+            {
+              "city": "Koeln",
+              "channel_name": "dine_in",
+              "line_revenue": 452291.82,
+              "__band": "Koeln",
+              "__label": "Koeln",
+              "__partial": false,
+              "__series": "dine in",
+              "__tip": "€452k",
+              "__order": 0
+            },
+            {
+              "city": "Frankfurt",
+              "channel_name": "delivery",
+              "line_revenue": 424109.58,
+              "__band": "Frankfurt",
+              "__label": "Frankfurt",
+              "__partial": false,
+              "__series": "delivery",
+              "__tip": "€424k",
+              "__order": 1
+            },
+            {
+              "city": "Hamburg",
+              "channel_name": "dine_in",
+              "line_revenue": 371691.69,
+              "__band": "Hamburg",
+              "__label": "Hamburg",
+              "__partial": false,
+              "__series": "dine in",
+              "__tip": "€372k",
+              "__order": 0
+            },
+            {
+              "city": "Berlin",
+              "channel_name": "delivery",
+              "line_revenue": 367767.36,
+              "__band": "Berlin",
+              "__label": "Berlin",
+              "__partial": false,
+              "__series": "delivery",
+              "__tip": "€368k",
+              "__order": 1
+            },
+            {
+              "city": "Koeln",
+              "channel_name": "delivery",
+              "line_revenue": 333934.8,
+              "__band": "Koeln",
+              "__label": "Koeln",
+              "__partial": false,
+              "__series": "delivery",
+              "__tip": "€334k",
+              "__order": 1
+            },
+            {
+              "city": "Stuttgart",
+              "channel_name": "dine_in",
+              "line_revenue": 333892.17,
+              "__band": "Stuttgart",
+              "__label": "Stuttgart",
+              "__partial": false,
+              "__series": "dine in",
+              "__tip": "€334k",
+              "__order": 0
+            },
+            {
+              "city": "Frankfurt",
+              "channel_name": "takeaway",
+              "line_revenue": 319313.36,
+              "__band": "Frankfurt",
+              "__label": "Frankfurt",
+              "__partial": false,
+              "__series": "takeaway",
+              "__tip": "€319k",
+              "__order": 2
+            },
+            {
+              "city": "Muenchen",
+              "channel_name": "dine_in",
+              "line_revenue": 301518.79,
+              "__band": "Muenchen",
+              "__label": "Muenchen",
+              "__partial": false,
+              "__series": "dine in",
+              "__tip": "€302k",
+              "__order": 0
+            },
+            {
+              "city": "Berlin",
+              "channel_name": "takeaway",
+              "line_revenue": 275898.82,
+              "__band": "Berlin",
+              "__label": "Berlin",
+              "__partial": false,
+              "__series": "takeaway",
+              "__tip": "€276k",
+              "__order": 2
+            },
+            {
+              "city": "Hamburg",
+              "channel_name": "delivery",
+              "line_revenue": 270258.21,
+              "__band": "Hamburg",
+              "__label": "Hamburg",
+              "__partial": false,
+              "__series": "delivery",
+              "__tip": "€270k",
+              "__order": 1
+            },
+            {
+              "city": "Koeln",
+              "channel_name": "takeaway",
+              "line_revenue": 255120.13,
+              "__band": "Koeln",
+              "__label": "Koeln",
+              "__partial": false,
+              "__series": "takeaway",
+              "__tip": "€255k",
+              "__order": 2
+            },
+            {
+              "city": "Dresden",
+              "channel_name": "dine_in",
+              "line_revenue": 250714.9,
+              "__band": "Dresden",
+              "__label": "Dresden",
+              "__partial": false,
+              "__series": "dine in",
+              "__tip": "€251k",
+              "__order": 0
+            },
+            {
+              "city": "Stuttgart",
+              "channel_name": "delivery",
+              "line_revenue": 245172.82,
+              "__band": "Stuttgart",
+              "__label": "Stuttgart",
+              "__partial": false,
+              "__series": "delivery",
+              "__tip": "€245k",
+              "__order": 1
+            },
+            {
+              "city": "Heidelberg",
+              "channel_name": "dine_in",
+              "line_revenue": 228972.62,
+              "__band": "Heidelberg",
+              "__label": "Heidelberg",
+              "__partial": false,
+              "__series": "dine in",
+              "__tip": "€229k",
+              "__order": 0
+            },
+            {
+              "city": "Muenchen",
+              "channel_name": "delivery",
+              "line_revenue": 223584.95,
+              "__band": "Muenchen",
+              "__label": "Muenchen",
+              "__partial": false,
+              "__series": "delivery",
+              "__tip": "€224k",
+              "__order": 1
+            },
+            {
+              "city": "Hamburg",
+              "channel_name": "takeaway",
+              "line_revenue": 201203.9,
+              "__band": "Hamburg",
+              "__label": "Hamburg",
+              "__partial": false,
+              "__series": "takeaway",
+              "__tip": "€201k",
+              "__order": 2
+            },
+            {
+              "city": "Dresden",
+              "channel_name": "delivery",
+              "line_revenue": 183437.29,
+              "__band": "Dresden",
+              "__label": "Dresden",
+              "__partial": false,
+              "__series": "delivery",
+              "__tip": "€183k",
+              "__order": 1
+            },
+            {
+              "city": "Stuttgart",
+              "channel_name": "takeaway",
+              "line_revenue": 181913.32,
+              "__band": "Stuttgart",
+              "__label": "Stuttgart",
+              "__partial": false,
+              "__series": "takeaway",
+              "__tip": "€182k",
+              "__order": 2
+            },
+            {
+              "city": "Heidelberg",
+              "channel_name": "delivery",
+              "line_revenue": 169481.14,
+              "__band": "Heidelberg",
+              "__label": "Heidelberg",
+              "__partial": false,
+              "__series": "delivery",
+              "__tip": "€169k",
+              "__order": 1
+            },
+            {
+              "city": "Muenchen",
+              "channel_name": "takeaway",
+              "line_revenue": 165763.32,
+              "__band": "Muenchen",
+              "__label": "Muenchen",
+              "__partial": false,
+              "__series": "takeaway",
+              "__tip": "€166k",
+              "__order": 2
+            },
+            {
+              "city": "Dresden",
+              "channel_name": "takeaway",
+              "line_revenue": 135448.62,
+              "__band": "Dresden",
+              "__label": "Dresden",
+              "__partial": false,
+              "__series": "takeaway",
+              "__tip": "€135k",
+              "__order": 2
+            },
+            {
+              "city": "Heidelberg",
+              "channel_name": "takeaway",
+              "line_revenue": 123413.04,
+              "__band": "Heidelberg",
+              "__label": "Heidelberg",
+              "__partial": false,
+              "__series": "takeaway",
+              "__tip": "€123k",
+              "__order": 2
+            }
+          ]
+        },
+        "height": 300,
+        "layer": [
+          {
+            "mark": {
+              "type": "bar",
+              "stroke": "white",
+              "strokeWidth": 1,
+              "cornerRadiusEnd": 4
+            },
+            "encoding": {
+              "y": {
+                "field": "line_revenue",
+                "type": "quantitative",
+                "title": "line revenue (€)",
+                "axis": {
+                  "format": "~s",
+                  "labelExpr": "datum.value == 0 ? '€0' : (datum.label ? '€' + datum.label : '')"
+                }
+              },
+              "color": {
+                "field": "__series",
+                "type": "nominal",
+                "scale": {
+                  "domain": [
+                    "dine in",
+                    "delivery",
+                    "takeaway"
+                  ],
+                  "range": [
+                    "#1227FD",
+                    "#00967A",
+                    "#8B5CF6"
+                  ]
+                },
+                "sort": [
+                  "dine in",
+                  "delivery",
+                  "takeaway"
+                ],
+                "legend": {
+                  "orient": "top",
+                  "direction": "horizontal",
+                  "title": null,
+                  "offset": 6
+                }
+              },
+              "tooltip": [
+                {
+                  "field": "__label",
+                  "type": "nominal",
+                  "title": "city"
+                },
+                {
+                  "field": "__series",
+                  "type": "nominal",
+                  "title": "channel"
+                },
+                {
+                  "field": "__tip",
+                  "type": "nominal",
+                  "title": "line revenue"
+                }
+              ],
+              "fillOpacity": {
+                "condition": {
+                  "test": "datum.__partial",
+                  "value": 0.5
+                },
+                "value": 1
+              },
+              "xOffset": {
+                "field": "__series",
+                "type": "nominal",
+                "sort": [
+                  "dine in",
+                  "delivery",
+                  "takeaway"
+                ]
+              },
+              "x": {
+                "field": "__band",
+                "type": "ordinal",
+                "sort": [
+                  "Frankfurt",
+                  "Berlin",
+                  "Koeln",
+                  "Hamburg",
+                  "Stuttgart",
+                  "Muenchen",
+                  "Dresden",
+                  "Heidelberg"
+                ],
+                "title": null,
+                "axis": {
+                  "labelAngle": 0,
+                  "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                  "ticks": false,
+                  "labelPadding": 6,
+                  "labelLimit": 120
+                },
+                "scale": {
+                  "paddingInner": 0.22,
+                  "paddingOuter": 0.1
+                }
+              }
+            }
+          }
+        ],
+        "title": {
+          "text": "Line revenue by city and channel"
+        },
+        "usermeta": {
+          "theme": "pattern-perspectives"
+        },
+        "config": {
+          "background": "#FFFFFF",
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+          "padding": {
+            "left": 20,
+            "right": 24,
+            "top": 20,
+            "bottom": 18
+          },
+          "view": {
+            "stroke": null
+          },
+          "title": {
+            "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "fontSize": 16,
+            "fontWeight": 600,
+            "color": "#191C1F",
+            "anchor": "start",
+            "offset": 16,
+            "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "subtitleColor": "#5F6368",
+            "subtitleFontSize": 12.5,
+            "subtitleFontWeight": 400,
+            "subtitlePadding": 6,
+            "subtitleLineHeight": 17
+          },
+          "axis": {
+            "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "labelFontSize": 10.5,
+            "labelColor": "#5F6368",
+            "labelPadding": 8,
+            "labelSeparation": 6,
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "titlePadding": 12,
+            "domainColor": "#C9C9CD",
+            "tickColor": "#C9C9CD",
+            "gridColor": "#E2E2E7",
+            "gridWidth": 1
+          },
+          "axisX": {
+            "grid": false,
+            "ticks": true,
+            "tickSize": 4,
+            "domain": true
+          },
+          "axisY": {
+            "domain": false,
+            "ticks": false,
+            "grid": true
+          },
+          "axisBand": {
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelColor": "#191C1F",
+            "labelFontSize": 11,
+            "labelPadding": 10
+          },
+          "legend": {
+            "orient": "bottom",
+            "direction": "horizontal",
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelFontSize": 12,
+            "labelColor": "#191C1F",
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "symbolType": "circle",
+            "symbolSize": 110,
+            "symbolStrokeWidth": 0,
+            "columnPadding": 16,
+            "padding": 4,
+            "offset": 16
+          },
+          "range": {
+            "category": [
+              "#1227FD",
+              "#00967A",
+              "#8B5CF6",
+              "#B07800",
+              "#46277A",
+              "#4F7BFF",
+              "#191C1F"
+            ],
+            "ramp": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "heatmap": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "diverging": [
+              "#E23B4A",
+              "#F4F4F6",
+              "#1227FD"
+            ]
+          },
+          "mark": {
+            "color": "#1227FD"
+          },
+          "line": {
+            "color": "#1227FD",
+            "strokeWidth": 2.5,
+            "strokeCap": "round",
+            "strokeJoin": "round"
+          },
+          "point": {
+            "color": "#1227FD",
+            "size": 56,
+            "filled": true
+          },
+          "area": {
+            "color": "#1227FD",
+            "opacity": 0.16
+          },
+          "bar": {
+            "color": "#1227FD",
+            "cornerRadiusEnd": 5
+          },
+          "arc": {
+            "stroke": "#FFFFFF",
+            "strokeWidth": 2
+          },
+          "rect": {
+            "color": "#1227FD"
+          },
+          "rule": {
+            "color": "#C9C9CD"
+          },
+          "text": {
+            "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "fontSize": 11,
+            "color": "#191C1F"
+          }
+        }
+      },
+      "png_url": null,
+      "alternatives": [
+        {
+          "chart": "point",
+          "label": "ranked dots",
+          "hint": "see which categories are the largest and how far apart they are"
+        },
+        {
+          "chart": "heatmap",
+          "label": "a labelled grid",
+          "hint": "find where the large and the small values sit across two groupings, with every value readable"
+        },
+        {
+          "chart": "stacked_bar",
+          "label": "stacked columns",
+          "hint": null
+        },
+        {
+          "chart": "table",
+          "label": "a table",
+          "hint": null
+        }
+      ]
+    },
+    "findings": []
+  },
+  "charts": {
+    "grouped_bar": {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "description": "grouped_bar (deterministic fallback); rules: CH-N-HUE, CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO, VIS-HUE-CARD",
+      "data": {
+        "values": [
+          {
+            "city": "Frankfurt",
+            "channel_name": "dine_in",
+            "line_revenue": 582673.9,
+            "__band": "Frankfurt",
+            "__label": "Frankfurt",
+            "__partial": false,
+            "__series": "dine in",
+            "__tip": "€583k",
+            "__order": 0
+          },
+          {
+            "city": "Berlin",
+            "channel_name": "dine_in",
+            "line_revenue": 496559.93,
+            "__band": "Berlin",
+            "__label": "Berlin",
+            "__partial": false,
+            "__series": "dine in",
+            "__tip": "€497k",
+            "__order": 0
+          },
+          {
+            "city": "Koeln",
+            "channel_name": "dine_in",
+            "line_revenue": 452291.82,
+            "__band": "Koeln",
+            "__label": "Koeln",
+            "__partial": false,
+            "__series": "dine in",
+            "__tip": "€452k",
+            "__order": 0
+          },
+          {
+            "city": "Frankfurt",
+            "channel_name": "delivery",
+            "line_revenue": 424109.58,
+            "__band": "Frankfurt",
+            "__label": "Frankfurt",
+            "__partial": false,
+            "__series": "delivery",
+            "__tip": "€424k",
+            "__order": 1
+          },
+          {
+            "city": "Hamburg",
+            "channel_name": "dine_in",
+            "line_revenue": 371691.69,
+            "__band": "Hamburg",
+            "__label": "Hamburg",
+            "__partial": false,
+            "__series": "dine in",
+            "__tip": "€372k",
+            "__order": 0
+          },
+          {
+            "city": "Berlin",
+            "channel_name": "delivery",
+            "line_revenue": 367767.36,
+            "__band": "Berlin",
+            "__label": "Berlin",
+            "__partial": false,
+            "__series": "delivery",
+            "__tip": "€368k",
+            "__order": 1
+          },
+          {
+            "city": "Koeln",
+            "channel_name": "delivery",
+            "line_revenue": 333934.8,
+            "__band": "Koeln",
+            "__label": "Koeln",
+            "__partial": false,
+            "__series": "delivery",
+            "__tip": "€334k",
+            "__order": 1
+          },
+          {
+            "city": "Stuttgart",
+            "channel_name": "dine_in",
+            "line_revenue": 333892.17,
+            "__band": "Stuttgart",
+            "__label": "Stuttgart",
+            "__partial": false,
+            "__series": "dine in",
+            "__tip": "€334k",
+            "__order": 0
+          },
+          {
+            "city": "Frankfurt",
+            "channel_name": "takeaway",
+            "line_revenue": 319313.36,
+            "__band": "Frankfurt",
+            "__label": "Frankfurt",
+            "__partial": false,
+            "__series": "takeaway",
+            "__tip": "€319k",
+            "__order": 2
+          },
+          {
+            "city": "Muenchen",
+            "channel_name": "dine_in",
+            "line_revenue": 301518.79,
+            "__band": "Muenchen",
+            "__label": "Muenchen",
+            "__partial": false,
+            "__series": "dine in",
+            "__tip": "€302k",
+            "__order": 0
+          },
+          {
+            "city": "Berlin",
+            "channel_name": "takeaway",
+            "line_revenue": 275898.82,
+            "__band": "Berlin",
+            "__label": "Berlin",
+            "__partial": false,
+            "__series": "takeaway",
+            "__tip": "€276k",
+            "__order": 2
+          },
+          {
+            "city": "Hamburg",
+            "channel_name": "delivery",
+            "line_revenue": 270258.21,
+            "__band": "Hamburg",
+            "__label": "Hamburg",
+            "__partial": false,
+            "__series": "delivery",
+            "__tip": "€270k",
+            "__order": 1
+          },
+          {
+            "city": "Koeln",
+            "channel_name": "takeaway",
+            "line_revenue": 255120.13,
+            "__band": "Koeln",
+            "__label": "Koeln",
+            "__partial": false,
+            "__series": "takeaway",
+            "__tip": "€255k",
+            "__order": 2
+          },
+          {
+            "city": "Dresden",
+            "channel_name": "dine_in",
+            "line_revenue": 250714.9,
+            "__band": "Dresden",
+            "__label": "Dresden",
+            "__partial": false,
+            "__series": "dine in",
+            "__tip": "€251k",
+            "__order": 0
+          },
+          {
+            "city": "Stuttgart",
+            "channel_name": "delivery",
+            "line_revenue": 245172.82,
+            "__band": "Stuttgart",
+            "__label": "Stuttgart",
+            "__partial": false,
+            "__series": "delivery",
+            "__tip": "€245k",
+            "__order": 1
+          },
+          {
+            "city": "Heidelberg",
+            "channel_name": "dine_in",
+            "line_revenue": 228972.62,
+            "__band": "Heidelberg",
+            "__label": "Heidelberg",
+            "__partial": false,
+            "__series": "dine in",
+            "__tip": "€229k",
+            "__order": 0
+          },
+          {
+            "city": "Muenchen",
+            "channel_name": "delivery",
+            "line_revenue": 223584.95,
+            "__band": "Muenchen",
+            "__label": "Muenchen",
+            "__partial": false,
+            "__series": "delivery",
+            "__tip": "€224k",
+            "__order": 1
+          },
+          {
+            "city": "Hamburg",
+            "channel_name": "takeaway",
+            "line_revenue": 201203.9,
+            "__band": "Hamburg",
+            "__label": "Hamburg",
+            "__partial": false,
+            "__series": "takeaway",
+            "__tip": "€201k",
+            "__order": 2
+          },
+          {
+            "city": "Dresden",
+            "channel_name": "delivery",
+            "line_revenue": 183437.29,
+            "__band": "Dresden",
+            "__label": "Dresden",
+            "__partial": false,
+            "__series": "delivery",
+            "__tip": "€183k",
+            "__order": 1
+          },
+          {
+            "city": "Stuttgart",
+            "channel_name": "takeaway",
+            "line_revenue": 181913.32,
+            "__band": "Stuttgart",
+            "__label": "Stuttgart",
+            "__partial": false,
+            "__series": "takeaway",
+            "__tip": "€182k",
+            "__order": 2
+          },
+          {
+            "city": "Heidelberg",
+            "channel_name": "delivery",
+            "line_revenue": 169481.14,
+            "__band": "Heidelberg",
+            "__label": "Heidelberg",
+            "__partial": false,
+            "__series": "delivery",
+            "__tip": "€169k",
+            "__order": 1
+          },
+          {
+            "city": "Muenchen",
+            "channel_name": "takeaway",
+            "line_revenue": 165763.32,
+            "__band": "Muenchen",
+            "__label": "Muenchen",
+            "__partial": false,
+            "__series": "takeaway",
+            "__tip": "€166k",
+            "__order": 2
+          },
+          {
+            "city": "Dresden",
+            "channel_name": "takeaway",
+            "line_revenue": 135448.62,
+            "__band": "Dresden",
+            "__label": "Dresden",
+            "__partial": false,
+            "__series": "takeaway",
+            "__tip": "€135k",
+            "__order": 2
+          },
+          {
+            "city": "Heidelberg",
+            "channel_name": "takeaway",
+            "line_revenue": 123413.04,
+            "__band": "Heidelberg",
+            "__label": "Heidelberg",
+            "__partial": false,
+            "__series": "takeaway",
+            "__tip": "€123k",
+            "__order": 2
+          }
+        ]
+      },
+      "height": 300,
+      "layer": [
+        {
+          "mark": {
+            "type": "bar",
+            "stroke": "white",
+            "strokeWidth": 1,
+            "cornerRadiusEnd": 4
+          },
+          "encoding": {
+            "y": {
+              "field": "line_revenue",
+              "type": "quantitative",
+              "title": "line revenue (€)",
+              "axis": {
+                "format": "~s",
+                "labelExpr": "datum.value == 0 ? '€0' : (datum.label ? '€' + datum.label : '')"
+              }
+            },
+            "color": {
+              "field": "__series",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "dine in",
+                  "delivery",
+                  "takeaway"
+                ],
+                "range": [
+                  "#1227FD",
+                  "#00967A",
+                  "#8B5CF6"
+                ]
+              },
+              "sort": [
+                "dine in",
+                "delivery",
+                "takeaway"
+              ],
+              "legend": {
+                "orient": "top",
+                "direction": "horizontal",
+                "title": null,
+                "offset": 6
+              }
+            },
+            "tooltip": [
+              {
+                "field": "__label",
+                "type": "nominal",
+                "title": "city"
+              },
+              {
+                "field": "__series",
+                "type": "nominal",
+                "title": "channel"
+              },
+              {
+                "field": "__tip",
+                "type": "nominal",
+                "title": "line revenue"
+              }
+            ],
+            "fillOpacity": {
+              "condition": {
+                "test": "datum.__partial",
+                "value": 0.5
+              },
+              "value": 1
+            },
+            "xOffset": {
+              "field": "__series",
+              "type": "nominal",
+              "sort": [
+                "dine in",
+                "delivery",
+                "takeaway"
+              ]
+            },
+            "x": {
+              "field": "__band",
+              "type": "ordinal",
+              "sort": [
+                "Frankfurt",
+                "Berlin",
+                "Koeln",
+                "Hamburg",
+                "Stuttgart",
+                "Muenchen",
+                "Dresden",
+                "Heidelberg"
+              ],
+              "title": null,
+              "axis": {
+                "labelAngle": 0,
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                "ticks": false,
+                "labelPadding": 6,
+                "labelLimit": 120
+              },
+              "scale": {
+                "paddingInner": 0.22,
+                "paddingOuter": 0.1
+              }
+            }
+          }
+        }
+      ],
+      "title": {
+        "text": "Line revenue by city and channel"
+      },
+      "usermeta": {
+        "theme": "pattern-perspectives"
+      },
+      "config": {
+        "background": "#FFFFFF",
+        "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+        "padding": {
+          "left": 20,
+          "right": 24,
+          "top": 20,
+          "bottom": 18
+        },
+        "view": {
+          "stroke": null
+        },
+        "title": {
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "fontSize": 16,
+          "fontWeight": 600,
+          "color": "#191C1F",
+          "anchor": "start",
+          "offset": 16,
+          "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "subtitleColor": "#5F6368",
+          "subtitleFontSize": 12.5,
+          "subtitleFontWeight": 400,
+          "subtitlePadding": 6,
+          "subtitleLineHeight": 17
+        },
+        "axis": {
+          "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "labelFontSize": 10.5,
+          "labelColor": "#5F6368",
+          "labelPadding": 8,
+          "labelSeparation": 6,
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "titlePadding": 12,
+          "domainColor": "#C9C9CD",
+          "tickColor": "#C9C9CD",
+          "gridColor": "#E2E2E7",
+          "gridWidth": 1
+        },
+        "axisX": {
+          "grid": false,
+          "ticks": true,
+          "tickSize": 4,
+          "domain": true
+        },
+        "axisY": {
+          "domain": false,
+          "ticks": false,
+          "grid": true
+        },
+        "axisBand": {
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelColor": "#191C1F",
+          "labelFontSize": 11,
+          "labelPadding": 10
+        },
+        "legend": {
+          "orient": "bottom",
+          "direction": "horizontal",
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelFontSize": 12,
+          "labelColor": "#191C1F",
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "symbolType": "circle",
+          "symbolSize": 110,
+          "symbolStrokeWidth": 0,
+          "columnPadding": 16,
+          "padding": 4,
+          "offset": 16
+        },
+        "range": {
+          "category": [
+            "#1227FD",
+            "#00967A",
+            "#8B5CF6",
+            "#B07800",
+            "#46277A",
+            "#4F7BFF",
+            "#191C1F"
+          ],
+          "ramp": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "heatmap": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "diverging": [
+            "#E23B4A",
+            "#F4F4F6",
+            "#1227FD"
+          ]
+        },
+        "mark": {
+          "color": "#1227FD"
+        },
+        "line": {
+          "color": "#1227FD",
+          "strokeWidth": 2.5,
+          "strokeCap": "round",
+          "strokeJoin": "round"
+        },
+        "point": {
+          "color": "#1227FD",
+          "size": 56,
+          "filled": true
+        },
+        "area": {
+          "color": "#1227FD",
+          "opacity": 0.16
+        },
+        "bar": {
+          "color": "#1227FD",
+          "cornerRadiusEnd": 5
+        },
+        "arc": {
+          "stroke": "#FFFFFF",
+          "strokeWidth": 2
+        },
+        "rect": {
+          "color": "#1227FD"
+        },
+        "rule": {
+          "color": "#C9C9CD"
+        },
+        "text": {
+          "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "fontSize": 11,
+          "color": "#191C1F"
+        }
+      }
+    }
+  },
+  "chart_options": [
+    {
+      "chart": "grouped_bar",
+      "label": "columns side by side",
+      "hint": "compare a few groups within each category"
+    },
+    {
+      "chart": "point",
+      "label": "ranked dots",
+      "hint": "see which categories are the largest and how far apart they are"
+    },
+    {
+      "chart": "heatmap",
+      "label": "a labelled grid",
+      "hint": "find where the large and the small values sit across two groupings, with every value readable"
+    },
+    {
+      "chart": "stacked_bar",
+      "label": "stacked columns",
+      "hint": null
+    },
+    {
+      "chart": "table",
+      "label": "a table",
+      "hint": null
+    }
+  ]
+}

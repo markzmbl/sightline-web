@@ -1,0 +1,1009 @@
+{
+  "slug": "oee-line",
+  "workspace": "manufacturing",
+  "question": "What was the OEE of each line last week?",
+  "final_status": "complete",
+  "continuation": null,
+  "stages": [
+    {
+      "phase": "understand",
+      "stage": "situate",
+      "ms": 296
+    },
+    {
+      "phase": "understand",
+      "stage": "recall",
+      "ms": 19
+    },
+    {
+      "phase": "understand",
+      "stage": "define",
+      "ms": 16
+    },
+    {
+      "phase": "understand",
+      "stage": "ground",
+      "ms": 97
+    },
+    {
+      "phase": "understand",
+      "stage": "abstract",
+      "ms": 102412
+    },
+    {
+      "phase": "understand",
+      "stage": "bind",
+      "ms": 14
+    },
+    {
+      "phase": "analyse",
+      "stage": "enrich",
+      "ms": 5
+    },
+    {
+      "phase": "analyse",
+      "stage": "derive",
+      "ms": 7
+    },
+    {
+      "phase": "analyse",
+      "stage": "query",
+      "ms": 6
+    },
+    {
+      "phase": "present",
+      "stage": "idiom",
+      "ms": 284
+    },
+    {
+      "phase": "present",
+      "stage": "render",
+      "ms": 14
+    },
+    {
+      "phase": "present",
+      "stage": "perceive",
+      "ms": 29427
+    },
+    {
+      "phase": "present",
+      "stage": "validate",
+      "ms": 828
+    }
+  ],
+  "restatement": "You want to see oEE by line, from 22 Dec 2025 to 28 Dec 2025. Defined as: oEE is a proposed definition from sightline's KPI library (ISO 22400-2:2014, key performance indicators for manufacturing operations management), not yet approved: availability (actual production time (run hours) over planned busy time (planned busy hours)) times effectiveness (ideal production time (ideal hours) over actual production time (run hours)) times quality ratio (good quantity over produced quantity).",
+  "card": {
+    "blocking": false,
+    "points": [
+      {
+        "id": "reading",
+        "step": "form",
+        "question": "What do you want to read from it?",
+        "options": [
+          {
+            "id": "none",
+            "label": "it does not run over time",
+            "hint": ""
+          },
+          {
+            "id": "amounts",
+            "label": "how much each period holds, read one by one",
+            "hint": "columns, each with its value"
+          }
+        ],
+        "chosen": "amounts",
+        "default": "none",
+        "by": "s2",
+        "confidence": 0.45,
+        "why": "Claude read the question again",
+        "open": false,
+        "stage": "abstract"
+      },
+      {
+        "id": "labels",
+        "step": "detail",
+        "question": "Should every mark carry its value?",
+        "options": [
+          {
+            "id": "all",
+            "label": "every mark carries its value",
+            "hint": ""
+          },
+          {
+            "id": "none",
+            "label": "values are read off the axis",
+            "hint": ""
+          }
+        ],
+        "chosen": "all",
+        "default": "all",
+        "by": "s1",
+        "confidence": 0.02,
+        "why": "the System 1 model was not sure (0.02 below 0.50)",
+        "open": true,
+        "stage": "idiom"
+      }
+    ]
+  },
+  "clarify": null,
+  "result": {
+    "sql": "SELECT \"dim_equipment\".\"line_name\" AS \"line_name\", (100 * ((((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"planned_busy_minutes\" / 60.0), 0)), 0))) * ((((COALESCE(SUM(\"f\".\"ideal_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0)), 0))) * ((((COALESCE(SUM(\"f\".\"good_qty\"), 0))) / NULLIF((COALESCE(SUM(\"f\".\"produced_qty\"), 0)), 0)))) AS \"oee\" FROM \"main\".\"fct_production_shifts\" AS \"f\" JOIN \"main\".\"dim_equipment\" AS \"dim_equipment\" ON \"f\".\"equipment_code\" = \"dim_equipment\".\"equipment_code\" WHERE \"f\".\"shift_date\" >= CAST('2025-12-22' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-28' AS DATE) GROUP BY \"dim_equipment\".\"line_name\" HAVING (COUNT(*) + COUNT(*) + COUNT(*) + COUNT(*) + COUNT(*)) > 0 ORDER BY \"oee\" DESC LIMIT 10000",
+    "columns": [
+      {
+        "name": "line_name",
+        "type": "nominal"
+      },
+      {
+        "name": "oee",
+        "type": "q_ratio"
+      }
+    ],
+    "rows": [
+      [
+        "Augsburg moulding 1",
+        79.666612
+      ],
+      [
+        "Augsburg moulding 2",
+        77.864263
+      ],
+      [
+        "Linz stamping",
+        77.74545
+      ],
+      [
+        "Brno stamping",
+        75.248422
+      ],
+      [
+        "Linz assembly",
+        75.125
+      ],
+      [
+        "Linz laser bending",
+        75.124562
+      ],
+      [
+        "Augsburg assembly",
+        75.110639
+      ],
+      [
+        "Brno assembly",
+        72.333333
+      ],
+      [
+        "Brno welding",
+        71.155538
+      ]
+    ],
+    "row_count": 9,
+    "truncated": false,
+    "chart": {
+      "chart": "table",
+      "label": "a table",
+      "spec": {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "description": "table (deterministic fallback); rules: TABLE-FALLBACK",
+        "data": {
+          "values": [
+            {
+              "line_name": "Augsburg moulding 1",
+              "oee": 79.666612
+            },
+            {
+              "line_name": "Augsburg moulding 2",
+              "oee": 77.864263
+            },
+            {
+              "line_name": "Linz stamping",
+              "oee": 77.74545
+            },
+            {
+              "line_name": "Brno stamping",
+              "oee": 75.248422
+            },
+            {
+              "line_name": "Linz assembly",
+              "oee": 75.125
+            },
+            {
+              "line_name": "Linz laser bending",
+              "oee": 75.124562
+            },
+            {
+              "line_name": "Augsburg assembly",
+              "oee": 75.110639
+            },
+            {
+              "line_name": "Brno assembly",
+              "oee": 72.333333
+            },
+            {
+              "line_name": "Brno welding",
+              "oee": 71.155538
+            }
+          ]
+        },
+        "transform": [
+          {
+            "window": [
+              {
+                "op": "row_number",
+                "as": "__row"
+              }
+            ]
+          },
+          {
+            "fold": [
+              "line_name",
+              "oee"
+            ],
+            "as": [
+              "__col",
+              "__val"
+            ]
+          }
+        ],
+        "title": {
+          "text": "OEE by line",
+          "subtitle": [
+            "22–28 Dec 2025"
+          ]
+        },
+        "usermeta": {
+          "theme": "pattern-perspectives"
+        },
+        "layer": [
+          {
+            "data": {
+              "values": [
+                {}
+              ]
+            },
+            "mark": {
+              "type": "rect",
+              "fill": {
+                "gradient": "linear",
+                "x1": 0,
+                "y1": 0,
+                "x2": 1,
+                "y2": 0,
+                "stops": [
+                  {
+                    "offset": 0,
+                    "color": "#6B4FF0"
+                  },
+                  {
+                    "offset": 0.45,
+                    "color": "#1227FD"
+                  },
+                  {
+                    "offset": 1,
+                    "color": "#1227FD"
+                  }
+                ]
+              },
+              "cornerRadius": 6,
+              "tooltip": false
+            },
+            "encoding": {
+              "x": {
+                "value": 0
+              },
+              "x2": {
+                "value": "width"
+              },
+              "y": {
+                "value": -30
+              },
+              "y2": {
+                "value": -2
+              }
+            }
+          },
+          {
+            "transform": [
+              {
+                "filter": "datum.__row % 2 == 0 && datum.__col == \"line_name\""
+              }
+            ],
+            "mark": {
+              "type": "rect",
+              "color": "#F5F6FA",
+              "tooltip": false
+            },
+            "encoding": {
+              "y": {
+                "field": "__row",
+                "type": "ordinal",
+                "axis": null
+              },
+              "x": {
+                "value": 0
+              },
+              "x2": {
+                "value": "width"
+              }
+            }
+          },
+          {
+            "transform": [
+              {
+                "filter": "datum.__col == \"oee\""
+              },
+              {
+                "calculate": "toNumber(datum.__val)",
+                "as": "__num"
+              }
+            ],
+            "mark": {
+              "type": "rect",
+              "cornerRadius": 3,
+              "tooltip": false,
+              "height": {
+                "band": 0.86
+              },
+              "width": {
+                "band": 0.62
+              }
+            },
+            "encoding": {
+              "x": {
+                "field": "__col",
+                "type": "nominal",
+                "sort": [
+                  "line_name",
+                  "oee"
+                ],
+                "axis": {
+                  "orient": "top",
+                  "title": null,
+                  "labelAngle": 0,
+                  "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                  "labelFontWeight": 600,
+                  "labelColor": "#FFFFFF",
+                  "labelFontSize": 12,
+                  "domain": false,
+                  "ticks": false,
+                  "labelPadding": 9,
+                  "zindex": 2
+                }
+              },
+              "y": {
+                "field": "__row",
+                "type": "ordinal",
+                "axis": null
+              },
+              "color": {
+                "field": "__num",
+                "type": "quantitative",
+                "legend": null,
+                "scale": {
+                  "range": [
+                    "#F1F4FF",
+                    "#C3D1FF"
+                  ],
+                  "domain": [
+                    0,
+                    79.666612
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "mark": "text",
+            "encoding": {
+              "y": {
+                "field": "__row",
+                "type": "ordinal",
+                "axis": null
+              },
+              "x": {
+                "field": "__col",
+                "type": "nominal",
+                "sort": [
+                  "line_name",
+                  "oee"
+                ],
+                "axis": {
+                  "orient": "top",
+                  "title": null,
+                  "labelAngle": 0,
+                  "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                  "labelFontWeight": 600,
+                  "labelColor": "#FFFFFF",
+                  "labelFontSize": 12,
+                  "domain": false,
+                  "ticks": false,
+                  "labelPadding": 9,
+                  "zindex": 2
+                }
+              },
+              "text": {
+                "field": "__val",
+                "type": "nominal"
+              }
+            }
+          }
+        ],
+        "resolve": {
+          "scale": {
+            "color": "independent"
+          }
+        },
+        "config": {
+          "background": "#FFFFFF",
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+          "padding": {
+            "left": 20,
+            "right": 24,
+            "top": 20,
+            "bottom": 18
+          },
+          "view": {
+            "stroke": null
+          },
+          "title": {
+            "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "fontSize": 16,
+            "fontWeight": 600,
+            "color": "#191C1F",
+            "anchor": "start",
+            "offset": 16,
+            "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "subtitleColor": "#5F6368",
+            "subtitleFontSize": 12.5,
+            "subtitleFontWeight": 400,
+            "subtitlePadding": 6,
+            "subtitleLineHeight": 17
+          },
+          "axis": {
+            "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "labelFontSize": 10.5,
+            "labelColor": "#5F6368",
+            "labelPadding": 8,
+            "labelSeparation": 6,
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "titlePadding": 12,
+            "domainColor": "#C9C9CD",
+            "tickColor": "#C9C9CD",
+            "gridColor": "#E2E2E7",
+            "gridWidth": 1
+          },
+          "axisX": {
+            "grid": false,
+            "ticks": true,
+            "tickSize": 4,
+            "domain": true
+          },
+          "axisY": {
+            "domain": false,
+            "ticks": false,
+            "grid": true
+          },
+          "axisBand": {
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelColor": "#191C1F",
+            "labelFontSize": 11,
+            "labelPadding": 10
+          },
+          "legend": {
+            "orient": "bottom",
+            "direction": "horizontal",
+            "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "labelFontSize": 12,
+            "labelColor": "#191C1F",
+            "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+            "titleFontSize": 11.5,
+            "titleFontWeight": 500,
+            "titleColor": "#5F6368",
+            "symbolType": "circle",
+            "symbolSize": 110,
+            "symbolStrokeWidth": 0,
+            "columnPadding": 16,
+            "padding": 4,
+            "offset": 16
+          },
+          "range": {
+            "category": [
+              "#1227FD",
+              "#00967A",
+              "#8B5CF6",
+              "#B07800",
+              "#46277A",
+              "#4F7BFF",
+              "#191C1F"
+            ],
+            "ramp": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "heatmap": [
+              "#EEF2FF",
+              "#1227FD"
+            ],
+            "diverging": [
+              "#E23B4A",
+              "#F4F4F6",
+              "#1227FD"
+            ]
+          },
+          "mark": {
+            "color": "#1227FD"
+          },
+          "line": {
+            "color": "#1227FD",
+            "strokeWidth": 2.5,
+            "strokeCap": "round",
+            "strokeJoin": "round"
+          },
+          "point": {
+            "color": "#1227FD",
+            "size": 56,
+            "filled": true
+          },
+          "area": {
+            "color": "#1227FD",
+            "opacity": 0.16
+          },
+          "bar": {
+            "color": "#1227FD",
+            "cornerRadiusEnd": 5
+          },
+          "arc": {
+            "stroke": "#FFFFFF",
+            "strokeWidth": 2
+          },
+          "rect": {
+            "color": "#1227FD"
+          },
+          "rule": {
+            "color": "#C9C9CD"
+          },
+          "text": {
+            "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+            "fontSize": 11,
+            "color": "#191C1F"
+          }
+        }
+      },
+      "png_url": null,
+      "alternatives": [
+        {
+          "chart": "horizontal_bar",
+          "label": "ranked bars",
+          "hint": "see which categories are the largest and how far apart they are"
+        },
+        {
+          "chart": "point",
+          "label": "ranked dots",
+          "hint": "see which categories are the largest and how far apart they are"
+        },
+        {
+          "chart": "bar",
+          "label": "columns",
+          "hint": null
+        }
+      ]
+    },
+    "findings": []
+  },
+  "charts": {
+    "table": {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "description": "table (deterministic fallback); rules: TABLE-FALLBACK",
+      "data": {
+        "values": [
+          {
+            "line_name": "Augsburg moulding 1",
+            "oee": 79.666612
+          },
+          {
+            "line_name": "Augsburg moulding 2",
+            "oee": 77.864263
+          },
+          {
+            "line_name": "Linz stamping",
+            "oee": 77.74545
+          },
+          {
+            "line_name": "Brno stamping",
+            "oee": 75.248422
+          },
+          {
+            "line_name": "Linz assembly",
+            "oee": 75.125
+          },
+          {
+            "line_name": "Linz laser bending",
+            "oee": 75.124562
+          },
+          {
+            "line_name": "Augsburg assembly",
+            "oee": 75.110639
+          },
+          {
+            "line_name": "Brno assembly",
+            "oee": 72.333333
+          },
+          {
+            "line_name": "Brno welding",
+            "oee": 71.155538
+          }
+        ]
+      },
+      "transform": [
+        {
+          "window": [
+            {
+              "op": "row_number",
+              "as": "__row"
+            }
+          ]
+        },
+        {
+          "fold": [
+            "line_name",
+            "oee"
+          ],
+          "as": [
+            "__col",
+            "__val"
+          ]
+        }
+      ],
+      "title": {
+        "text": "OEE by line",
+        "subtitle": [
+          "22–28 Dec 2025"
+        ]
+      },
+      "usermeta": {
+        "theme": "pattern-perspectives"
+      },
+      "layer": [
+        {
+          "data": {
+            "values": [
+              {}
+            ]
+          },
+          "mark": {
+            "type": "rect",
+            "fill": {
+              "gradient": "linear",
+              "x1": 0,
+              "y1": 0,
+              "x2": 1,
+              "y2": 0,
+              "stops": [
+                {
+                  "offset": 0,
+                  "color": "#6B4FF0"
+                },
+                {
+                  "offset": 0.45,
+                  "color": "#1227FD"
+                },
+                {
+                  "offset": 1,
+                  "color": "#1227FD"
+                }
+              ]
+            },
+            "cornerRadius": 6,
+            "tooltip": false
+          },
+          "encoding": {
+            "x": {
+              "value": 0
+            },
+            "x2": {
+              "value": "width"
+            },
+            "y": {
+              "value": -30
+            },
+            "y2": {
+              "value": -2
+            }
+          }
+        },
+        {
+          "transform": [
+            {
+              "filter": "datum.__row % 2 == 0 && datum.__col == \"line_name\""
+            }
+          ],
+          "mark": {
+            "type": "rect",
+            "color": "#F5F6FA",
+            "tooltip": false
+          },
+          "encoding": {
+            "y": {
+              "field": "__row",
+              "type": "ordinal",
+              "axis": null
+            },
+            "x": {
+              "value": 0
+            },
+            "x2": {
+              "value": "width"
+            }
+          }
+        },
+        {
+          "transform": [
+            {
+              "filter": "datum.__col == \"oee\""
+            },
+            {
+              "calculate": "toNumber(datum.__val)",
+              "as": "__num"
+            }
+          ],
+          "mark": {
+            "type": "rect",
+            "cornerRadius": 3,
+            "tooltip": false,
+            "height": {
+              "band": 0.86
+            },
+            "width": {
+              "band": 0.62
+            }
+          },
+          "encoding": {
+            "x": {
+              "field": "__col",
+              "type": "nominal",
+              "sort": [
+                "line_name",
+                "oee"
+              ],
+              "axis": {
+                "orient": "top",
+                "title": null,
+                "labelAngle": 0,
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                "labelFontWeight": 600,
+                "labelColor": "#FFFFFF",
+                "labelFontSize": 12,
+                "domain": false,
+                "ticks": false,
+                "labelPadding": 9,
+                "zindex": 2
+              }
+            },
+            "y": {
+              "field": "__row",
+              "type": "ordinal",
+              "axis": null
+            },
+            "color": {
+              "field": "__num",
+              "type": "quantitative",
+              "legend": null,
+              "scale": {
+                "range": [
+                  "#F1F4FF",
+                  "#C3D1FF"
+                ],
+                "domain": [
+                  0,
+                  79.666612
+                ]
+              }
+            }
+          }
+        },
+        {
+          "mark": "text",
+          "encoding": {
+            "y": {
+              "field": "__row",
+              "type": "ordinal",
+              "axis": null
+            },
+            "x": {
+              "field": "__col",
+              "type": "nominal",
+              "sort": [
+                "line_name",
+                "oee"
+              ],
+              "axis": {
+                "orient": "top",
+                "title": null,
+                "labelAngle": 0,
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+                "labelFontWeight": 600,
+                "labelColor": "#FFFFFF",
+                "labelFontSize": 12,
+                "domain": false,
+                "ticks": false,
+                "labelPadding": 9,
+                "zindex": 2
+              }
+            },
+            "text": {
+              "field": "__val",
+              "type": "nominal"
+            }
+          }
+        }
+      ],
+      "resolve": {
+        "scale": {
+          "color": "independent"
+        }
+      },
+      "config": {
+        "background": "#FFFFFF",
+        "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+        "padding": {
+          "left": 20,
+          "right": 24,
+          "top": 20,
+          "bottom": 18
+        },
+        "view": {
+          "stroke": null
+        },
+        "title": {
+          "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "fontSize": 16,
+          "fontWeight": 600,
+          "color": "#191C1F",
+          "anchor": "start",
+          "offset": 16,
+          "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "subtitleColor": "#5F6368",
+          "subtitleFontSize": 12.5,
+          "subtitleFontWeight": 400,
+          "subtitlePadding": 6,
+          "subtitleLineHeight": 17
+        },
+        "axis": {
+          "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "labelFontSize": 10.5,
+          "labelColor": "#5F6368",
+          "labelPadding": 8,
+          "labelSeparation": 6,
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "titlePadding": 12,
+          "domainColor": "#C9C9CD",
+          "tickColor": "#C9C9CD",
+          "gridColor": "#E2E2E7",
+          "gridWidth": 1
+        },
+        "axisX": {
+          "grid": false,
+          "ticks": true,
+          "tickSize": 4,
+          "domain": true
+        },
+        "axisY": {
+          "domain": false,
+          "ticks": false,
+          "grid": true
+        },
+        "axisBand": {
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelColor": "#191C1F",
+          "labelFontSize": 11,
+          "labelPadding": 10
+        },
+        "legend": {
+          "orient": "bottom",
+          "direction": "horizontal",
+          "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "labelFontSize": 12,
+          "labelColor": "#191C1F",
+          "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+          "titleFontSize": 11.5,
+          "titleFontWeight": 500,
+          "titleColor": "#5F6368",
+          "symbolType": "circle",
+          "symbolSize": 110,
+          "symbolStrokeWidth": 0,
+          "columnPadding": 16,
+          "padding": 4,
+          "offset": 16
+        },
+        "range": {
+          "category": [
+            "#1227FD",
+            "#00967A",
+            "#8B5CF6",
+            "#B07800",
+            "#46277A",
+            "#4F7BFF",
+            "#191C1F"
+          ],
+          "ramp": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "heatmap": [
+            "#EEF2FF",
+            "#1227FD"
+          ],
+          "diverging": [
+            "#E23B4A",
+            "#F4F4F6",
+            "#1227FD"
+          ]
+        },
+        "mark": {
+          "color": "#1227FD"
+        },
+        "line": {
+          "color": "#1227FD",
+          "strokeWidth": 2.5,
+          "strokeCap": "round",
+          "strokeJoin": "round"
+        },
+        "point": {
+          "color": "#1227FD",
+          "size": 56,
+          "filled": true
+        },
+        "area": {
+          "color": "#1227FD",
+          "opacity": 0.16
+        },
+        "bar": {
+          "color": "#1227FD",
+          "cornerRadiusEnd": 5
+        },
+        "arc": {
+          "stroke": "#FFFFFF",
+          "strokeWidth": 2
+        },
+        "rect": {
+          "color": "#1227FD"
+        },
+        "rule": {
+          "color": "#C9C9CD"
+        },
+        "text": {
+          "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+          "fontSize": 11,
+          "color": "#191C1F"
+        }
+      }
+    }
+  },
+  "chart_options": [
+    {
+      "chart": "table",
+      "label": "a table",
+      "hint": null
+    },
+    {
+      "chart": "horizontal_bar",
+      "label": "ranked bars",
+      "hint": "see which categories are the largest and how far apart they are"
+    },
+    {
+      "chart": "point",
+      "label": "ranked dots",
+      "hint": "see which categories are the largest and how far apart they are"
+    },
+    {
+      "chart": "bar",
+      "label": "columns",
+      "hint": null
+    }
+  ]
+}

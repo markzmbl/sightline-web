@@ -1,0 +1,305 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar);
+  height: 100%;
+  min-height: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  outline: none;
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 10px 8px 16px;
+}
+
+.sidebar__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border-radius: 6px;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.sidebar__logo > span:first-child {
+  display: inline-flex;
+}
+
+.sidebar__actions {
+  display: grid;
+  gap: 6px;
+  padding: 4px 10px 10px;
+}
+
+/* The workspace picker: a native select, so the keyboard and screen readers get the real thing. */
+.switcher {
+  position: relative;
+  display: block;
+}
+
+.switcher__select {
+  width: 100%;
+  height: 30px;
+  padding: 0 30px 0 12px;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  appearance: none;
+  cursor: pointer;
+  text-overflow: ellipsis;
+}
+
+.switcher__select:hover:not(:disabled) {
+  background: var(--raised);
+}
+
+.switcher__select:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+.switcher__select option {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.switcher__chevron {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  display: inline-flex;
+  color: var(--muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.sidebar__new {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: var(--radius-small);
+  color: var(--ink);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.sidebar__new:hover {
+  background: var(--raised);
+}
+
+.sidebar__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-small);
+  color: var(--muted);
+}
+
+.sidebar__search:hover {
+  background: var(--raised);
+}
+
+.sidebar__search:focus-within {
+  border-color: var(--accent);
+  background: var(--ground);
+}
+
+.sidebar__search input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13.5px;
+  outline: none;
+}
+
+.sidebar__search input::placeholder {
+  color: var(--muted);
+}
+
+.thread-list {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 2px 8px 12px;
+  overflow-y: auto;
+}
+
+.thread-list__note {
+  padding: 8px 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.thread-list__note p {
+  margin: 0 0 10px;
+}
+
+.thread-list__skeleton {
+  display: block;
+  height: 12px;
+  margin: 14px 10px;
+  border-radius: 6px;
+  background: var(--raised);
+}
+
+.thread-list__group + .thread-list__group {
+  margin-top: 10px;
+}
+
+.thread-list__label {
+  margin: 10px 10px 4px;
+  font: 500 10.5px/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.thread-list ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.thread-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 13.5px;
+  text-decoration: none;
+}
+
+.thread-row:hover {
+  background: var(--raised);
+}
+
+.thread-row[aria-current="page"] {
+  background: var(--raised);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.thread-row__question {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.thread-row__time {
+  flex: none;
+  min-width: 2.6em;
+  color: var(--muted);
+  font: 400 11.5px/1 var(--mono);
+  text-align: right;
+}
+
+.thread-row__failed {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin: 0 3.5px;
+  border-radius: 50%;
+  background: var(--bad);
+}
+
+/* Under the list, above who is signed in: the key user's review view. */
+.sidebar__tools {
+  padding: 8px 10px 4px;
+  border-top: 1px solid var(--line);
+}
+
+.sidebar__review {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: var(--radius-small);
+  color: var(--ink);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.sidebar__review:hover {
+  background: var(--raised);
+}
+
+.sidebar__review[aria-current="page"] {
+  background: var(--raised);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.sidebar__review-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar__badge {
+  flex: none;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--ground);
+  font: 600 11px/18px var(--mono);
+  text-align: center;
+}
+
+.sidebar__footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 12px 14px;
+  border-top: 1px solid var(--line);
+}
+
+/* The review row's line above already parts the footer from the list. */
+.sidebar__tools + .sidebar__footer {
+  padding-top: 6px;
+  border-top: 0;
+}
+
+.sidebar__avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: var(--brand-mist);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sidebar__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13.5px;
+}

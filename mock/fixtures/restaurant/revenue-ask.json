@@ -1,0 +1,220 @@
+{
+  "slug": "revenue-ask",
+  "workspace": "restaurant",
+  "question": "How much revenue did we make per month in 2025?",
+  "final_status": "asking",
+  "continuation": "delivery-monthly",
+  "stages": [
+    {
+      "phase": "understand",
+      "stage": "situate",
+      "ms": 39
+    },
+    {
+      "phase": "understand",
+      "stage": "abstract",
+      "ms": 17901
+    }
+  ],
+  "restatement": null,
+  "card": {
+    "blocking": true,
+    "points": [
+      {
+        "id": "area",
+        "step": "meaning",
+        "question": "Which data do you mean?",
+        "options": [
+          {
+            "id": "fact_order_lines",
+            "label": "fact order lines",
+            "hint": ""
+          },
+          {
+            "id": "fact_payments",
+            "label": "fact payments",
+            "hint": ""
+          },
+          {
+            "id": "fact_reservations",
+            "label": "fact reservations",
+            "hint": ""
+          },
+          {
+            "id": "fact_recipes",
+            "label": "fact recipes",
+            "hint": ""
+          },
+          {
+            "id": "fact_supply_costs",
+            "label": "fact supply costs",
+            "hint": ""
+          }
+        ],
+        "chosen": "fact_order_lines",
+        "default": "fact_order_lines",
+        "by": "s1",
+        "confidence": 0.9000000000000001,
+        "why": "",
+        "open": false,
+        "stage": "abstract"
+      },
+      {
+        "id": "shape",
+        "step": "meaning",
+        "question": "What kind of answer do you want?",
+        "options": [
+          {
+            "id": "trend",
+            "label": "a development over time",
+            "hint": ""
+          },
+          {
+            "id": "comparison",
+            "label": "one number per category",
+            "hint": ""
+          },
+          {
+            "id": "distribution",
+            "label": "the spread of the single values",
+            "hint": ""
+          },
+          {
+            "id": "part_to_whole",
+            "label": "shares of a total",
+            "hint": ""
+          },
+          {
+            "id": "correlation",
+            "label": "how two measures relate",
+            "hint": ""
+          },
+          {
+            "id": "ranking",
+            "label": "the top or bottom few",
+            "hint": ""
+          },
+          {
+            "id": "flow",
+            "label": "movement between states",
+            "hint": ""
+          },
+          {
+            "id": "affinity",
+            "label": "what goes together",
+            "hint": ""
+          }
+        ],
+        "chosen": "trend",
+        "default": "trend",
+        "by": "s1",
+        "confidence": 0.6571428571428571,
+        "why": "",
+        "open": false,
+        "stage": "abstract"
+      },
+      {
+        "id": "measure",
+        "step": "meaning",
+        "question": "What should be measured?",
+        "options": [
+          {
+            "id": "fact_order_lines.line_revenue",
+            "label": "line revenue",
+            "hint": "Net revenue of the line (quantity times unit_price minus discount), EUR."
+          },
+          {
+            "id": "dim_menu_item.ingredient_cost",
+            "label": "ingredient cost",
+            "hint": "Ingredient cost of one serving at primary-supplier prices, EUR. Compare against list_price for kitchen margins."
+          },
+          {
+            "id": "fact_payments.dwell_minutes",
+            "label": "dwell minutes",
+            "hint": "Minutes from placing the order to settling the bill - table dwell time for dine-in, hand-over time for takeaway, door time for delivery. Weekend dine-in guests linger longer."
+          },
+          {
+            "id": "fact_recipes.quantity_per_serving",
+            "label": "quantity per serving",
+            "hint": "Amount of the ingredient per serving, in the ingredient's unit."
+          },
+          {
+            "id": "fact_supply_costs.cost_per_unit",
+            "label": "cost per unit",
+            "hint": "Purchase cost per unit of the ingredient, EUR."
+          },
+          {
+            "id": "dim_menu_item.list_price",
+            "label": "list price",
+            "hint": "Current menu list price, EUR."
+          },
+          {
+            "id": "fact_order_lines.discount_amount",
+            "label": "discount amount",
+            "hint": "Absolute discount applied to the line, EUR. Zero for most lines."
+          },
+          {
+            "id": "fact_order_lines.quantity",
+            "label": "quantity",
+            "hint": "Number of units sold on this line."
+          },
+          {
+            "id": "fact_order_lines.unit_price",
+            "label": "unit price",
+            "hint": "Price per unit at time of sale, EUR."
+          },
+          {
+            "id": "fact_payments.amount",
+            "label": "amount",
+            "hint": "Amount of this payment excluding tip, EUR."
+          },
+          {
+            "id": "fact_payments.tip_amount",
+            "label": "tip amount",
+            "hint": "Tip on this payment, EUR. Zero on cash payments because cash tips are not recorded."
+          },
+          {
+            "id": "fact_reservations.party_size",
+            "label": "party size",
+            "hint": "Number of guests the reservation was made for."
+          }
+        ],
+        "chosen": "fact_order_lines.line_revenue",
+        "default": "fact_order_lines.line_revenue",
+        "by": "s1",
+        "confidence": 0.8502673796791445,
+        "why": "",
+        "open": false,
+        "stage": "abstract"
+      },
+      {
+        "id": "order",
+        "step": "meaning",
+        "question": "From which end?",
+        "options": [
+          {
+            "id": "descending",
+            "label": "the largest first",
+            "hint": ""
+          },
+          {
+            "id": "ascending",
+            "label": "the smallest first",
+            "hint": ""
+          }
+        ],
+        "chosen": "descending",
+        "default": "ascending",
+        "by": "s1",
+        "confidence": 0.3999999999999999,
+        "why": "",
+        "open": false,
+        "stage": "abstract"
+      }
+    ]
+  },
+  "clarify": null,
+  "result": null,
+  "charts": {},
+  "chart_options": []
+}
