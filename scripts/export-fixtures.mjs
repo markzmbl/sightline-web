@@ -1,5 +1,5 @@
 // Exports real sightline runs into the mock backend's fixtures:
-//   ../sightline/runs/<workspace>/<run id>/  ->  mock/fixtures/<workspace>/<slug>.json
+//   ../runs/<workspace>/<run id>/  ->  mock/fixtures/<workspace>/<slug>.json
 // The runs folder can be moved with SIGHTLINE_RUNS. The output conforms to the
 // Fixture type in mock/fixture.ts; the mock server replays it as a live run.
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
@@ -7,7 +7,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const runsDir = resolve(process.env.SIGHTLINE_RUNS ?? join(root, "../sightline/runs"));
+const runsDir = resolve(process.env.SIGHTLINE_RUNS ?? join(root, "../runs"));
 const outDir = join(root, "mock/fixtures");
 
 /** [workspace, slug, run dir, continuation slug] */

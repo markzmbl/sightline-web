@@ -1,6 +1,6 @@
 // Generates src/api/schema.d.ts from the API contract. Sources, first found wins:
 //   1. SIGHTLINE_OPENAPI (a path or an http(s) URL)
-//   2. ../sightline-backend/contract/openapi.json (the backend's published contract)
+//   2. ../backend/contract/openapi.json (the backend's published contract)
 //   3. contract/openapi.draft.yaml (the provisional draft kept here until then)
 import { existsSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -10,7 +10,7 @@ import openapiTS, { astToString } from "openapi-typescript";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const candidates = [
   process.env.SIGHTLINE_OPENAPI,
-  resolve(root, "../sightline-backend/contract/openapi.json"),
+  resolve(root, "../backend/contract/openapi.json"),
   resolve(root, "contract/openapi.draft.yaml"),
 ].filter(Boolean);
 
