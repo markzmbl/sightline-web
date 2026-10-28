@@ -1,11 +1,12 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router";
+import type { ApiError } from "../../api/client";
 import { useRegistryEntry, useReview } from "../../api/registry";
-import type { EntryRun, RegistryEntryDetail, Review, ReviewAction } from "../../api/types";
+import type { EntryChange, EntryRun, KindInfo, RegistryEntryDetail, Review, ReviewAction } from "../../api/types";
 import { threadPath } from "../sidebar/paths";
 import { ChoiceBars } from "./ChoiceBars";
 import { collisionsOf, isDirty, placeOf, rebase, startDraft, wordsToSave, type Draft } from "./draft";
-import { ago, counted, fieldNames, KIND_LABEL, longDate, sentence, STATUS_LABEL } from "./format";
+import { ago, capital, counted, fieldNames, kindWords, longDate, sentence, STATUS_LABEL } from "./format";
 import { ThumbIcon } from "./icons";
 import { useNow } from "./useNow";
 import { WordsEditor } from "./WordsEditor";
@@ -16,30 +17,36 @@ interface Props {
   entryId: string;
   /** The way back to the list, for a narrow page where the entry takes the list's place. */
   back: ReactNode;
+  /** The list's URL with its filters, for the way back from an entry that is gone. */
+  list: string;
+  /** The server's kinds and their words; undefined until they are in. */
+  kinds: readonly KindInfo[] | undefined;
 }
 
+const GONE = "This entry does not exist (any more).";
+
+/** A 404 about the entry, not the workspace: no_entry, or a 404 that does not say. */
+const isGone = (error: ApiError | null): boolean => error?.status === 404 && error.code !== "no_workspace";
+
 /** One entry beside the list: what it is, how often it was asked, its words, and the review. */
-export function EntryDetail({ ws, entryId, back }: Props) {
+export function EntryDetail({ ws, entryId, back, list, kinds }: Props) {
   const entry = useRegistryEntry(ws, entryId);
 
-  if (entry.data) return <EntryReview ws={ws} entry={entry.data} back={back} />;
+  // Gone is gone, even with an earlier version still at hand.
+  if (entry.isError && isGone(entry.error)) return <Gone back={back} list={list} />;
+
+  if (entry.data) return <EntryReview ws={ws} entry={entry.data} back={back} list={list} kinds={kinds} />;
 
   if (entry.isError) {
     return (
       <div className="rv-detail">
         {back}
         <div className="rv-detail__missing" role="alert">
-          {entry.error.status === 404 ? (
-            <p>This entry is not in the registry any more.</p>
-          ) : (
-            <>
-              <p>Could not load the entry.</p>
-              <p className="muted">{entry.error.message}</p>
-              <button type="button" className="pill" onClick={() => void entry.refetch()}>
-                Retry
-              </button>
-            </>
-          )}
+          <p>Could not load the entry.</p>
+          <p className="muted">{entry.error.message}</p>
+          <button type="button" className="pill" onClick={() => void entry.refetch()}>
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -52,6 +59,36 @@ export function EntryDetail({ ws, entryId, back }: Props) {
       {[40, 64, 88, 72, 56].map((width, i) => (
         <span key={i} className="rv-detail__bone" style={{ width: `${width}%` }} />
       ))}
+    </div>
+  );
+}
+
+/** Focus is nowhere a keyboard user can go on from: on the page itself, or on something hidden or taken away. */
+function focusLost(): boolean {
+  const active = document.activeElement;
+  return (
+    active === null ||
+    active === document.body ||
+    (active instanceof HTMLElement && typeof active.checkVisibility === "function" && !active.checkVisibility())
+  );
+}
+
+/** An entry that does not exist (any more), on opening it or on a review of it: nothing to do but go back. */
+function Gone({ back, list }: { back: ReactNode; list: string }) {
+  const link = useRef<HTMLAnchorElement>(null);
+  // The review's button went with the form, or the list gave way to the entry: the way back takes focus.
+  useEffect(() => {
+    if (focusLost()) link.current?.focus({ preventScroll: true });
+  }, []);
+  return (
+    <div className="rv-detail">
+      {back}
+      <div className="rv-detail__missing" role="alert">
+        <p>{GONE}</p>
+        <Link ref={link} to={list} className="pill">
+          Back to all entries
+        </Link>
+      </div>
     </div>
   );
 }
@@ -76,9 +113,11 @@ interface ReviewProps {
   ws: string;
   entry: RegistryEntryDetail;
   back: ReactNode;
+  list: string;
+  kinds: readonly KindInfo[] | undefined;
 }
 
-function EntryReview({ ws, entry, back }: ReviewProps) {
+function EntryReview({ ws, entry, back, list, kinds }: ReviewProps) {
   const review = useReview(ws, entry.id);
   const now = useNow();
   const [draft, setDraft] = useState<Draft>(() => startDraft(entry));
@@ -107,12 +146,7 @@ function EntryReview({ ws, entry, back }: ReviewProps) {
 
   // Opened with focus nowhere (on a narrow page the list it was in gave way to the entry), the heading takes it.
   useEffect(() => {
-    const active = document.activeElement;
-    const lost =
-      active === null ||
-      active === document.body ||
-      (active instanceof HTMLElement && typeof active.checkVisibility === "function" && !active.checkVisibility());
-    if (lost) heading.current?.focus({ preventScroll: true });
+    if (focusLost()) heading.current?.focus({ preventScroll: true });
   }, []);
 
   // The button pressed is disabled while its review is pending, which drops focus, and it may be
@@ -132,15 +166,16 @@ function EntryReview({ ws, entry, back }: ReviewProps) {
   const dirty = isDirty(current);
   const label = current.fields.label.trim();
   const error = review.error;
-  const conflict = error?.status === 409 && error.code === "version_conflict";
+  // The entry was not as the key user saw it; the hook has loaded it as it stands.
+  const moved = error?.status === 409 ? movedBy(error.code) : null;
   const collisions =
     error?.status === 422 ? collisionsOf(error.errors, review.variables?.changes?.words ?? {}) : [];
-  const failure = error && !conflict && collisions.length === 0 ? error.message : null;
+  const failure = error && !moved && collisions.length === 0 ? error.message : null;
   // A colliding word removed (or changed) since has nothing left to fix.
   const clashing = collisions.filter(
     (collision) => placeOf(collision, current.fields.words[collision.locale] ?? []) >= 0,
   );
-  const notice = noticeOf(conflict, dropped, dirty);
+  const notice = noticeOf(moved, dropped, dirty);
 
   const edit = (change: (fields: Draft["fields"]) => Draft["fields"]) => {
     setSaid("");
@@ -195,6 +230,14 @@ function EntryReview({ ws, entry, back }: ReviewProps) {
   // With edits to save first, a review needs a label to save.
   const blocked = pending || (dirty && label === "");
 
+  // The review found the entry gone: as on opening it, there is nothing left to review or save.
+  if (isGone(error)) return <Gone back={back} list={list} />;
+
+  // Every review's note sits in the history with the review it came with; the entry's own shows
+  // here only when the history does not carry it.
+  const entryNote = entry.note?.trim();
+  const headNote = entryNote && !entry.history.some((change) => change.note?.trim() === entryNote) ? entryNote : null;
+
   return (
     <article className="rv-detail" aria-labelledby={`${labelId}-term`}>
       {back}
@@ -203,7 +246,7 @@ function EntryReview({ ws, entry, back }: ReviewProps) {
           <h2 id={`${labelId}-term`} ref={heading} tabIndex={-1} className="rv-detail__term">
             {entry.term}
           </h2>
-          <span className="rv-chip">{KIND_LABEL[entry.kind]}</span>
+          <span className="rv-chip">{capital(kindWords(kinds, entry.kind).label)}</span>
           <span className={`rv-status rv-status--${entry.status}`}>
             <span className={`rv-dot rv-dot--${entry.status}`} aria-hidden="true" />
             {STATUS_LABEL[entry.status]}
@@ -217,11 +260,11 @@ function EntryReview({ ws, entry, back }: ReviewProps) {
           {entry.reviewed_by && (
             <>
               {" · "}reviewed by {entry.reviewed_by}
-              {ago(entry.updated_at, now) && ` · ${ago(entry.updated_at, now)}`}
+              {ago(entry.reviewed_at, now) && ` · ${ago(entry.reviewed_at, now)}`}
             </>
           )}
         </p>
-        {entry.note && <p className="rv-detail__said-note">“{entry.note}”</p>}
+        {headNote && <p className="rv-detail__said-note">“{headNote}”</p>}
       </header>
 
       <section className="rv-detail__about" aria-label="What it is">
@@ -239,7 +282,7 @@ function EntryReview({ ws, entry, back }: ReviewProps) {
 
       {entry.kind === "default" && entry.choices && entry.choices.length > 0 && (
         <Section title="What users picked">
-          <ChoiceBars choices={entry.choices} chosen={entry.definition} />
+          <ChoiceBars choices={entry.choices} chosen={entry.chosen_option} />
         </Section>
       )}
 
@@ -359,28 +402,33 @@ function EntryReview({ ws, entry, back }: ReviewProps) {
       </Section>
 
       <Section title="Used in">
-        {entry.runs.length > 0 ? (
-          <ul className="rv-runs">
-            {entry.runs.map((run) => (
-              <RunRow key={run.run_id} ws={ws} run={run} now={now} />
-            ))}
-          </ul>
-        ) : (
-          <p className="muted">Not used in a run yet.</p>
-        )}
+        <UsedIn ws={ws} entry={entry} now={now} />
       </Section>
+
+      {entry.history.length > 0 && (
+        <Section title="History">
+          <History changes={entry.history} now={now} />
+        </Section>
+      )}
     </article>
   );
 }
 
+/** Why a review found the entry other than the key user saw it: someone reviewed it first, or it moved on. */
+type Moved = "version_conflict" | "not_allowed";
+
+const movedBy = (code: ApiError["code"]): Moved | null =>
+  code === "version_conflict" || code === "not_allowed" ? code : null;
+
+const MOVED: Record<Moved, string> = {
+  version_conflict: "Someone reviewed this entry first. You are now looking at the latest version.",
+  not_allowed: "This entry was moved since you opened it; here it is as it stands.",
+};
+
 /** What the key user is told when a newer version came in: who moved it, and what became of their edits. */
-function noticeOf(conflict: boolean, dropped: readonly string[], dirty: boolean): string | null {
-  if (!conflict && dropped.length === 0) return null;
-  const parts = [
-    conflict
-      ? "Someone reviewed this entry first. You are now looking at the latest version."
-      : "This entry changed while you were editing it.",
-  ];
+function noticeOf(moved: Moved | null, dropped: readonly string[], dirty: boolean): string | null {
+  if (moved === null && dropped.length === 0) return null;
+  const parts = [moved ? MOVED[moved] : "This entry changed while you were editing it."];
   if (dropped.length > 0 && dirty) {
     parts.push(
       `Some of your edits no longer applied and were discarded: ${fieldNames(dropped)}.`,
@@ -456,12 +504,44 @@ function Listed({ title, items }: { title: string; items: string[] }) {
   );
 }
 
-/** A run that used the entry: its question (to the thread), how it was rated, and when. */
+/** The newest runs that used the entry, and how many more did. */
+function UsedIn({ ws, entry, now }: { ws: string; entry: RegistryEntryDetail; now: number }) {
+  const more = entry.runs_total - entry.runs.length;
+  if (entry.runs.length === 0) {
+    return (
+      <p className="muted">
+        {entry.runs_total > 0 ? `Used in ${counted(entry.runs_total, "run")}.` : "Not used in a run yet."}
+      </p>
+    );
+  }
+  return (
+    <>
+      <ul className="rv-runs">
+        {entry.runs.map((run) => (
+          <RunRow key={run.run_id} ws={ws} run={run} now={now} />
+        ))}
+      </ul>
+      {more > 0 && <p className="rv-runs__more">and {more} more</p>}
+    </>
+  );
+}
+
+/**
+ * A run that used the entry: the thread's question and, for a later run of it, which revision
+ * and what was sent (both to the thread), how it was rated, and when.
+ */
 function RunRow({ ws, run, now }: { ws: string; run: EntryRun; now: number }) {
+  // Revision 0 is the question itself: what was sent is the question.
+  const revision = run.revision > 0 ? `Revision ${run.revision} · ${run.prompt}` : null;
   return (
     <li className="rv-runs__row">
-      <Link to={threadPath(ws, run.thread_id)} className="rv-runs__question" title={run.question}>
-        {run.question}
+      <Link
+        to={threadPath(ws, run.thread_id)}
+        className="rv-runs__link"
+        title={revision ? `${run.question}\n${revision}` : run.question}
+      >
+        <span className="rv-runs__question">{run.question}</span>
+        {revision && <span className="rv-runs__revision">{revision}</span>}
       </Link>
       {run.rating && (
         <span
@@ -474,6 +554,73 @@ function RunRow({ ws, run, now }: { ws: string; run: EntryRun; now: number }) {
         </span>
       )}
       <span className="rv-runs__time">{ago(run.at, now)}</span>
+    </li>
+  );
+}
+
+/** A change in words: a key user's review, or sightline's own (worded as what happened, by no one). */
+const CHANGE: Record<EntryChange["action"], string> = {
+  proposed: "Proposed by sightline",
+  demand: "Demand updated",
+  approve: "Approved",
+  reject: "Rejected",
+  reopen: "Reopened",
+  edit: "Edited",
+};
+
+/** The newest changes shown before "Show all". */
+const HISTORY_SHOWN = 5;
+
+/** The entry's changes, newest first: what happened, who did it, its version after, when, and the note. */
+function History({ changes, now }: { changes: EntryChange[]; now: number }) {
+  const [all, setAll] = useState(false);
+  const newest = [...changes].reverse();
+  const shown = all ? newest : newest.slice(0, HISTORY_SHOWN);
+  return (
+    <>
+      <ul className="rv-history">
+        {shown.map((change, index) => (
+          <ChangeRow key={`${change.at}:${change.action}:${index}`} change={change} now={now} />
+        ))}
+      </ul>
+      {newest.length > HISTORY_SHOWN && (
+        <button
+          type="button"
+          className="rv-button rv-button--quiet rv-history__all"
+          aria-expanded={all}
+          onClick={() => setAll((previous) => !previous)}
+        >
+          {all ? "Show fewer" : `Show all ${counted(newest.length, "change")}`}
+        </button>
+      )}
+    </>
+  );
+}
+
+/** One change: "Approved by Ada · v4 · 2 h ago", and its note. */
+function ChangeRow({ change, now }: { change: EntryChange; now: number }) {
+  // An action a later contract adds goes by its own name.
+  const what = CHANGE[change.action] ?? capital(change.action);
+  const note = change.note?.trim();
+  const when = ago(change.at, now);
+  return (
+    <li className="rv-history__row">
+      <span className="rv-history__line">
+        <span className="rv-history__what">
+          {what}
+          {change.by && ` by ${change.by}`}
+        </span>
+        <span className="mono rv-history__version" title={`Version ${change.version}`}>
+          v{change.version}
+        </span>
+        {when && (
+          <time className="rv-history__when" dateTime={change.at} title={longDate(change.at)}>
+            {when}
+          </time>
+        )}
+      </span>
+      {/* A key user's note is theirs, quoted; sightline's own is a plain line. */}
+      {note && <span className="rv-history__note">{change.by ? `“${note}”` : sentence(note)}</span>}
     </li>
   );
 }

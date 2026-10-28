@@ -8,10 +8,13 @@ const LABELS: Record<string, string> = {
   define: "Defining",
   ground: "Grounding",
   abstract: "Abstracting",
+  plan: "Planning the analysis",
   bind: "Binding",
   enrich: "Enriching",
   derive: "Deriving",
   query: "Querying",
+  analyse: "Analysing",
+  gather: "Weighing the evidence",
   idiom: "Choosing the idiom",
   render: "Rendering",
   perceive: "Perceiving",
@@ -19,6 +22,9 @@ const LABELS: Record<string, string> = {
   clarify: "Clarifying",
   reconsider: "Reconsidering",
   restore: "Restoring",
+  // "Repairing" would suggest something broke; it reads the question again.
+  repair: "Rereading the question",
+  propose: "Noting definitions for review",
 };
 
 export const WAITING = "Waiting for you";

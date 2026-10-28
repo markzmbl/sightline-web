@@ -2,7 +2,7 @@ import type { EntryChoice } from "../../api/types";
 
 interface Props {
   choices: EntryChoice[];
-  /** The label of the option the default stands for, marked in the list. */
+  /** The id of the option the default chooses (RegistryEntry.chosen_option), marked in the list. */
   chosen: string | null;
 }
 
@@ -16,7 +16,13 @@ export function ChoiceBars({ choices, chosen }: Props) {
         <li key={choice.option} className="rv-bars__row">
           <span className="rv-bars__label">
             {choice.label}
-            {choice.label === chosen && <span className="rv-tag rv-bars__tag">the default</span>}
+            {chosen !== null && choice.option === chosen && (
+              <>
+                {/* The label is a flex row, where a plain space is dropped: the separator is said, not shown. */}
+                <span className="sr-only">, </span>
+                <span className="rv-tag rv-bars__tag">the default</span>
+              </>
+            )}
           </span>
           <span className="rv-bars__track" aria-hidden="true">
             <span className="rv-bars__bar" style={{ width: `${(Math.max(0, choice.count) / most) * 100}%` }} />

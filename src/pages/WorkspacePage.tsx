@@ -15,12 +15,30 @@ export function WorkspacePage() {
   return <NewQuestion key={ws} ws={ws} sidebarButton={sidebarButton} />;
 }
 
+const STARTERS_SHOWN = 4;
+
+/** The pack's example questions to offer: at most four, each once, none blank. */
+function startersOf(starters: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const kept: string[] = [];
+  for (const starter of starters) {
+    const text = starter.trim();
+    const key = text.toLocaleLowerCase();
+    if (!text || seen.has(key)) continue;
+    seen.add(key);
+    kept.push(text);
+    if (kept.length === STARTERS_SHOWN) break;
+  }
+  return kept;
+}
+
 function NewQuestion({ ws, sidebarButton }: { ws: string; sidebarButton: ReactNode }) {
   const me = useMe();
   const threads = useThreads(ws);
   const create = useCreateThread(ws);
   const navigate = useNavigate();
   const workspace = me.data?.workspaces.find((w) => w.id === ws);
+  const starters = startersOf(workspace?.starters ?? []);
   // A question asked twice is offered once, by its latest thread.
   const recent = distinctQuestions(threads.data ?? [], 3);
 
@@ -49,7 +67,7 @@ function NewQuestion({ ws, sidebarButton }: { ws: string; sidebarButton: ReactNo
         <header className="shell__bar">{sidebarButton}</header>
         <div className="workspace__body">
           <p className="workspace__missing">
-            There is no workspace “{ws}” for you. <Link to="/">Open your first workspace</Link>.
+            There is no workspace “{ws}” for you. <Link to="/">Open one of yours</Link>.
           </p>
         </div>
       </div>
@@ -75,6 +93,22 @@ function NewQuestion({ ws, sidebarButton }: { ws: string; sidebarButton: ReactNo
           <p className="workspace__error" role="alert">
             Could not ask: {create.error.message}
           </p>
+        )}
+        {starters.length > 0 && (
+          <div className="workspace__starters" role="group" aria-label="Example questions">
+            {starters.map((starter) => (
+              <button
+                key={starter}
+                type="button"
+                className="pill workspace__starter"
+                disabled={create.isPending}
+                // A failure shows like a typed question's, above.
+                onClick={() => void ask(starter).catch(() => undefined)}
+              >
+                {starter}
+              </button>
+            ))}
+          </div>
         )}
         {recent.length > 0 && (
           <nav className="workspace__recent" aria-label="Recent questions">

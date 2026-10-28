@@ -42,6 +42,41 @@
   font-size: 13px;
 }
 
+/* The pack's example questions: whole questions, so they wrap rather than cut off. */
+.workspace__starters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.workspace__starter {
+  max-width: 100%;
+  height: auto;
+  min-height: 30px;
+  padding: 6px 14px;
+  border-radius: 16px;
+  color: var(--ink);
+  line-height: 1.4;
+  text-align: left;
+  white-space: normal;
+}
+
+.workspace__starter:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+.workspace__starter:disabled:hover {
+  background: transparent;
+}
+
+/* Below the examples, the recent questions sit a little closer. */
+.workspace__starters + .workspace__recent {
+  margin-top: 12px;
+}
+
 .workspace__recent {
   display: flex;
   flex-wrap: wrap;

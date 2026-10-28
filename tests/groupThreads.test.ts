@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { distinctQuestions, filterThreads, groupThreads, relativeTime } from "../src/components/sidebar/groupThreads";
+import { distinctQuestions, filterThreads, groupThreads, mergeThreads, relativeTime } from "../src/components/sidebar/groupThreads";
 
 // All times are local, built from calendar parts, so the tests hold in any time zone.
 const NOW = new Date(2026, 9, 24, 15, 30); // Saturday 24 October 2026, 15:30
@@ -115,6 +115,31 @@ describe("distinctQuestions", () => {
     expect(distinctQuestions(items, 3).map((t) => t.id)).toEqual(["a", "c", "d"]);
     expect(distinctQuestions(items, 0)).toEqual([]);
     expect(distinctQuestions([], 3)).toEqual([]);
+  });
+});
+
+describe("mergeThreads", () => {
+  const ids = (items: { id: string }[]) => items.map((t) => t.id);
+
+  it("adds what only the second list has, most recently updated first", () => {
+    const here = [thread("a", at(2026, 9, 24, 12)), thread("c", at(2026, 9, 20))];
+    const server = [thread("b", at(2026, 9, 23)), thread("a", at(2026, 9, 24, 12)), thread("d", at(2026, 8, 1))];
+    expect(ids(mergeThreads(here, server))).toEqual(["a", "b", "c", "d"]);
+  });
+
+  it("keeps the first list's copy of a thread both have", () => {
+    const mine = { id: "a", updated_at: at(2026, 9, 24), question: "here" };
+    const theirs = { id: "a", updated_at: at(2026, 9, 24), question: "server" };
+    expect(mergeThreads([mine], [theirs])).toEqual([mine]);
+  });
+
+  it("keeps the order given for threads updated at the same moment, the first list's before the second's", () => {
+    const same = at(2026, 9, 24, 9);
+    expect(ids(mergeThreads([thread("x", same), thread("y", same)], [thread("z", same)]))).toEqual(["x", "y", "z"]);
+  });
+
+  it("puts an unreadable time last", () => {
+    expect(ids(mergeThreads([thread("bad", "soon")], [thread("ok", at(2026, 9, 1))]))).toEqual(["ok", "bad"]);
   });
 });
 

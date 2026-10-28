@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { Link } from "react-router";
 import type { Card, DecisionPoint } from "../../api/types";
 import { WorkingCube } from "../working/WorkingCube";
+import { reviewPath } from "./Definitions";
 import { formatConfidence } from "./format";
 
 type Answers = Record<string, string | null>;
@@ -49,15 +51,29 @@ function asked(points: DecisionPoint[]): DecisionPoint[] {
 }
 
 /**
- * Who settled the point: the user, or sightline (its rules or a model). The confidence is
- * the System 1 model's, so it goes with S1's own pick only, never with the pick S2 or the
- * rules made after S1 was unsure.
+ * Who settled the point: the user, a default the key user approved, or sightline (its
+ * rules or a model). The confidence is the System 1 model's, so it goes with S1's own
+ * pick only, never with the pick S2 or the rules made after S1 was unsure.
  */
 function pickTag(point: DecisionPoint): string {
   if (point.by === "user") return "your choice";
+  if (point.by === "default") return "your key user's default";
   return point.by === "s1" && point.confidence !== null
     ? `sightline's pick · ${formatConfidence(point.confidence)}`
     : "sightline's pick";
+}
+
+/** The tag beside a choice made; an approved default links to its registry entry, where it is reviewed. */
+function PickTag({ point }: { point: DecisionPoint }) {
+  if (point.by === "default" && point.entry_id) {
+    return (
+      <Link className="tx-made__by tx-made__by--default" to={reviewPath(point.entry_id)} relative="path">
+        {pickTag(point)}
+      </Link>
+    );
+  }
+  const className = point.by === "default" ? "tx-made__by tx-made__by--default" : "tx-made__by";
+  return <span className={className}>{pickTag(point)}</span>;
 }
 
 function isTyping(target: EventTarget): boolean {
@@ -244,7 +260,7 @@ export function AskedNote({ card }: { card: Card }) {
                 {option ? (
                   <>
                     <span className="tx-made__answer">{option.label}</span>
-                    <span className="tx-made__by">{pickTag(point)}</span>
+                    <PickTag point={point} />
                   </>
                 ) : (
                   <span className="tx-made__by">not answered</span>
@@ -294,7 +310,7 @@ function ChoicesMade({ points, busy, onSubmit }: MadeProps) {
               <div className="tx-made__line">
                 <span className="tx-made__question">{point.question}</span>
                 <span className="tx-made__answer">{option?.label ?? current ?? "–"}</span>
-                <span className="tx-made__by">{pickTag(point)}</span>
+                <PickTag point={point} />
                 {onSubmit && (
                   <button
                     type="button"

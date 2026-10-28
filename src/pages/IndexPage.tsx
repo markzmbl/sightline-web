@@ -4,7 +4,7 @@ import { workspacePath } from "../components/sidebar/paths";
 import { WorkingCube } from "../components/working/WorkingCube";
 import "./IndexPage.css";
 
-/** "/": straight into the first workspace the caller may use. */
+/** "/": straight into the workspace the caller used last, or else the first they may use. */
 export function IndexPage() {
   const me = useMe();
 
@@ -30,8 +30,10 @@ export function IndexPage() {
     );
   }
 
-  const first = me.data.workspaces[0];
-  if (!first) {
+  const { workspaces, last_workspace } = me.data;
+  // The last one used, while it is still one of theirs.
+  const open = workspaces.find((w) => w.id === last_workspace) ?? workspaces[0];
+  if (!open) {
     return (
       <main className="index">
         <div className="index__note">
@@ -42,5 +44,5 @@ export function IndexPage() {
     );
   }
 
-  return <Navigate to={workspacePath(first.id)} replace />;
+  return <Navigate to={workspacePath(open.id)} replace />;
 }

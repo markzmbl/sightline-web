@@ -71,34 +71,23 @@
       "ms": 828
     }
   ],
-  "restatement": "You want to see oEE by line, from 22 Dec 2025 to 28 Dec 2025. Defined as: oEE is a proposed definition from sightline's KPI library (ISO 22400-2:2014, key performance indicators for manufacturing operations management), not yet approved: availability (actual production time (run hours) over planned busy time (planned busy hours)) times effectiveness (ideal production time (ideal hours) over actual production time (run hours)) times quality ratio (good quantity over produced quantity).",
+  "restatement": "You want to see OEE by line, from 22 Dec 2025 to 28 Dec 2025.",
+  "definitions": [
+    {
+      "name": "oee",
+      "label": "OEE",
+      "definition": "availability (actual production time (run hours) over planned busy time (planned busy hours)) times effectiveness (ideal production time (ideal hours) over actual production time (run hours)) times quality ratio (good quantity over produced quantity)",
+      "entry_id": "measure-oee",
+      "source": {
+        "kind": "library",
+        "text": "from sightline's KPI library (ISO 22400-2)"
+      },
+      "status": "proposed"
+    }
+  ],
   "card": {
     "blocking": false,
     "points": [
-      {
-        "id": "reading",
-        "step": "form",
-        "question": "What do you want to read from it?",
-        "options": [
-          {
-            "id": "none",
-            "label": "it does not run over time",
-            "hint": ""
-          },
-          {
-            "id": "amounts",
-            "label": "how much each period holds, read one by one",
-            "hint": "columns, each with its value"
-          }
-        ],
-        "chosen": "amounts",
-        "default": "none",
-        "by": "s2",
-        "confidence": 0.45,
-        "why": "Claude read the question again",
-        "open": false,
-        "stage": "abstract"
-      },
       {
         "id": "labels",
         "step": "detail",
@@ -121,21 +110,35 @@
         "confidence": 0.02,
         "why": "the System 1 model was not sure (0.02 below 0.50)",
         "open": true,
-        "stage": "idiom"
+        "stage": "idiom",
+        "entry_id": null
       }
     ]
   },
   "clarify": null,
+  "follow_ups": [],
+  "error": null,
   "result": {
     "sql": "SELECT \"dim_equipment\".\"line_name\" AS \"line_name\", (100 * ((((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"planned_busy_minutes\" / 60.0), 0)), 0))) * ((((COALESCE(SUM(\"f\".\"ideal_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0)), 0))) * ((((COALESCE(SUM(\"f\".\"good_qty\"), 0))) / NULLIF((COALESCE(SUM(\"f\".\"produced_qty\"), 0)), 0)))) AS \"oee\" FROM \"main\".\"fct_production_shifts\" AS \"f\" JOIN \"main\".\"dim_equipment\" AS \"dim_equipment\" ON \"f\".\"equipment_code\" = \"dim_equipment\".\"equipment_code\" WHERE \"f\".\"shift_date\" >= CAST('2025-12-22' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-28' AS DATE) GROUP BY \"dim_equipment\".\"line_name\" HAVING (COUNT(*) + COUNT(*) + COUNT(*) + COUNT(*) + COUNT(*)) > 0 ORDER BY \"oee\" DESC LIMIT 10000",
+    "step_id": "st1",
     "columns": [
       {
         "name": "line_name",
-        "type": "nominal"
+        "label": "line name",
+        "type": "nominal",
+        "role": "dimension",
+        "unit": null,
+        "format": null,
+        "description": "Line of the machine; empty for utilities."
       },
       {
         "name": "oee",
-        "type": "q_ratio"
+        "label": "OEE",
+        "type": "q_ratio",
+        "role": "measure",
+        "unit": "%",
+        "format": ",.1f",
+        "description": "OEE: availability (actual production time (run hours) over planned busy time (planned busy hours)) times effectiveness (ideal production time (ideal hours) over actual production time (run hours)) times quality ratio (good quantity over produced quantity)"
       }
     ],
     "rows": [
@@ -181,9 +184,15 @@
     "chart": {
       "chart": "table",
       "label": "a table",
+      "title": "OEE by line",
+      "subtitle": [
+        "22–28 Dec 2025"
+      ],
+      "hint": null,
+      "score": 1,
       "spec": {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "description": "table (deterministic fallback); rules: TABLE-FALLBACK",
+        "description": "A table: OEE by line, 22–28 Dec 2025",
         "data": {
           "values": [
             {
@@ -251,7 +260,11 @@
           ]
         },
         "usermeta": {
-          "theme": "pattern-perspectives"
+          "theme": "pattern-perspectives",
+          "rules": [
+            "TABLE-FALLBACK",
+            "VIS-RATE-DOMAIN"
+          ]
         },
         "layer": [
           {
@@ -572,30 +585,53 @@
         }
       },
       "png_url": null,
-      "alternatives": [
+      "min_width": null,
+      "options": [
         {
           "chart": "horizontal_bar",
           "label": "ranked bars",
-          "hint": "see which categories are the largest and how far apart they are"
+          "hint": "see which categories are the largest and how far apart they are",
+          "score": 25,
+          "drawn": false
         },
         {
           "chart": "point",
           "label": "ranked dots",
-          "hint": "see which categories are the largest and how far apart they are"
+          "hint": "see which categories are the largest and how far apart they are",
+          "score": 23,
+          "drawn": false
         },
         {
           "chart": "bar",
           "label": "columns",
-          "hint": null
+          "hint": null,
+          "score": 22,
+          "drawn": false
+        },
+        {
+          "chart": "table",
+          "label": "a table",
+          "hint": null,
+          "score": 1,
+          "drawn": true
         }
       ]
     },
-    "findings": []
+    "findings": [],
+    "notes": [],
+    "verdict": "warn",
+    "concerns": [
+      "System 1 doubts that the chart answers the question asked (P 0.48)",
+      "Reduction marks: 0.177 share vs 0.9 share; 14 of 79 blobs after reduction"
+    ],
+    "storyline": null,
+    "lead": null,
+    "supports": []
   },
   "charts": {
     "table": {
       "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "description": "table (deterministic fallback); rules: TABLE-FALLBACK",
+      "description": "A table: OEE by line, 22–28 Dec 2025",
       "data": {
         "values": [
           {
@@ -663,7 +699,11 @@
         ]
       },
       "usermeta": {
-        "theme": "pattern-perspectives"
+        "theme": "pattern-perspectives",
+        "rules": [
+          "TABLE-FALLBACK",
+          "VIS-RATE-DOMAIN"
+        ]
       },
       "layer": [
         {
@@ -986,24 +1026,571 @@
   },
   "chart_options": [
     {
-      "chart": "table",
-      "label": "a table",
-      "hint": null
-    },
-    {
       "chart": "horizontal_bar",
       "label": "ranked bars",
-      "hint": "see which categories are the largest and how far apart they are"
+      "hint": "see which categories are the largest and how far apart they are",
+      "score": 25,
+      "drawn": false
     },
     {
       "chart": "point",
       "label": "ranked dots",
-      "hint": "see which categories are the largest and how far apart they are"
+      "hint": "see which categories are the largest and how far apart they are",
+      "score": 23,
+      "drawn": false
     },
     {
       "chart": "bar",
       "label": "columns",
-      "hint": null
+      "hint": null,
+      "score": 22,
+      "drawn": false
+    },
+    {
+      "chart": "table",
+      "label": "a table",
+      "hint": null,
+      "score": 1,
+      "drawn": false
     }
-  ]
+  ],
+  "form_point": {
+    "id": "idiom",
+    "step": "form",
+    "question": "How do you want to see it?",
+    "options": [
+      {
+        "id": "horizontal_bar",
+        "label": "ranked bars",
+        "hint": "to see which categories are the largest and how far apart they are"
+      },
+      {
+        "id": "point",
+        "label": "ranked dots",
+        "hint": "to see which categories are the largest and how far apart they are"
+      },
+      {
+        "id": "bar",
+        "label": "columns",
+        "hint": ""
+      },
+      {
+        "id": "table",
+        "label": "a table",
+        "hint": ""
+      }
+    ],
+    "chosen": "table",
+    "default": "horizontal_bar",
+    "by": "s1",
+    "confidence": 0.84,
+    "why": "",
+    "open": false,
+    "stage": "idiom",
+    "entry_id": null
+  },
+  "refs": [
+    {
+      "table": "fct_production_shifts",
+      "column": "oee",
+      "label": "OEE",
+      "type": "q_ratio",
+      "role": "measure",
+      "unit": "%",
+      "description": "OEE: availability (actual production time (run hours) over planned busy time (planned busy hours)) times effectiveness (ideal production time (ideal hours) over actual production time (run hours)) times quality ratio (good quantity over produced quantity)",
+      "metric": true
+    },
+    {
+      "table": "dim_equipment",
+      "column": "line_name",
+      "label": "line name",
+      "type": "nominal",
+      "role": "dimension",
+      "unit": null,
+      "description": "Line of the machine; empty for utilities.",
+      "metric": false
+    },
+    {
+      "table": "fct_production_shifts",
+      "column": "shift_date",
+      "label": "shift date",
+      "type": "temporal",
+      "role": "time",
+      "unit": null,
+      "description": "Day of the shift. Joins to dim_date.",
+      "metric": false
+    }
+  ],
+  "analysis": {
+    "synthetic": true,
+    "about": "Synthetic: made up by mock/showcase.ts from the run's own rows, to show what the core's analysis (plan, analyse, gather) will add to the answer; the core does not make it yet.",
+    "stages": [
+      {
+        "phase": "understand",
+        "stage": "plan",
+        "ms": 2600
+      },
+      {
+        "phase": "analyse",
+        "stage": "analyse",
+        "ms": 3720
+      },
+      {
+        "phase": "analyse",
+        "stage": "gather",
+        "ms": 1900
+      }
+    ],
+    "storyline": {
+      "top": "Augsburg moulding 1 led the lines on OEE last week, at 79.7%",
+      "key_line": [
+        {
+          "id": "k1",
+          "text": "Augsburg moulding 1 reached 79.7%, 1.8 points ahead of Augsburg moulding 2"
+        },
+        {
+          "id": "k2",
+          "text": "Brno welding came last at 71.2%, 8.5 points behind the leader"
+        },
+        {
+          "id": "k3",
+          "text": "Six of the nine lines sat within 2.5 points of the average of 75.5%"
+        }
+      ]
+    },
+    "lead": "sp1",
+    "supports": [
+      {
+        "id": "sp1",
+        "role": "answer",
+        "point": "k1",
+        "text": "The OEE of each line last week, highest first",
+        "drawn": "main",
+        "chart": null,
+        "layer": "answer",
+        "note": null
+      },
+      {
+        "id": "sp2",
+        "role": "comparison",
+        "point": "k3",
+        "text": "Each line against the average of 75.5%, in points",
+        "drawn": "small",
+        "chart": {
+          "chart": "horizontal_bar",
+          "label": "ranked bars",
+          "title": null,
+          "subtitle": [],
+          "hint": null,
+          "score": null,
+          "spec": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "description": "Bars: each line's OEE last week minus the average over the lines, in points; above the average to the right",
+            "data": {
+              "values": [
+                {
+                  "member": "Augsburg moulding 1",
+                  "value": 4.180632
+                },
+                {
+                  "member": "Augsburg moulding 2",
+                  "value": 2.378283
+                },
+                {
+                  "member": "Linz stamping",
+                  "value": 2.25947
+                },
+                {
+                  "member": "Brno stamping",
+                  "value": -0.237558
+                },
+                {
+                  "member": "Linz assembly",
+                  "value": -0.36098
+                },
+                {
+                  "member": "Linz laser bending",
+                  "value": -0.361418
+                },
+                {
+                  "member": "Augsburg assembly",
+                  "value": -0.375341
+                },
+                {
+                  "member": "Brno assembly",
+                  "value": -3.152647
+                },
+                {
+                  "member": "Brno welding",
+                  "value": -4.330442
+                }
+              ]
+            },
+            "height": 160,
+            "mark": {
+              "type": "bar",
+              "cornerRadiusEnd": 3
+            },
+            "encoding": {
+              "y": {
+                "field": "member",
+                "type": "nominal",
+                "sort": "-x",
+                "title": null,
+                "axis": {
+                  "labelLimit": 160
+                }
+              },
+              "x": {
+                "field": "value",
+                "type": "quantitative",
+                "title": "points from the average",
+                "axis": {
+                  "format": "+.1f",
+                  "tickCount": 4
+                }
+              },
+              "color": {
+                "condition": {
+                  "test": "datum.value < 0",
+                  "value": "#E23B4A"
+                },
+                "value": "#1227FD"
+              },
+              "tooltip": [
+                {
+                  "field": "member",
+                  "title": ""
+                },
+                {
+                  "field": "value",
+                  "type": "quantitative",
+                  "title": "points from the average",
+                  "format": "+.1f"
+                }
+              ]
+            },
+            "usermeta": {
+              "theme": "pattern-perspectives",
+              "drawn_by": "mock",
+              "synthetic": true
+            },
+            "config": {
+              "background": "#FFFFFF",
+              "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+              "padding": {
+                "left": 20,
+                "right": 24,
+                "top": 20,
+                "bottom": 18
+              },
+              "view": {
+                "stroke": null
+              },
+              "title": {
+                "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "fontSize": 16,
+                "fontWeight": 600,
+                "color": "#191C1F",
+                "anchor": "start",
+                "offset": 16,
+                "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "subtitleColor": "#5F6368",
+                "subtitleFontSize": 12.5,
+                "subtitleFontWeight": 400,
+                "subtitlePadding": 6,
+                "subtitleLineHeight": 17
+              },
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelFontSize": 10.5,
+                "labelColor": "#5F6368",
+                "labelPadding": 8,
+                "labelSeparation": 6,
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "titlePadding": 12,
+                "domainColor": "#C9C9CD",
+                "tickColor": "#C9C9CD",
+                "gridColor": "#E2E2E7",
+                "gridWidth": 1
+              },
+              "axisX": {
+                "grid": false,
+                "ticks": true,
+                "tickSize": 4,
+                "domain": true
+              },
+              "axisY": {
+                "domain": false,
+                "ticks": false,
+                "grid": true
+              },
+              "axisBand": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelColor": "#191C1F",
+                "labelFontSize": 11,
+                "labelPadding": 10
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelFontSize": 12,
+                "labelColor": "#191C1F",
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "symbolType": "circle",
+                "symbolSize": 110,
+                "symbolStrokeWidth": 0,
+                "columnPadding": 16,
+                "padding": 4,
+                "offset": 16
+              },
+              "range": {
+                "category": [
+                  "#1227FD",
+                  "#00967A",
+                  "#8B5CF6",
+                  "#B07800",
+                  "#46277A",
+                  "#4F7BFF",
+                  "#191C1F"
+                ],
+                "ramp": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "heatmap": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "diverging": [
+                  "#E23B4A",
+                  "#F4F4F6",
+                  "#1227FD"
+                ]
+              },
+              "mark": {
+                "color": "#1227FD"
+              },
+              "line": {
+                "color": "#1227FD",
+                "strokeWidth": 2.5,
+                "strokeCap": "round",
+                "strokeJoin": "round"
+              },
+              "point": {
+                "color": "#1227FD",
+                "size": 56,
+                "filled": true
+              },
+              "area": {
+                "color": "#1227FD",
+                "opacity": 0.16
+              },
+              "bar": {
+                "color": "#1227FD",
+                "cornerRadiusEnd": 5
+              },
+              "arc": {
+                "stroke": "#FFFFFF",
+                "strokeWidth": 2
+              },
+              "rect": {
+                "color": "#1227FD"
+              },
+              "rule": {
+                "color": "#C9C9CD"
+              },
+              "text": {
+                "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "fontSize": 11,
+                "color": "#191C1F"
+              }
+            }
+          },
+          "png_url": null,
+          "min_width": 260,
+          "options": []
+        },
+        "layer": null,
+        "note": null
+      },
+      {
+        "id": "sp3",
+        "role": "context",
+        "point": null,
+        "text": "Three lines were above the average and six below it",
+        "drawn": "none",
+        "chart": null,
+        "layer": null,
+        "note": null
+      }
+    ],
+    "notes": [
+      "The average of 75.5% is the plain mean of the nine lines, not weighted by their planned busy time",
+      "The warehouse holds no full week after 28 Dec 2025, so last week is the week before it"
+    ],
+    "steps": [
+      {
+        "id": "st1",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "OEE per line last week",
+        "role": "answer",
+        "ms": 140,
+        "verdict": null,
+        "cached": true,
+        "sql": "SELECT \"dim_equipment\".\"line_name\" AS \"line_name\", (100 * ((((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"planned_busy_minutes\" / 60.0), 0)), 0))) * ((((COALESCE(SUM(\"f\".\"ideal_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0)), 0))) * ((((COALESCE(SUM(\"f\".\"good_qty\"), 0))) / NULLIF((COALESCE(SUM(\"f\".\"produced_qty\"), 0)), 0)))) AS \"oee\" FROM \"main\".\"fct_production_shifts\" AS \"f\" JOIN \"main\".\"dim_equipment\" AS \"dim_equipment\" ON \"f\".\"equipment_code\" = \"dim_equipment\".\"equipment_code\" WHERE \"f\".\"shift_date\" >= CAST('2025-12-22' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-28' AS DATE) GROUP BY \"dim_equipment\".\"line_name\" HAVING (COUNT(*) + COUNT(*) + COUNT(*) + COUNT(*) + COUNT(*)) > 0 ORDER BY \"oee\" DESC LIMIT 10000",
+        "columns": [
+          {
+            "name": "line_name",
+            "label": "line name",
+            "type": "nominal",
+            "role": "dimension",
+            "unit": null,
+            "format": null,
+            "description": "Line of the machine; empty for utilities."
+          },
+          {
+            "name": "oee",
+            "label": "OEE",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "%",
+            "format": ",.1f",
+            "description": "OEE: availability (actual production time (run hours) over planned busy time (planned busy hours)) times effectiveness (ideal production time (ideal hours) over actual production time (run hours)) times quality ratio (good quantity over produced quantity)"
+          }
+        ],
+        "rows": [
+          [
+            "Augsburg moulding 1",
+            79.666612
+          ],
+          [
+            "Augsburg moulding 2",
+            77.864263
+          ],
+          [
+            "Linz stamping",
+            77.74545
+          ],
+          [
+            "Brno stamping",
+            75.248422
+          ],
+          [
+            "Linz assembly",
+            75.125
+          ],
+          [
+            "Linz laser bending",
+            75.124562
+          ],
+          [
+            "Augsburg assembly",
+            75.110639
+          ],
+          [
+            "Brno assembly",
+            72.333333
+          ],
+          [
+            "Brno welding",
+            71.155538
+          ]
+        ],
+        "row_count": 9
+      },
+      {
+        "id": "st2",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "the average over all lines",
+        "role": "comparison",
+        "ms": 1900,
+        "verdict": "as_expected",
+        "cached": false,
+        "sql": "SELECT AVG(\"oee\") AS \"oee\"\nFROM (\n  SELECT \"dim_equipment\".\"line_name\" AS \"line_name\", (100 * ((((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"planned_busy_minutes\" / 60.0), 0)), 0))) * ((((COALESCE(SUM(\"f\".\"ideal_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0)), 0))) * ((((COALESCE(SUM(\"f\".\"good_qty\"), 0))) / NULLIF((COALESCE(SUM(\"f\".\"produced_qty\"), 0)), 0)))) AS \"oee\" FROM \"main\".\"fct_production_shifts\" AS \"f\" JOIN \"main\".\"dim_equipment\" AS \"dim_equipment\" ON \"f\".\"equipment_code\" = \"dim_equipment\".\"equipment_code\" WHERE \"f\".\"shift_date\" >= CAST('2025-12-22' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-28' AS DATE) GROUP BY \"dim_equipment\".\"line_name\" HAVING (COUNT(*) + COUNT(*) + COUNT(*) + COUNT(*) + COUNT(*)) > 0 ORDER BY \"oee\" DESC LIMIT 10000\n) AS \"answer\"",
+        "columns": [
+          {
+            "name": "oee",
+            "label": "OEE",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "%",
+            "format": ",.1f",
+            "description": "OEE: availability (actual production time (run hours) over planned busy time (planned busy hours)) times effectiveness (ideal production time (ideal hours) over actual production time (run hours)) times quality ratio (good quantity over produced quantity)"
+          }
+        ],
+        "rows": [
+          [
+            75.48598
+          ]
+        ],
+        "row_count": 1
+      },
+      {
+        "id": "st3",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "the lead over the runner-up",
+        "role": "check",
+        "ms": 1600,
+        "verdict": "as_expected",
+        "cached": false,
+        "sql": "SELECT *\nFROM (\n  SELECT \"dim_equipment\".\"line_name\" AS \"line_name\", (100 * ((((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"planned_busy_minutes\" / 60.0), 0)), 0))) * ((((COALESCE(SUM(\"f\".\"ideal_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0)), 0))) * ((((COALESCE(SUM(\"f\".\"good_qty\"), 0))) / NULLIF((COALESCE(SUM(\"f\".\"produced_qty\"), 0)), 0)))) AS \"oee\" FROM \"main\".\"fct_production_shifts\" AS \"f\" JOIN \"main\".\"dim_equipment\" AS \"dim_equipment\" ON \"f\".\"equipment_code\" = \"dim_equipment\".\"equipment_code\" WHERE \"f\".\"shift_date\" >= CAST('2025-12-22' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-28' AS DATE) GROUP BY \"dim_equipment\".\"line_name\" HAVING (COUNT(*) + COUNT(*) + COUNT(*) + COUNT(*) + COUNT(*)) > 0 ORDER BY \"oee\" DESC LIMIT 10000\n) AS \"answer\"\nORDER BY \"oee\" DESC\nLIMIT 2",
+        "columns": [
+          {
+            "name": "line_name",
+            "label": "line name",
+            "type": "nominal",
+            "role": "dimension",
+            "unit": null,
+            "format": null,
+            "description": "Line of the machine; empty for utilities."
+          },
+          {
+            "name": "oee",
+            "label": "OEE",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "%",
+            "format": ",.1f",
+            "description": "OEE: availability (actual production time (run hours) over planned busy time (planned busy hours)) times effectiveness (ideal production time (ideal hours) over actual production time (run hours)) times quality ratio (good quantity over produced quantity)"
+          }
+        ],
+        "rows": [
+          [
+            "Augsburg moulding 1",
+            79.666612
+          ],
+          [
+            "Augsburg moulding 2",
+            77.864263
+          ]
+        ],
+        "row_count": 2
+      }
+    ],
+    "follow_ups": [
+      {
+        "id": "fu1",
+        "kind": "breakdown",
+        "question": "How did availability, effectiveness and quality ratio develop per week in Q4 2025?",
+        "fixture": "aeq-weekly"
+      },
+      {
+        "id": "fu2",
+        "kind": "next_level",
+        "question": "What was the OEE of each machine on Augsburg moulding 1 last week?",
+        "fixture": null
+      }
+    ]
+  }
 }

@@ -177,17 +177,32 @@ function chartOf(long: Long, chart: string): VegaLiteSpec {
   }
 }
 
+type Title = { text?: unknown; subtitle?: unknown };
+
+/** The chart in plain words for screen readers: its name, its title and its bases. */
+function describe(label: string, theme: VegaLiteSpec | null): string {
+  const title: Title | null = typeof theme?.title === "object" && theme.title !== null && !Array.isArray(theme.title) ? (theme.title as Title) : null;
+  const text = title ? title.text : theme?.title;
+  const said = Array.isArray(text) ? text.join(" ") : typeof text === "string" ? text : "";
+  const bases = Array.isArray(title?.subtitle) ? title.subtitle.map(String) : typeof title?.subtitle === "string" ? [title.subtitle] : [];
+  const name = label.charAt(0).toUpperCase() + label.slice(1);
+  return `${name}${said ? `: ${said}` : ""}${bases.length ? `, ${bases.join(", ")}` : ""}`;
+}
+
 /**
  * A spec for `chart` over the result's rows, carrying the theme config (and the title)
  * of the chart the run did draw, `theme`; a table when the result has no measure to draw.
+ * Its description says it in plain words, with `label` as the chart's name; the drawn
+ * chart's rule ids stay behind, since no rule drew this one.
  */
-export function drawnByMock(result: Result, chart: string, theme: VegaLiteSpec | null): VegaLiteSpec {
+export function drawnByMock(result: Result, chart: string, theme: VegaLiteSpec | null, label: string = humanise(chart)): VegaLiteSpec {
   const long = longForm(result);
   const body = chart === "table" || !long.hasMeasure ? table(result) : chartOf(long, chart);
-  const usermeta = typeof theme?.usermeta === "object" && theme.usermeta !== null ? theme.usermeta : {};
+  const { rules: _rules, ...usermeta } =
+    typeof theme?.usermeta === "object" && theme.usermeta !== null ? (theme.usermeta as Record<string, unknown>) : {};
   return {
     $schema: "https://vega.github.io/schema/vega-lite/v5.json",
-    description: `${chart}, drawn by the mock from the result's rows; the backend draws it with the core's forms`,
+    description: describe(label, theme),
     ...(theme?.title === undefined ? {} : { title: theme.title }),
     ...body,
     usermeta: { ...usermeta, drawn_by: "mock" },

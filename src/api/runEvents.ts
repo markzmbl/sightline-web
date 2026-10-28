@@ -1,13 +1,19 @@
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { ApiError, authHeaders } from "./client";
+import { api, ApiError, authHeaders, unwrap } from "./client";
 import { keys, runQueryOptions } from "./queries";
-import { ENDED, isWorking, type Result, type RunEvent, type RunView, type StageTiming } from "./types";
+import { ENDED, isWorking, type Result, type RunEvent, type RunView, type StageTiming, type StepRecord } from "./types";
 
 /**
  * Folds one event into a run. Pure: returns a new RunView and never mutates `run`.
  * `now` (ISO time) stamps fields the event does not carry, such as finished_at.
+ * Folding a run's whole stream gives what getRun gives, except for what no event
+ * carries: the definitions (the run has them from bind, when the restatement is told),
+ * the follow-ups (after the terminal run.status), and the time of a step cut off by
+ * the run's end (no step.finished comes for it, so its record stays open, elapsed_ms
+ * null). useRunStream fetches the definitions after each restatement; the rest comes
+ * with getRun's or the thread's copy once the run has ended.
  */
 export function applyEvent(run: RunView, event: RunEvent, now: string = new Date().toISOString()): RunView {
   switch (event.type) {
@@ -19,10 +25,15 @@ export function applyEvent(run: RunView, event: RunEvent, now: string = new Date
       // Working again after an end (a re-present, a resume): the run is not finished,
       // and its trace stays, the stages it runs again appending to it.
       if (isWorking(status)) next.finished_at = null;
-      // Queued while running: a worker restarted the run, which starts its stages over.
-      // What it already said (restatement, card, result) stands until it says otherwise.
+      // Asking or ended: no step is under way any more.
+      if (!isWorking(status)) next.step = null;
+      // Queued while running: a worker restarted the run, which starts its stages and
+      // steps over. What it already said (restatement, card, result) stands until it
+      // says otherwise.
       if (status === "queued" && run.status === "running") {
         next.timings = [];
+        next.steps = [];
+        next.step = null;
         next.phase = null;
         next.stage = null;
       }
@@ -48,17 +59,67 @@ export function applyEvent(run: RunView, event: RunEvent, now: string = new Date
           : run.timings.map((t, i) => (i === open ? { ...t, elapsed_ms: event.elapsed_ms } : t));
       return { ...run, timings };
     }
+    case "step.started": {
+      const record: StepRecord = {
+        id: event.step.id,
+        label: event.step.label,
+        role: event.role,
+        stage: event.stage,
+        started_at: event.at,
+        elapsed_ms: null,
+        verdict: null,
+        cached: false,
+        sql: null,
+        row_count: null,
+      };
+      return { ...run, step: event.step, steps: [...run.steps, record] };
+    }
+    case "step.finished": {
+      const { step } = event;
+      const closed = {
+        role: event.role,
+        elapsed_ms: event.elapsed_ms,
+        verdict: event.verdict,
+        cached: event.cached,
+        sql: event.sql,
+        row_count: event.row_count,
+      };
+      // Step ids are unique per execution: close the step's open record. A finish
+      // whose start was never seen is recorded whole, its start counted back from its end.
+      let at = run.steps.findLastIndex((s) => s.id === step.id && s.elapsed_ms === null);
+      if (at === -1) at = run.steps.findLastIndex((s) => s.id === step.id);
+      const steps =
+        at === -1
+          ? [
+              ...run.steps,
+              { id: step.id, label: step.label, stage: event.stage, started_at: startOf(event.at, event.elapsed_ms), ...closed },
+            ]
+          : run.steps.map((s, i) => (i === at ? { ...s, ...closed } : s));
+      return { ...run, steps, step: run.step?.id === step.id ? null : run.step };
+    }
     case "restatement":
+      // Told after bind, and again whenever the text changes: the latest stands.
       return { ...run, restatement: event.text };
     case "card":
       return { ...run, card: event.card };
     case "clarify":
       return { ...run, clarify: event.clarify };
-    case "error":
-      return { ...run, error: { message: event.message, stage: event.stage } };
+    case "error": {
+      const { code, retryable, message, detail, stage } = event;
+      return { ...run, error: { code, retryable, message, detail, stage } };
+    }
     case "chart": {
-      const result: Result = run.result ?? emptyResult();
-      return { ...run, result: { ...result, chart: event.chart } };
+      // The main chart. It comes before the result, so it may need the result's shell.
+      if (event.support_id == null) {
+        const result: Result = run.result ?? emptyResult();
+        return { ...run, result: { ...result, chart: event.chart } };
+      }
+      // A support's small chart. A support not in the result yet (the result event
+      // has not come) is left to that event, which carries every support with its chart.
+      const at = run.result?.supports.findIndex((s) => s.id === event.support_id) ?? -1;
+      if (!run.result || at === -1) return run;
+      const supports = run.result.supports.map((s, i) => (i === at ? { ...s, chart: event.chart } : s));
+      return { ...run, result: { ...run.result, supports } };
     }
     case "result":
       return { ...run, result: event.result };
@@ -68,8 +129,33 @@ export function applyEvent(run: RunView, event: RunEvent, now: string = new Date
   }
 }
 
+/**
+ * The result a main chart folds into when it comes before the result event: no rows,
+ * no storyline, verdict pass. The result event replaces it whole.
+ */
 function emptyResult(): Result {
-  return { sql: null, columns: [], rows: [], row_count: 0, truncated: false, chart: null, findings: [] };
+  return {
+    sql: null,
+    step_id: null,
+    columns: [],
+    rows: [],
+    row_count: 0,
+    truncated: false,
+    chart: null,
+    verdict: "pass",
+    concerns: [],
+    notes: [],
+    findings: [],
+    storyline: null,
+    lead: null,
+    supports: [],
+  };
+}
+
+/** When a step that ended at `at` after `elapsedMs` started; `at` itself when it is no time. */
+function startOf(at: string, elapsedMs: number): string {
+  const end = Date.parse(at);
+  return Number.isNaN(end) ? at : new Date(end - elapsedMs).toISOString();
 }
 
 /** Stops the library's own reconnecting: retrying the same request cannot help. */
@@ -92,7 +178,9 @@ export interface RunStream {
  * into the TanStack Query cache entry `keys.run(ws, runId)`. A stream the server
  * refuses is opened again later, with the run refetched meanwhile, until the run
  * stops working. Pass null to follow nothing; passing another run closes this
- * run's stream first, so its late frames are dropped.
+ * run's stream first, so its late frames are dropped. After each restatement it
+ * fetches the run once (getRun) and takes only its definitions, which no event
+ * carries, so they show with the restatement rather than at the end.
  */
 export function useRunEvents(ws: string, runId: string | null): void {
   useRunStream(ws, runId);
@@ -118,10 +206,28 @@ export function useRunStream(ws: string, runId: string | null): RunStream {
     let failures = 0;
     let timer: ReturnType<typeof setTimeout> | undefined;
 
-    // Asking or ended: the thread and the sidebar catch up.
-    const settle = (threadId: string) => {
+    // Asking or ended: the thread and the sidebar catch up, and so does the run unless
+    // it was just fetched: the follow-ups and a cut-off step's elapsed_ms come only with
+    // getRun or the thread's latest. The run's refetch is cancelled should nothing observe
+    // the run any more by the time it would land (useLiveThread lets go of an ended
+    // latest); useLiveThread then caches the thread's copy of it instead.
+    const settle = (threadId: string, fetched = false) => {
       void queryClient.invalidateQueries({ queryKey: keys.thread(ws, threadId) });
       void queryClient.invalidateQueries({ queryKey: keys.threads(ws) });
+      if (!fetched) void queryClient.invalidateQueries({ queryKey: key });
+    };
+
+    // The id of the latest restatement folded in; only a copy that has it folded in has its definitions.
+    let restatedAt = 0;
+    const takeDefinitions = async (id: number) => {
+      restatedAt = id;
+      const fetched = await api
+        .GET("/api/v1/workspaces/{ws}/runs/{run_id}", { params: { path: { ws, run_id: runId } }, signal: controller.signal })
+        .then((result) => unwrap(result))
+        .catch(() => undefined);
+      // Let go of, or behind: the end of the run brings them (or newer ones) anyway.
+      if (!fetched || controller.signal.aborted || fetched.last_event_id < restatedAt) return;
+      queryClient.setQueryData<RunView>(key, (old) => old && { ...old, definitions: fetched.definitions });
     };
 
     const url = `/api/v1/workspaces/${encodeURIComponent(ws)}/runs/${encodeURIComponent(runId)}/events`;
@@ -166,6 +272,7 @@ export function useRunStream(ws: string, runId: string | null): RunStream {
         // Only this run's frames fold into this run's entry, never another run's.
         if (event.run_id !== undefined && event.run_id !== runId) return;
         queryClient.setQueryData<RunView>(key, (old) => old && { ...applyEvent(old, event), last_event_id: id });
+        if (event.type === "restatement") void takeDefinitions(id);
         // A queued after running (a worker restart) keeps working, and the stream stays.
         if (event.type === "run.status" && !isWorking(event.status)) {
           // Asking or ended (superseded too): the server closes the stream here.
@@ -192,7 +299,7 @@ export function useRunStream(ws: string, runId: string | null): RunStream {
         .fetchQuery({ ...runQueryOptions(ws, runId), staleTime: 0 })
         .catch(() => undefined);
       if (controller.signal.aborted) return;
-      if (fresh && !isWorking(fresh.status)) return settle(fresh.thread_id);
+      if (fresh && !isWorking(fresh.status)) return settle(fresh.thread_id, true);
       refusals.current.count += 1;
       const delay = Math.min(REOPEN_MS * 2 ** (refusals.current.count - 1), REOPEN_MAX_MS);
       timer = setTimeout(() => setReopen((n) => n + 1), delay);

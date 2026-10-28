@@ -1,6 +1,9 @@
 {
   "slug": "aeq-clarify",
   "workspace": "manufacturing",
+  "made_up": [
+    "restatement"
+  ],
   "question": "How did availability, effectiveness and quality ratio develop per week in Q4 2025?",
   "final_status": "clarify",
   "continuation": null,
@@ -26,71 +29,95 @@
       "ms": 5
     }
   ],
-  "restatement": null,
+  "restatement": "You want to see how availability, effectiveness and quality ratio developed per week, from 1 Oct 2025 to 31 Dec 2025.",
+  "definitions": [],
   "card": null,
   "clarify": {
     "gaps": [
       {
         "slot": "measure:availability",
         "requested": "availability",
-        "reason": "no measure on this star matches this term",
+        "reason": "No measure in the data matches \"availability\"",
         "suggestions": [
-          "mart_supplier_scorecard_month.scorecard_spend",
-          "mart_supplier_scorecard_month.scorecard_defect_reports",
-          "mart_supplier_scorecard_month.scorecard_defect_downtime"
+          {
+            "id": "mart_supplier_scorecard_month.scorecard_spend",
+            "label": "scorecard spend",
+            "question": "How did scorecard spend, effectiveness and quality ratio develop per week in Q4 2025?"
+          },
+          {
+            "id": "mart_supplier_scorecard_month.scorecard_defect_reports",
+            "label": "scorecard defect reports",
+            "question": "How did scorecard defect reports, effectiveness and quality ratio develop per week in Q4 2025?"
+          },
+          {
+            "id": "mart_supplier_scorecard_month.scorecard_defect_downtime",
+            "label": "scorecard defect downtime",
+            "question": "How did scorecard defect downtime, effectiveness and quality ratio develop per week in Q4 2025?"
+          }
         ]
       },
       {
         "slot": "measure:effectiveness",
         "requested": "effectiveness",
-        "reason": "no measure on this star matches this term",
+        "reason": "No measure in the data matches \"effectiveness\"",
         "suggestions": [
-          "mart_supplier_scorecard_month.scorecard_spend",
-          "mart_supplier_scorecard_month.scorecard_defect_reports",
-          "mart_supplier_scorecard_month.scorecard_defect_downtime"
+          {
+            "id": "mart_supplier_scorecard_month.scorecard_spend",
+            "label": "scorecard spend",
+            "question": "How did availability, scorecard spend and quality ratio develop per week in Q4 2025?"
+          },
+          {
+            "id": "mart_supplier_scorecard_month.scorecard_defect_reports",
+            "label": "scorecard defect reports",
+            "question": "How did availability, scorecard defect reports and quality ratio develop per week in Q4 2025?"
+          },
+          {
+            "id": "mart_supplier_scorecard_month.scorecard_defect_downtime",
+            "label": "scorecard defect downtime",
+            "question": "How did availability, scorecard defect downtime and quality ratio develop per week in Q4 2025?"
+          }
         ]
       },
       {
         "slot": "measure:quality_ratio",
         "requested": "quality ratio",
-        "reason": "no measure on this star matches this term; dim_stop_reason.reason would match on the fct_downtime_events star - one question binds one fact star",
+        "reason": "No measure in the data matches \"quality ratio\"; stop reason would match in the downtime events, but one question reads one area of the data at a time",
         "suggestions": [
-          "mart_supplier_scorecard_month.scorecard_spend",
-          "mart_supplier_scorecard_month.scorecard_defect_reports",
-          "mart_supplier_scorecard_month.scorecard_defect_downtime"
+          {
+            "id": "mart_supplier_scorecard_month.scorecard_spend",
+            "label": "scorecard spend",
+            "question": "How did availability, effectiveness and scorecard spend develop per week in Q4 2025?"
+          },
+          {
+            "id": "mart_supplier_scorecard_month.scorecard_defect_reports",
+            "label": "scorecard defect reports",
+            "question": "How did availability, effectiveness and scorecard defect reports develop per week in Q4 2025?"
+          },
+          {
+            "id": "mart_supplier_scorecard_month.scorecard_defect_downtime",
+            "label": "scorecard defect downtime",
+            "question": "How did availability, effectiveness and scorecard defect downtime develop per week in Q4 2025?"
+          }
         ]
       }
     ],
     "missing": [],
     "record": [],
-    "nearest": [],
     "warnings": [
       "availability: mart_supplier_scorecard_month.month_start has no data 2024-01-02..2024-01-31",
       "availability: mart_supplier_scorecard_month.month_start has no data 2024-02-02..2024-02-29",
       "availability: mart_supplier_scorecard_month.month_start has no data 2024-03-02..2024-03-31",
       "availability: mart_supplier_scorecard_month.month_start has no data 2024-04-02..2024-04-30",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2024-05-02..2024-05-31",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2024-06-02..2024-06-30",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2024-07-02..2024-07-31",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2024-08-02..2024-08-31",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2024-09-02..2024-09-30",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2024-10-02..2024-10-31",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2024-11-02..2024-11-30",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2024-12-02..2024-12-31",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2025-01-02..2025-01-31",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2025-02-02..2025-02-28",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2025-03-02..2025-03-31",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2025-04-02..2025-04-30",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2025-05-02..2025-05-31",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2025-06-02..2025-06-30",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2025-07-02..2025-07-31",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2025-08-02..2025-08-31",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2025-09-02..2025-09-30",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2025-10-02..2025-10-31",
-      "availability: mart_supplier_scorecard_month.month_start has no data 2025-11-02..2025-11-30"
-    ]
+      "availability: mart_supplier_scorecard_month.month_start has no data 2024-05-02..2024-05-31"
+    ],
+    "warnings_total": 23
   },
+  "follow_ups": [],
+  "error": null,
   "result": null,
   "charts": {},
-  "chart_options": []
+  "chart_options": [],
+  "form_point": null,
+  "refs": [],
+  "analysis": null
 }

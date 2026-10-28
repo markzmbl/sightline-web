@@ -1,14 +1,18 @@
 // The key-user registry: what sightline proposes for review (measures, learned
 // defaults, data gaps), one per workspace, seeded from the fixtures in the core's
-// own words. An entry's demand grows as runs that follow its fixtures end; a review
-// moves its status and version. HTTP lives in server.ts.
+// own words. An entry's demand grows as runs that follow its fixtures end; only a
+// review moves its status and version. The runs read their definitions' statuses
+// from here when they start. HTTP lives in server.ts.
 import type { components } from "../src/api/schema.d.ts";
 import type {
+  Definition,
+  EntryChange,
   EntryChoice,
   EntryGap,
   EntryRun,
   EntrySource,
   ErrorItem,
+  KindInfo,
   RegistryCounts,
   RegistryEntry,
   RegistryEntryDetail,
@@ -27,6 +31,16 @@ type Words = RegistryEntry["words"];
 
 export const KINDS: readonly RegistryKind[] = ["measure", "default", "gap"];
 export const STATUSES: readonly RegistryStatus[] = ["proposed", "approved", "rejected"];
+export const SORTS = ["last_asked", "demand", "updated"] as const;
+export type RegistrySort = (typeof SORTS)[number];
+/** The display words of every kind. */
+export const KIND_WORDS: readonly KindInfo[] = [
+  { kind: "measure", label: "measure", plural: "measures" },
+  { kind: "default", label: "default", plural: "defaults" },
+  { kind: "gap", label: "data gap", plural: "data gaps" },
+];
+/** The newest runs an entry's detail lists. */
+const RUNS_SHOWN = 20;
 const ACTIONS: readonly ReviewAction[] = ["approve", "reject", "reopen", "edit"];
 /** Who reviews: v1 has no auth, and the dev user is a key user everywhere. */
 export const REVIEWER = "Dev user";
@@ -54,20 +68,22 @@ interface Seed {
   reviewed?: number;
   gap?: (fixtures: readonly Fixture[]) => EntryGap;
   choices?: (fixtures: readonly Fixture[]) => EntryChoice[];
+  /** For a default, the id of the option it chooses. */
+  chosen?: string;
 }
 
 const KPI_LIBRARY = (standard: string): EntrySource => ({ kind: "library", text: `from sightline's KPI library (${standard})` });
 const DRAFTED: EntrySource = { kind: "drafted", text: "drafted by sightline" };
 const LEARNED: EntrySource = { kind: "learned", text: "learned from the answers users gave on the card" };
+const FROM_QUESTION: EntrySource = { kind: "question", text: "as the question states it" };
 
 const fixed = <T>(value: T) => (): T => value;
 
-/** What a restatement says after "Defined as: ... not yet approved:", the definition in the core's words. */
-function definedAs(slug: string, fallback: string) {
+/** The definition a fixture's run used for the term, in the core's words. */
+function definedAs(slug: string, term: string, fallback: string) {
   return (fixtures: readonly Fixture[]): string => {
-    const text = fixtures.find((f) => f.slug === slug)?.restatement ?? "";
-    const match = /Defined as: .*?not yet approved: (.+?)\.?$/s.exec(text);
-    return match?.[1]?.trim() || fallback;
+    const used = fixtures.find((f) => f.slug === slug)?.definitions.find((d) => d.name === term);
+    return used?.definition?.trim() || fallback;
   };
 }
 
@@ -107,6 +123,7 @@ const SEEDS: Record<string, Seed[]> = {
       words: { en: ["oee", "oee index", "overall equipment effectiveness"], de: ["gesamtanlageneffektivität", "gae"] },
       definition: definedAs(
         "oee-line",
+        "oee",
         "availability (actual production time (run hours) over planned busy time (planned busy hours)) times effectiveness " +
           "(ideal production time (ideal hours) over actual production time (run hours)) times quality ratio " +
           "(good quantity over produced quantity)",
@@ -153,7 +170,8 @@ const SEEDS: Record<string, Seed[]> = {
       kind: "measure",
       term: "energy per good unit",
       label: "Energy per 1,000 good units",
-      source: DRAFTED,
+      // Proposed from the energy question, which says what it divides.
+      source: FROM_QUESTION,
       status: "proposed",
       words: {
         en: ["energy per good unit", "energy per 1,000 good units", "energy intensity"],
@@ -184,6 +202,7 @@ const SEEDS: Record<string, Seed[]> = {
       status: "proposed",
       words: { en: ["best plant", "best performing plant", "top plant"], de: ["bestes werk", "bester standort"] },
       definition: fixed("OEE"),
+      chosen: "oee",
       // The ranking questions where users picked the measure the card offered.
       slugs: ["oee-line", "energy"],
       history: { runs: 8, first: 19, last: 4 },
@@ -258,6 +277,7 @@ const SEEDS: Record<string, Seed[]> = {
       status: "proposed",
       words: { en: ["revenue", "turnover"], de: ["umsatz"] },
       definition: fixed("line revenue"),
+      chosen: "fact_order_lines.line_revenue",
       // An answered revenue-ask run goes on as delivery-monthly, so that is the fixture it ends on.
       slugs: ["city-channel", "delivery-monthly"],
       history: { runs: 6, first: 27, last: 13 },
@@ -275,6 +295,7 @@ const SEEDS: Record<string, Seed[]> = {
       status: "approved",
       words: { en: ["best branch", "top branch"], de: ["beste filiale"] },
       definition: fixed("line revenue"),
+      chosen: "fact_order_lines.line_revenue",
       note: "Revenue it is, until margins can be measured.",
       slugs: ["city-channel", "tips"],
       history: { runs: 4, first: 22, last: 5 },
@@ -324,12 +345,19 @@ const SEEDS: Record<string, Seed[]> = {
 
 // --- the state -----------------------------------------------------------------------------
 
+/** A review as the entry's history keeps it. */
+type ReviewChange = EntryChange & { action: ReviewAction };
+
 interface EntryRecord {
-  entry: Omit<RegistryEntry, "demand">;
+  entry: Omit<RegistryEntry, "demand" | "reviewed_at">;
   slugs: ReadonlySet<string>;
   history: { runs: number; first: string | null; last: string | null };
   /** The runs the mock holds that asked for it, with when each ended. */
   uses: Map<string, string>;
+  /** When sightline proposed it. */
+  proposed: string;
+  /** The key user's reviews, oldest first. */
+  reviews: ReviewChange[];
 }
 
 const slugify = (term: string): string =>
@@ -349,7 +377,30 @@ function demandOf(record: EntryRecord): RegistryEntry["demand"] {
   return { runs: record.history.runs + record.uses.size, first_asked: earliest, last_asked: latest };
 }
 
-const asEntry = (record: EntryRecord): RegistryEntry => ({ ...record.entry, demand: demandOf(record) });
+const asEntry = (record: EntryRecord): RegistryEntry => ({
+  ...record.entry,
+  demand: demandOf(record),
+  reviewed_at: record.reviews.at(-1)?.at ?? null,
+});
+
+/**
+ * The entry's changes, oldest first: sightline proposing it, the key user's reviews, and
+ * the runs asking for it, told as one demand change at the latest ask. Only a review moves
+ * the version; sightline's own changes keep the version in force when they happened.
+ */
+function historyOf(record: EntryRecord): EntryChange[] {
+  const changes: EntryChange[] = [{ version: 1, action: "proposed", by: null, at: record.proposed, note: null }, ...record.reviews];
+  const demand = demandOf(record);
+  const lastAsked = demand.last_asked;
+  if (lastAsked) {
+    const version = record.reviews.filter((r) => r.at <= lastAsked).at(-1)?.version ?? 1;
+    const note = `${demand.runs} ${demand.runs === 1 ? "run" : "runs"} asked for it`;
+    changes.push({ version, action: "demand", by: null, at: lastAsked, note });
+  }
+  // At the same time, sightline's proposal comes first and a demand change after a review.
+  const rank = (c: EntryChange) => (c.action === "proposed" ? 0 : c.action === "demand" ? 2 : 1);
+  return changes.sort((a, b) => a.at.localeCompare(b.at) || rank(a) - rank(b));
+}
 
 /** The 422 for words that already name other entries; `remedy` says what to do about them. */
 function collided(clashes: ErrorItem[], remedy?: string): HttpError {
@@ -361,18 +412,48 @@ function collided(clashes: ErrorItem[], remedy?: string): HttpError {
 /** A run's EntryRun as the engine knows it, or null for a run it does not hold. */
 export type RunLookup = (runId: string) => EntryRun | null;
 
+export interface RegistryFilters {
+  kind?: RegistryKind;
+  status?: RegistryStatus;
+  q?: string;
+  sort: RegistrySort;
+}
+
+/** The order `sort` names; ties by id. */
+function ordered(sort: RegistrySort) {
+  const asked = (e: RegistryEntry) => e.demand.last_asked ?? "";
+  return (a: RegistryEntry, b: RegistryEntry): number => {
+    switch (sort) {
+      case "demand":
+        return b.demand.runs - a.demand.runs || asked(b).localeCompare(asked(a)) || a.id.localeCompare(b.id);
+      case "updated":
+        return b.updated_at.localeCompare(a.updated_at) || a.id.localeCompare(b.id);
+      case "last_asked":
+        return asked(b).localeCompare(asked(a)) || a.id.localeCompare(b.id);
+    }
+  };
+}
+
+/** Whether `q` is in the entry's term, label or any of its words, ignoring case. */
+function matches(entry: RegistryEntry, q: string): boolean {
+  const needle = q.trim().toLocaleLowerCase();
+  if (!needle) return true;
+  const said = [entry.term, entry.label, ...Object.values(entry.words).flat()];
+  return said.some((text) => text.toLocaleLowerCase().includes(needle));
+}
+
 export function createRegistry() {
   const books = new Map<string, Map<string, EntryRecord>>();
 
   function book(ws: string): Map<string, EntryRecord> {
     const found = books.get(ws);
-    if (!found || !WORKSPACES.some((w) => w.id === ws)) throw new HttpError(404, `No workspace ${ws}.`);
+    if (!found || !WORKSPACES.some((w) => w.id === ws)) throw new HttpError(404, `No workspace ${ws}.`, { code: "no_workspace" });
     return found;
   }
 
   function record(ws: string, id: string): EntryRecord {
     const found = book(ws).get(id);
-    if (!found) throw new HttpError(404, `No registry entry ${id} in ${ws}.`);
+    if (!found) throw new HttpError(404, `No registry entry ${id} in ${ws}.`, { code: "no_entry" });
     return found;
   }
 
@@ -385,7 +466,8 @@ export function createRegistry() {
       })
       .filter((run): run is EntryRun => run !== null)
       .sort((a, b) => b.at.localeCompare(a.at) || a.run_id.localeCompare(b.run_id));
-    return { ...asEntry(record), runs };
+    const entry = asEntry(record);
+    return { ...entry, runs: runs.slice(0, RUNS_SHOWN), runs_total: entry.demand.runs, history: historyOf(record) };
   }
 
   /**
@@ -420,7 +502,8 @@ export function createRegistry() {
         for (const seed of SEEDS[workspace.id] ?? []) {
           const id = `${seed.kind}-${slugify(seed.term)}`;
           const first = now - seed.history.first * DAY;
-          const entry: Omit<RegistryEntry, "demand"> = {
+          const reviewedAt = seed.reviewed === undefined ? null : iso(now - seed.reviewed * DAY);
+          const entry: Omit<RegistryEntry, "demand" | "reviewed_at"> = {
             id,
             kind: seed.kind,
             term: seed.term,
@@ -431,12 +514,17 @@ export function createRegistry() {
             definition: seed.definition(own),
             note: seed.note ?? null,
             // A reviewed entry has had one review since it was proposed at version 1.
-            version: seed.reviewed === undefined ? 1 : 2,
-            updated_at: iso(seed.reviewed === undefined ? first : now - seed.reviewed * DAY),
-            reviewed_by: seed.reviewed === undefined ? null : REVIEWER,
+            version: reviewedAt === null ? 1 : 2,
+            updated_at: reviewedAt ?? iso(first),
+            reviewed_by: reviewedAt === null ? null : REVIEWER,
             gap: seed.gap ? seed.gap(own) : null,
             choices: seed.choices ? seed.choices(own) : null,
+            chosen_option: seed.kind === "default" ? (seed.chosen ?? null) : null,
           };
+          const reviews: ReviewChange[] =
+            reviewedAt === null
+              ? []
+              : [{ version: 2, action: seed.status === "rejected" ? "reject" : "approve", by: REVIEWER, at: reviewedAt, note: seed.note ?? null }];
           entries.set(id, {
             entry,
             slugs: new Set(seed.slugs),
@@ -446,6 +534,8 @@ export function createRegistry() {
               last: seed.history.runs > 0 ? iso(now - seed.history.last * DAY) : null,
             },
             uses: new Map(),
+            proposed: iso(first),
+            reviews,
           });
         }
         books.set(workspace.id, entries);
@@ -455,7 +545,7 @@ export function createRegistry() {
     /**
      * A run that followed `slug` ended: it counts as demand for the entries that fixture
      * asks for, once per run. A rejected entry is never proposed again, so a run after
-     * its rejection does not count.
+     * its rejection does not count. Demand never moves the version.
      */
     use(ws: string, slug: string, run: RunView): void {
       const at = run.finished_at ?? iso(Date.now());
@@ -466,20 +556,47 @@ export function createRegistry() {
       }
     },
 
-    /** Entries by kind and status, most recently asked first, `limit` from the offset `cursor`. */
-    list(ws: string, filters: { kind?: RegistryKind; status?: RegistryStatus }, cursor: string | null, limit: number): RegistryPage {
+    /**
+     * The definitions a run uses, as the registry has them now: an entry's label, wording,
+     * source and status (approved or proposed); a rejected entry never answers, so it is
+     * left out. A definition of no entry stands as the fixture has it.
+     */
+    definitionsFor(ws: string, definitions: readonly Definition[]): Definition[] {
+      const entries = books.get(ws);
+      return definitions.flatMap((definition): Definition[] => {
+        const found = definition.entry_id ? entries?.get(definition.entry_id) : undefined;
+        if (!found) return [definition];
+        const { entry } = found;
+        if (entry.status === "rejected") return [];
+        return [
+          {
+            ...definition,
+            label: entry.label,
+            definition: entry.definition ?? definition.definition,
+            source: entry.source,
+            status: entry.status,
+          },
+        ];
+      });
+    },
+
+    /** Entries by kind, status and text, in the order `sort` names, `limit` from the offset `cursor`. */
+    list(ws: string, filters: RegistryFilters, cursor: string | null, limit: number): RegistryPage {
       const all = [...book(ws).values()].map(asEntry);
-      const counts: RegistryCounts = { measure: 0, default: 0, gap: 0 };
-      for (const entry of all) if (entry.status === "proposed") counts[entry.kind] += 1;
+      const counts: RegistryCounts = Object.fromEntries(KINDS.map((kind) => [kind, 0]));
+      for (const entry of all) if (entry.status === "proposed") counts[entry.kind] = (counts[entry.kind] ?? 0) + 1;
       const matching = all
         .filter((e) => (!filters.kind || e.kind === filters.kind) && (!filters.status || e.status === filters.status))
-        .sort(
-          (a, b) =>
-            (b.demand.last_asked ?? "").localeCompare(a.demand.last_asked ?? "") || a.id.localeCompare(b.id),
-        );
+        .filter((e) => !filters.q || matches(e, filters.q))
+        .sort(ordered(filters.sort));
       const offset = Math.max(0, Number.parseInt(cursor ?? "0", 10) || 0);
       const end = offset + limit;
-      return { items: matching.slice(offset, end), next_cursor: end < matching.length ? String(end) : null, counts };
+      return {
+        items: matching.slice(offset, end),
+        next_cursor: end < matching.length ? String(end) : null,
+        counts,
+        kinds: KIND_WORDS.map((k) => ({ ...k })),
+      };
     },
 
     get(ws: string, id: string, lookup: RunLookup): RegistryEntryDetail {
@@ -488,7 +605,7 @@ export function createRegistry() {
 
     /**
      * Applies a review the key user made on `review.version`. 409 version_conflict when
-     * the entry moved on since; 409 not_latest for a move its status does not allow
+     * the entry moved on since; 409 not_allowed for a move its status does not allow
      * (approve and reject from proposed, reopen from approved or rejected); 422
      * word_collision for an edit whose words name another entry, or a reopen whose words
      * another entry took while it was rejected. Edit changes the label and the words only.
@@ -503,13 +620,13 @@ export function createRegistry() {
           { code: "version_conflict" },
         );
       }
-      let next: Omit<RegistryEntry, "demand"> = { ...entry };
+      let next: Omit<RegistryEntry, "demand" | "reviewed_at"> = { ...entry };
       switch (review.action) {
         case "approve":
         case "reject": {
           if (entry.status !== "proposed") {
             throw new HttpError(409, `"${entry.label}" is ${entry.status} already; reopen it to review it again.`, {
-              code: "not_latest",
+              code: "not_allowed",
             });
           }
           next.status = review.action === "approve" ? "approved" : "rejected";
@@ -518,7 +635,7 @@ export function createRegistry() {
         case "reopen": {
           if (entry.status === "proposed") {
             throw new HttpError(409, `"${entry.label}" is proposed already; there is nothing to reopen.`, {
-              code: "not_latest",
+              code: "not_allowed",
             });
           }
           // Its words were free while it was rejected: one another entry took since is
@@ -543,9 +660,12 @@ export function createRegistry() {
           break;
         }
       }
-      if (review.note !== undefined) next.note = review.note.trim() || null;
-      next = { ...next, version: entry.version + 1, updated_at: iso(now), reviewed_by: REVIEWER };
+      const note = review.note === undefined ? undefined : review.note.trim() || null;
+      if (note !== undefined) next.note = note;
+      const at = iso(now);
+      next = { ...next, version: entry.version + 1, updated_at: at, reviewed_by: REVIEWER };
       found.entry = next;
+      found.reviews.push({ version: next.version, action: review.action, by: REVIEWER, at, note: note ?? null });
       return detail(found, lookup);
     },
   };

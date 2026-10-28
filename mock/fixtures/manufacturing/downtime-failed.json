@@ -1,0 +1,58 @@
+{
+  "slug": "downtime-failed",
+  "workspace": "manufacturing",
+  "synthetic": true,
+  "question": "Which machines had the most unplanned downtime yesterday?",
+  "final_status": "failed",
+  "continuation": null,
+  "stages": [
+    {
+      "phase": "understand",
+      "stage": "situate",
+      "ms": 2100
+    },
+    {
+      "phase": "understand",
+      "stage": "abstract",
+      "ms": 4300
+    },
+    {
+      "phase": "understand",
+      "stage": "bind",
+      "ms": 1800
+    },
+    {
+      "phase": "analyse",
+      "stage": "enrich",
+      "ms": 900
+    },
+    {
+      "phase": "analyse",
+      "stage": "derive",
+      "ms": 2600
+    },
+    {
+      "phase": "analyse",
+      "stage": "query",
+      "ms": 6200
+    }
+  ],
+  "restatement": "You want to see the machines ranked by unplanned downtime minutes, on 31 Dec 2025.",
+  "definitions": [],
+  "card": null,
+  "clarify": null,
+  "follow_ups": [],
+  "error": {
+    "code": "warehouse_unavailable",
+    "message": "The warehouse did not answer in time, so the question could not be run. Asking again in a moment may work.",
+    "detail": "mock: a made-up failure in query (no warehouse behind the mock)",
+    "stage": "query",
+    "retryable": true
+  },
+  "result": null,
+  "charts": {},
+  "chart_options": [],
+  "form_point": null,
+  "refs": [],
+  "analysis": null
+}

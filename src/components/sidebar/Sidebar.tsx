@@ -22,11 +22,13 @@ interface Props {
   ref?: Ref<HTMLElement>;
 }
 
-/** The left column: brand, workspace, new question, search, past questions, review, and who is signed in. */
+/** The left column: brand, workspace, new question, search, past questions, review (key users), and who is signed in. */
 export function Sidebar({ ws, hidden, modal = false, onHide, hideLabel, ref }: Props) {
   const [query, setQuery] = useState("");
   const me = useMe();
   const name = me.data?.user.name;
+  // Only a key user reviews the registry; until the role is known, the way there stays out.
+  const keyUser = me.data?.workspaces.find((w) => w.id === ws)?.role === "key_user";
 
   return (
     <aside
@@ -77,9 +79,11 @@ export function Sidebar({ ws, hidden, modal = false, onHide, hideLabel, ref }: P
 
       <ThreadList ws={ws} query={query} />
 
-      <div className="sidebar__tools">
-        <ReviewLink ws={ws} />
-      </div>
+      {keyUser && (
+        <div className="sidebar__tools">
+          <ReviewLink ws={ws} />
+        </div>
+      )}
 
       <footer className="sidebar__footer">
         <span className="sidebar__avatar" aria-hidden="true">

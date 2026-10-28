@@ -15,6 +15,9 @@ describe("stageLabel", () => {
     expect(stageLabel("ground")).toBe("Grounding…");
     expect(stageLabel("idiom")).toBe("Choosing the idiom…");
     expect(stageLabel("ask")).toBe(WAITING);
+    expect(stageLabel("plan")).toBe("Planning the analysis…");
+    expect(stageLabel("gather")).toBe("Weighing the evidence…");
+    expect(stageLabel("repair")).toBe("Rereading the question…");
   });
 
   it("shows a stage it does not know by its own name", () => {

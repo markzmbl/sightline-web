@@ -4,8 +4,24 @@ import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../src/api/client";
 import { createQueryClient } from "../src/api/queries";
-import { registryKeys, useRegistry, useRegistryCounts, useRegistryEntry, useReview } from "../src/api/registry";
-import type { ErrorItem, RegistryCounts, RegistryEntry, RegistryEntryDetail, RegistryPage, Review } from "../src/api/types";
+import {
+  registryKeys,
+  useRegistry,
+  useRegistryCounts,
+  useRegistryEntry,
+  useRegistryKinds,
+  useReview,
+  type RegistryOverview,
+} from "../src/api/registry";
+import type {
+  ErrorItem,
+  KindInfo,
+  RegistryCounts,
+  RegistryEntry,
+  RegistryEntryDetail,
+  RegistryPage,
+  Review,
+} from "../src/api/types";
 
 // openapi-fetch builds same-origin, relative URLs, which a browser resolves
 // against the page and Node's Request refuses. Resolve them against jsdom's page,
@@ -60,8 +76,10 @@ function makeEntry(overrides: Partial<RegistryEntry> = {}): RegistryEntry {
     version: 3,
     updated_at: "2026-10-25T16:00:00.000Z",
     reviewed_by: null,
+    reviewed_at: null,
     gap: null,
     choices: null,
+    chosen_option: null,
     ...overrides,
   };
 }
@@ -74,18 +92,34 @@ function makeDetail(overrides: Partial<RegistryEntry> = {}): RegistryEntryDetail
         run_id: "r1",
         thread_id: "t1",
         question: "Which plant has the best OEE?",
+        prompt: "Which plant has the best OEE?",
+        revision: 0,
         rating: "up",
         at: "2026-10-25T16:00:00.000Z",
       },
     ],
+    runs_total: 1,
+    history: [{ action: "proposed", at: "2026-10-20T08:00:00.000Z", by: null, note: null, version: 3 }],
   };
 }
 
 const counts: RegistryCounts = { measure: 2, default: 1, gap: 1 };
+const kinds: KindInfo[] = [
+  { kind: "measure", label: "measure", plural: "measures" },
+  { kind: "default", label: "default", plural: "defaults" },
+  { kind: "gap", label: "data gap", plural: "data gaps" },
+];
 
-function page(items: RegistryEntry[], next_cursor: string | null = null, pageCounts = counts): RegistryPage {
-  return { items, next_cursor, counts: pageCounts };
+function page(
+  items: RegistryEntry[],
+  next_cursor: string | null = null,
+  pageCounts = counts,
+  pageKinds = kinds,
+): RegistryPage {
+  return { items, next_cursor, counts: pageCounts, kinds: pageKinds };
 }
+
+const overview = () => client.getQueryData<RegistryOverview>(registryKeys.overview("ws1"));
 
 let client: QueryClient;
 
@@ -129,8 +163,8 @@ describe("useRegistry", () => {
     expect(result.current.data?.pages.flatMap((p) => p.items.map((e) => e.id))).toEqual(["e1", "e2", "e3"]);
     expect(result.current.data?.pageParams).toEqual([null, "c2"]);
 
-    // Every page carries the counts, so the badge keeps up with the list.
-    expect(client.getQueryData(registryKeys.counts("ws1"))).toEqual(counts);
+    // Every page carries the counts and the kinds, so the badge keeps up with the list.
+    expect(overview()).toEqual({ counts, kinds });
   });
 
   it("keeps one list per set of filters", async () => {
@@ -143,6 +177,25 @@ describe("useRegistry", () => {
     expect(result.current.all.data?.pages[0]?.items.map((e) => e.id)).toEqual(["e1"]);
     expect(result.current.gaps.data?.pages[0]?.items.map((e) => e.id)).toEqual(["g1"]);
     expect(callsTo("GET", ENTRIES)).toBe(2);
+  });
+
+  it("sends the search and the order, and no blank search", async () => {
+    routes[`GET ${ENTRIES}`] = () => ({ body: page([makeEntry()]) });
+    const { result, rerender } = renderHook(
+      ({ q }: { q: string }) => useRegistry("ws1", { status: "proposed", q, sort: "demand" }),
+      { wrapper: wrapperFor(), initialProps: { q: "  " } },
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(queryOf(requests[0])).toEqual({ status: "proposed", sort: "demand", limit: "50" });
+
+    rerender({ q: " oee " });
+    await waitFor(() => expect(callsTo("GET", ENTRIES)).toBe(2));
+    expect(queryOf(requests[1])).toEqual({ status: "proposed", q: "oee", sort: "demand", limit: "50" });
+    // A blank search is the list without one: the same key, not fetched again.
+    rerender({ q: "" });
+    await act(() => Promise.resolve());
+    expect(callsTo("GET", ENTRIES)).toBe(2);
+    expect(client.getQueryData(registryKeys.list("ws1", { status: "proposed", sort: "demand" }))).toBeDefined();
   });
 
   it("fails with an ApiError and does not retry a 4xx", async () => {
@@ -163,7 +216,7 @@ describe("useRegistryCounts", () => {
     await waitFor(() => expect(result.current.data).toEqual(counts));
     expect(queryOf(requests[0])).toEqual({ status: "proposed", limit: "1" });
 
-    const options = client.getQueryCache().find({ queryKey: registryKeys.counts("ws1") })?.observers[0]?.options;
+    const options = client.getQueryCache().find({ queryKey: registryKeys.overview("ws1") })?.observers[0]?.options;
     expect(options?.refetchInterval).toBe(60_000);
     expect(options?.refetchOnWindowFocus).toBe(true);
   });
@@ -173,6 +226,34 @@ describe("useRegistryCounts", () => {
     await act(() => Promise.resolve());
     expect(result.current.fetchStatus).toBe("idle");
     expect(requests).toHaveLength(0);
+  });
+});
+
+describe("useRegistryKinds", () => {
+  it("serves the kinds from the counts' own request", async () => {
+    routes[`GET ${ENTRIES}`] = () => ({ body: page([makeEntry()]) });
+    const { result } = renderHook(() => ({ counts: useRegistryCounts("ws1"), kinds: useRegistryKinds("ws1") }), {
+      wrapper: wrapperFor(),
+    });
+    await waitFor(() => expect(result.current.kinds.data).toEqual(kinds));
+    expect(result.current.counts.data).toEqual(counts);
+    expect(callsTo("GET", ENTRIES)).toBe(1);
+  });
+
+  it("is refreshed by any list page", async () => {
+    let server = { counts, kinds };
+    routes[`GET ${ENTRIES}`] = () => ({ body: page([makeEntry()], null, server.counts, server.kinds) });
+    const { result } = renderHook(() => ({ kinds: useRegistryKinds("ws1"), gaps: useRegistry("ws1", { kind: "gap" }) }), {
+      wrapper: wrapperFor(),
+    });
+    await waitFor(() => expect(result.current.gaps.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.kinds.data).toEqual(kinds));
+
+    const renamed = kinds.map((k) => (k.kind === "gap" ? { ...k, label: "missing data", plural: "missing data" } : k));
+    server = { counts: { ...counts, gap: 2 }, kinds: renamed };
+    await act(() => result.current.gaps.refetch());
+    await waitFor(() => expect(result.current.kinds.data).toEqual(renamed));
+    expect(overview()).toEqual({ counts: { ...counts, gap: 2 }, kinds: renamed });
   });
 });
 
@@ -245,7 +326,7 @@ describe("useReview", () => {
 
     expect(await review(result, { action: "approve", version: 3, note: "the ISO definition" })).toBeNull();
     // Settled only once the lists and the counts it moved are back.
-    expect(client.getQueryData(registryKeys.counts("ws1"))).toEqual({ ...counts, measure: 1 });
+    expect(overview()?.counts).toEqual({ ...counts, measure: 1 });
     expect(callsTo("GET", ENTRIES)).toBe(lists + 3);
     // The entry is the answer itself, not fetched again.
     expect(client.getQueryData<RegistryEntryDetail>(registryKeys.entry("ws1", "e1"))).toEqual(server.entry);
@@ -278,6 +359,34 @@ describe("useReview", () => {
 
     await waitFor(() => expect(result.current.review.error?.code).toBe("version_conflict"));
     expect(result.current.entry.data?.reviewed_by).toBe("anna");
+  });
+
+  it("loads the entry as it stands when its status does not allow the move, then fails with not_allowed", async () => {
+    let entry = makeDetail();
+    routes[`GET ${ENTRIES}`] = () => ({ body: page([entry]) });
+    routes[`GET ${ENTRY}`] = () => ({ body: entry });
+    routes[`POST ${REVIEW}`] = () => {
+      entry = makeDetail({ status: "approved", version: 4, reviewed_by: "anna" });
+      return { status: 409, body: { detail: "An approved entry can't be approved again.", code: "not_allowed" } };
+    };
+    const { result } = await openReview();
+    const lists = callsTo("GET", ENTRIES);
+
+    const failure = await review(result, { action: "approve", version: 4 });
+    expect(failure).toMatchObject({ status: 409, code: "not_allowed" });
+    expect(client.getQueryData<RegistryEntryDetail>(registryKeys.entry("ws1", "e1"))?.status).toBe("approved");
+    expect(callsTo("GET", ENTRY)).toBe(2);
+    expect(callsTo("GET", ENTRIES)).toBe(lists + 3);
+  });
+
+  it("refetches nothing on a 409 it does not know", async () => {
+    routes[`GET ${ENTRIES}`] = () => ({ body: page([makeEntry()]) });
+    routes[`GET ${ENTRY}`] = () => ({ body: makeDetail() });
+    routes[`POST ${REVIEW}`] = () => ({ status: 409, body: { detail: "Conflict." } });
+    const { result } = await openReview();
+    const before = requests.length;
+    expect(await review(result, { action: "approve", version: 3 })).toMatchObject({ status: 409, code: null });
+    expect(requests.length).toBe(before + 1);
   });
 
   it("surfaces a word collision intact and refetches nothing", async () => {
