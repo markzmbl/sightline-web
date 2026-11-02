@@ -17,6 +17,7 @@
     }
   ],
   "restatement": null,
+  "definitions": [],
   "card": {
     "blocking": true,
     "points": [
@@ -57,7 +58,8 @@
         "confidence": 0.9000000000000001,
         "why": "",
         "open": false,
-        "stage": "abstract"
+        "stage": "abstract",
+        "entry_id": null
       },
       {
         "id": "shape",
@@ -111,7 +113,8 @@
         "confidence": 0.6571428571428571,
         "why": "",
         "open": false,
-        "stage": "abstract"
+        "stage": "abstract",
+        "entry_id": null
       },
       {
         "id": "measure",
@@ -185,7 +188,8 @@
         "confidence": 0.8502673796791445,
         "why": "",
         "open": false,
-        "stage": "abstract"
+        "stage": "abstract",
+        "entry_id": null
       },
       {
         "id": "order",
@@ -209,12 +213,18 @@
         "confidence": 0.3999999999999999,
         "why": "",
         "open": false,
-        "stage": "abstract"
+        "stage": "abstract",
+        "entry_id": null
       }
     ]
   },
   "clarify": null,
+  "follow_ups": [],
+  "error": null,
   "result": null,
   "charts": {},
-  "chart_options": []
+  "chart_options": [],
+  "form_point": null,
+  "refs": [],
+  "analysis": null
 }

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import type { Result, RunView, StageTiming } from "../src/api/types";
-import { groupPhases, StageTrace } from "../src/components/thread/StageTrace";
+import type { Column, Result, RunView, StageTiming, StepRecord } from "../src/api/types";
+import { groupPhases, placeSteps, StageTrace } from "../src/components/thread/StageTrace";
 import { phaseLabel } from "../src/components/thread/phaseLabels";
 import { layoutSql, tokenize } from "../src/components/thread/sqlHighlight";
 
@@ -15,12 +15,20 @@ const timing = (phase: string, stage: string, elapsed_ms: number | null): StageT
   elapsed_ms,
 });
 
+const column = (name: string, type: string): Column => ({
+  name,
+  label: name,
+  type,
+  role: null,
+  unit: null,
+  format: null,
+  description: null,
+});
+
 const RESULT: Result = {
   sql: "SELECT line, AVG(oee) AS oee FROM shifts WHERE week = '2026-W42' GROUP BY line ORDER BY oee DESC",
-  columns: [
-    { name: "line", type: "nominal" },
-    { name: "oee", type: "q_ratio" },
-  ],
+  step_id: null,
+  columns: [column("line", "nominal"), column("oee", "q_ratio")],
   rows: [
     ["L1", 0.81234567],
     ["L2", null],
@@ -29,6 +37,12 @@ const RESULT: Result = {
   truncated: false,
   chart: null,
   findings: [],
+  notes: [],
+  verdict: "pass",
+  concerns: [],
+  storyline: null,
+  lead: null,
+  supports: [],
 };
 
 function run(overrides: Partial<RunView> = {}): RunView {
@@ -36,16 +50,24 @@ function run(overrides: Partial<RunView> = {}): RunView {
     id: "r1",
     thread_id: "t1",
     revision: 0,
+    origin: "question",
+    follows: null,
+    takes_back: null,
     prompt: "What was the OEE of each line last week?",
     status: "complete",
     phase: null,
     stage: null,
+    step: null,
+    steps: [],
+    locale: null,
     started_at: AT,
     finished_at: null,
     restatement: null,
+    definitions: [],
     card: null,
     clarify: null,
     result: null,
+    follow_ups: [],
     timings: [],
     error: null,
     feedback: null,
@@ -375,6 +397,147 @@ describe("StageTrace", () => {
   it("renders nothing before the first stage", () => {
     const { container } = render(<StageTrace run={run({ status: "queued" })} />);
     expect(container.innerHTML).toBe("");
+  });
+});
+
+
+describe("StageTrace, analysis steps", () => {
+  const STEP_AT = "2026-10-24T19:09:00Z";
+  const step = (id: string, overrides: Partial<StepRecord> = {}): StepRecord => ({
+    id,
+    label: `step ${id}`,
+    role: "answer",
+    stage: "analyse",
+    started_at: STEP_AT,
+    elapsed_ms: 140,
+    verdict: null,
+    sql: "SELECT 1",
+    row_count: 9,
+    cached: false,
+    ...overrides,
+  });
+  const STEPS: StepRecord[] = [
+    step("st1", { label: "OEE per line last week", cached: true }),
+    step("st2", { label: "the average over all lines", role: "comparison", verdict: "as_expected", elapsed_ms: 1_900 }),
+    step("st3", { label: "the lead over the runner-up", role: "check", verdict: "as_expected", elapsed_ms: 1_600 }),
+    step("st4", { label: "the lead last month", role: "probe", verdict: "contradicts", elapsed_ms: 400, cached: true }),
+    step("st5", { label: "the line's own range", role: "reference", verdict: "routine", elapsed_ms: 2_100 }),
+  ];
+  const ANALYSED: StageTiming[] = [
+    timing("understand", "situate", 295),
+    timing("understand", "plan", 2_600),
+    timing("analyse", "query", 6),
+    { phase: "analyse", stage: "analyse", started_at: "2026-10-24T19:08:58Z", elapsed_ms: 6_140 },
+    timing("analyse", "gather", 1_900),
+    timing("present", "idiom", 1_440),
+  ];
+  const lines = () =>
+    [...document.querySelectorAll(".tx-trace__step:not(.tx-trace__step--checks)")].map((li) =>
+      [...li.children].map((child) => child.textContent),
+    );
+
+  it("counts the queries in the analyse summary, and how many came from the cache", () => {
+    render(<StageTrace run={run({ timings: ANALYSED, steps: STEPS, result: RESULT })} />);
+    expect(rows()[1]?.querySelector(".tx-trace__summary")?.textContent).toBe("· 3 stages · 8.0 s · 5 queries, 2 cached");
+  });
+
+  it("shows each step under its stage line, its checks folded into one row", () => {
+    render(<StageTrace run={run({ timings: ANALYSED, steps: STEPS, result: RESULT })} />);
+    fireEvent.click(rows()[1]!);
+    const analyse = [...document.querySelectorAll(".tx-trace__stage-item")].find(
+      (item) => item.querySelector(".tx-trace__name")?.textContent === "analyse",
+    );
+    expect(analyse?.querySelector(".tx-trace__steps")).not.toBeNull();
+    expect(lines()).toEqual([
+      ["OEE per line last week", "answer", "cached", "140 ms"],
+      ["the average over all lines", "comparison", "as expected", "1.9 s"],
+      ["the line's own range", "reference", "within its routine range", "2.1 s"],
+    ]);
+    // The checks that held stay quiet; the one that did not speaks up on the folded row.
+    const checks = screen.getByRole("button", { name: "2 checks, 1 contradicts the expectation" });
+    expect(checks.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByText("the lead over the runner-up")).toBeNull();
+    fireEvent.click(checks);
+    expect(checks.getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByText("the lead over the runner-up")).toBeTruthy();
+    expect(screen.getByText("the lead last month").closest("li")?.textContent).toContain("contradicts the expectation");
+    // Folded where the first of them started: after the comparison, before the reference.
+    const order = [...analyse!.querySelector(".tx-trace__steps")!.children].map(
+      (li) => li.querySelector(".tx-trace__step-label")?.textContent,
+    );
+    expect(order).toEqual(["OEE per line last week", "the average over all lines", "2 checks", "the line's own range"]);
+  });
+
+  it("marks the step under way while the run works", () => {
+    const working = run({
+      status: "running",
+      phase: "analyse",
+      stage: "analyse",
+      timings: [...ANALYSED.slice(0, 3), { ...ANALYSED[3]!, elapsed_ms: null }],
+      steps: [
+        STEPS[0]!,
+        step("st2", { label: "the prior period", role: "comparison", elapsed_ms: null, sql: null, row_count: null }),
+      ],
+    });
+    render(<StageTrace run={working} />);
+    expect(rows()[1]?.querySelector(".tx-trace__summary")?.textContent).toBe("· 2 stages · 6 ms · 1 query, 1 cached");
+    fireEvent.click(rows()[1]!);
+    const running = document.querySelector(".tx-trace__step--running");
+    expect(running?.querySelector(".tx-trace__step-label")?.textContent).toBe("the prior period");
+    expect(running?.textContent).toContain("running…");
+  });
+
+  it("marks no step under way once the run has ended, even one it cut off", () => {
+    const cut = run({
+      status: "cancelled",
+      timings: ANALYSED.slice(0, 4),
+      steps: [step("st1", { elapsed_ms: 820, sql: null, row_count: null, verdict: null })],
+    });
+    render(<StageTrace run={cut} />);
+    fireEvent.click(rows()[1]!);
+    expect(document.querySelector(".tx-trace__step--running")).toBeNull();
+    expect(lines()).toEqual([["step st1", "answer", "820 ms"]]);
+  });
+
+  it("names how many checks did not hold, and one under way, on the folded row", () => {
+    const working = run({
+      status: "running",
+      phase: "analyse",
+      timings: [...ANALYSED.slice(0, 3), { ...ANALYSED[3]!, elapsed_ms: null }],
+      steps: [
+        step("c1", { role: "check", verdict: "failed" }),
+        step("c2", { role: "check", verdict: "inconclusive" }),
+        step("c3", { role: "check", elapsed_ms: null, sql: null, row_count: null }),
+      ],
+    });
+    render(<StageTrace run={working} />);
+    fireEvent.click(rows()[1]!);
+    expect(screen.getByRole("button", { name: "3 checks, 1 inconclusive, 1 not checked, running" })).toBeTruthy();
+  });
+
+  it("puts a step of an analyse the hole loop ran again under the run it started in", () => {
+    const loop = run({
+      timings: [
+        { phase: "analyse", stage: "analyse", started_at: "2026-10-24T19:09:00Z", elapsed_ms: 1_000 },
+        { phase: "analyse", stage: "gather", started_at: "2026-10-24T19:09:01Z", elapsed_ms: 200 },
+        { phase: "analyse", stage: "analyse", started_at: "2026-10-24T19:09:02Z", elapsed_ms: 900 },
+        { phase: "present", stage: "idiom", started_at: "2026-10-24T19:09:03Z", elapsed_ms: 100 },
+      ],
+      steps: [
+        step("a", { started_at: "2026-10-24T19:09:00.200Z" }),
+        step("b", { started_at: "2026-10-24T19:09:02.100Z" }),
+        // A step of a stage the timings never told goes to the last analyse stage line.
+        step("c", { stage: "derive", started_at: "2026-10-24T19:09:02.500Z" }),
+      ],
+    });
+    expect(placeSteps(loop).map((placed) => placed.map((s) => s.id))).toEqual([["a"], [], ["b", "c"], []]);
+  });
+
+  it("keeps the SQL and rows summary of a run with no steps", () => {
+    render(<StageTrace run={run({ timings: ANALYSED, result: RESULT })} />);
+    expect(rows()[1]?.querySelector(".tx-trace__summary")?.textContent).toBe("· 3 stages · 8.0 s · SQL · 1,234 rows");
+    fireEvent.click(rows()[1]!);
+    expect(document.querySelector(".tx-trace__steps")).toBeNull();
   });
 });
 

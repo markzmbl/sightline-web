@@ -9,6 +9,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest
 import { api, ApiError, unwrap } from "../src/api/client";
 import { createQueryClient, keys } from "../src/api/queries";
 import type { RegistryEntryDetail, RegistryPage, RunView, Thread } from "../src/api/types";
+import { totalOf } from "../src/components/review/format";
 
 // openapi-fetch builds same-origin, relative URLs, which a browser resolves
 // against the page and Node's Request refuses. Resolve them against jsdom's page,
@@ -130,7 +131,7 @@ describe("the client against the mock", () => {
 
     // The sidebar badge sums the proposed counts the server gives.
     const page = await server<RegistryPage>(`${MFG}/registry/entries?status=proposed&limit=1`);
-    const proposed = page.counts.measure + page.counts.default + page.counts.gap;
+    const proposed = totalOf(page.counts);
     await screen.findByRole("link", { name: `Review, ${proposed} proposed` }, LONG);
 
     send(await screen.findByRole("textbox", { name: "Your question" }), "Which lines use the most energy per 1,000 good units?");
@@ -150,14 +151,14 @@ describe("the client against the mock", () => {
     expect(within(pairs()[0]!).getByRole("button", { expanded: false }).textContent).toMatch(/Replaced/);
     const old = client.getQueryData<RunView>(keys.run("manufacturing", first.id));
     expect(old).toBeDefined();
-    expect(unstamped(old!)).toEqual(unstamped(thread.runs[0]!));
+    expect(unstamped(old!)).toEqual(unstamped(await server<RunView>(`${MFG}/runs/${first.id}`)));
     expect(calls.some((c) => c.startsWith(`POST ${MFG}/runs/${first.id}/cancel`))).toBe(false);
 
-    const latest = thread.runs[1]!;
+    const latest = thread.latest;
     expect(unstamped(client.getQueryData<RunView>(keys.run("manufacturing", latest.id))!)).toEqual(unstamped(latest));
     expect(latest.status).toBe("complete");
     const switcher = within(lastPair()).getByRole("group", { name: "Show it as" });
-    const alternative = latest.result!.chart!.alternatives[0]!;
+    const alternative = latest.result!.chart!.options.find((option) => !option.drawn)!;
     vi.mocked(embed).mockClear();
     fireEvent.click(within(switcher).getByRole("button", { name: alternative.label }));
     // The same run presents again: queued, running, complete, with the picked chart.
@@ -180,7 +181,7 @@ describe("the client against the mock", () => {
     // thread catches up with the revision it speaks of.
     const elsewhere = await post<{ run_id: string }>(`${MFG}/threads/${threadId}/revisions`, { message: "only Linz" });
     expect(elsewhere.status).toBe(202);
-    const next = (await server<RunView>(`${MFG}/runs/${latest.id}`)).result!.chart!.alternatives[0]!;
+    const next = (await server<RunView>(`${MFG}/runs/${latest.id}`)).result!.chart!.options.find((option) => !option.drawn)!;
     fireEvent.click(within(lastPair()).getByRole("button", { name: next.label }));
     const banner = await screen.findByRole("alert", undefined, LONG);
     expect(banner.textContent).toBe("Could not switch the chart: a newer revision has replaced this answer.");
@@ -201,7 +202,7 @@ describe("the client against the mock", () => {
     send(await screen.findByRole("textbox", { name: "Your question" }), "How much revenue did we make per month in 2025?");
     const card = await screen.findByRole("region", { name: "sightline needs a choice" }, LONG);
     const threadId = threadIdOf(router);
-    const asked = (await server<Thread>(`${REST}/threads/${threadId}`)).runs[0]!;
+    const asked = (await server<Thread>(`${REST}/threads/${threadId}`)).latest;
     expect([asked.status, asked.card?.blocking]).toEqual(["asking", true]);
     await screen.findByText("answer the card, or revise the question");
 
@@ -209,20 +210,21 @@ describe("the client against the mock", () => {
     await waitFor(() => expect(lastPair().querySelector(".tx-run--complete")).not.toBeNull(), LONG);
     const done = await server<RunView>(`${REST}/runs/${asked.id}`);
     expect([done.id, done.status, done.card?.blocking]).toEqual([asked.id, "complete", false]);
-    expect(done.card?.points.every((p) => !p.open)).toBe(true);
+    // The side card replaces the answered one: it asks only what the drawing left open.
+    expect(done.card?.points.map((p) => p.id)).toEqual(["point"]);
     expect(unstamped(client.getQueryData<RunView>(keys.run("restaurant", asked.id))!)).toEqual(unstamped(done));
     expect((await server<Thread>(`${REST}/threads/${threadId}`)).runs).toHaveLength(1);
 
     // Beside the chart now: change one choice, and the same run presents again.
     const made = within(lastPair()).getByRole("region", { name: "Choices sightline made" });
-    const point = done.card!.points.find((p) => p.id === "order")!;
+    const point = done.card!.points[0]!;
     const other = point.options.find((o) => o.id !== point.chosen)!;
     const row = within(made).getByText(point.question).closest("li")!;
     fireEvent.click(within(row as HTMLElement).getByRole("button", { name: "Change" }));
     fireEvent.click(within(row as HTMLElement).getByRole("button", { name: other.label }));
     await waitFor(async () => {
       const run = await server<RunView>(`${REST}/runs/${asked.id}`);
-      expect(run.card?.points.find((p) => p.id === "order")).toMatchObject({ chosen: other.id, by: "user" });
+      expect(run.card?.points.find((p) => p.id === point.id)).toMatchObject({ chosen: other.id, by: "user" });
       expect(run.status).toBe("complete");
     }, LONG);
     await waitFor(() => expect(within(lastPair()).getByText("your choice")).toBeTruthy(), LONG);
@@ -236,11 +238,11 @@ describe("the client against the mock", () => {
     send(await screen.findByRole("textbox", { name: "Your question" }), "What is the profit margin per branch?");
     await screen.findByRole("heading", { name: "This is not possible with the data yet." }, LONG);
     const threadId = threadIdOf(router);
-    const ended = (await server<Thread>(`${REST}/threads/${threadId}`)).runs[0]!;
+    const ended = (await server<Thread>(`${REST}/threads/${threadId}`)).latest;
     expect(ended.status).toBe("clarify");
     for (const item of [...ended.clarify!.missing, ...ended.clarify!.record]) expect(screen.getByText(item)).toBeTruthy();
 
-    const nearest = ended.clarify!.nearest[0]!;
+    const nearest = ended.follow_ups.find((f) => f.kind === "nearest")!.question;
     fireEvent.click(screen.getByRole("button", { name: nearest }));
     await waitFor(() => expect(pairs()).toHaveLength(2), LONG);
     expect(within(lastPair()).getByText(nearest)).toBeTruthy();
@@ -261,11 +263,11 @@ describe("the client against the mock", () => {
     await waitFor(() => expect(threadIdOf(router)).not.toBe(""), LONG);
     await waitFor(() => expect(lastPair().querySelector(".tx-run--complete")).not.toBeNull(), LONG);
     const thread = await server<Thread>(`/api/v1/workspaces/manufacturing/threads/${threadIdOf(router)}`);
-    const run = thread.runs[0]!;
+    const run = thread.latest;
     const live = client.getQueryData<RunView>(keys.run("manufacturing", run.id));
     expect(live).toBeDefined();
     expect(unstamped(live!)).toEqual(unstamped(run));
-    expect(run.timings.map((t) => t.stage)).toHaveLength(13); // one pass, the second attempt's
+    expect(run.timings.map((t) => t.stage)).toHaveLength(16); // one pass, the second attempt's
   }, 30_000);
 
   it("carries the 409 codes and the 422 items into ApiError", async () => {
@@ -329,7 +331,7 @@ describe("the client against the mock", () => {
     const MFG = "/api/v1/workspaces/manufacturing";
     const { router } = mount("/w/manufacturing/review");
     const counts = (await server<RegistryPage>(`${MFG}/registry/entries?limit=1`)).counts;
-    const proposed = counts.measure + counts.default + counts.gap;
+    const proposed = totalOf(counts);
     await screen.findByRole("link", { name: `Review, ${proposed} proposed` }, LONG);
     const rows = await screen.findByRole("list", { name: "Entries" }, LONG);
 

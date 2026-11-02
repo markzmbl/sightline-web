@@ -32,6 +32,7 @@
     }
   ],
   "restatement": null,
+  "definitions": [],
   "card": null,
   "clarify": {
     "gaps": [],
@@ -41,15 +42,25 @@
     "record": [
       "the cost of the goods sold per sale or per period, from the costing or the general ledger"
     ],
-    "nearest": [
-      "What is the revenue per branch?"
-    ],
     "warnings": [
       "dim_menu_item.ingredient_cost for cost of goods sold: a measure of each dim menu item, not summed over fact order lines",
       "dim_menu_item.ingredient_cost for cost of goods sold: a measure of each dim menu item, not summed over fact recipes"
-    ]
+    ],
+    "warnings_total": 2
   },
+  "follow_ups": [
+    {
+      "id": "nq1",
+      "kind": "nearest",
+      "question": "What is the revenue per branch?",
+      "fixture": "city-channel"
+    }
+  ],
+  "error": null,
   "result": null,
   "charts": {},
-  "chart_options": []
+  "chart_options": [],
+  "form_point": null,
+  "refs": [],
+  "analysis": null
 }

@@ -1,5 +1,5 @@
-// The sidebar's list logic: date groups, the search filter, the short times, and the
-// distinct recent questions the new-question page offers.
+// The sidebar's list logic: date groups, the search filter and the merge of the server's
+// search, the short times, and the distinct recent questions the new-question page offers.
 // All of it is pure and takes `now`, so the boundaries are testable.
 
 export type GroupLabel = "Today" | "Yesterday" | "Previous 7 days" | "Older";
@@ -63,6 +63,22 @@ export function filterThreads<T extends Searchable>(items: readonly T[], query: 
     (t) =>
       t.question.toLocaleLowerCase().includes(needle) || (t.restatement ?? "").toLocaleLowerCase().includes(needle),
   );
+}
+
+/**
+ * The threads of both lists, each once (by id, the copy in `first` kept), most recently
+ * updated first; threads updated at the same moment keep their order, `first`'s before `second`'s.
+ */
+export function mergeThreads<T extends Dated & { id: string }>(first: readonly T[], second: readonly T[]): T[] {
+  const ids = new Set(first.map((t) => t.id));
+  const merged = [...first, ...second.filter((t) => !ids.has(t.id))];
+  if (merged.length === first.length) return merged;
+  const at = (t: T) => {
+    const time = Date.parse(t.updated_at);
+    return Number.isNaN(time) ? -Infinity : time;
+  };
+  // A stable sort, so equal times keep the order given.
+  return merged.sort((a, b) => at(b) - at(a));
 }
 
 /**

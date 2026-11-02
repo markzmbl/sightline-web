@@ -7,14 +7,16 @@ interface Props {
   state: CubeState;
   stage: string | null;
   phase: string | null;
+  /** The analysis step under way (RunView.step.label), in the asker's language: "the prior period". */
+  step?: string | null;
   /** When the run started (epoch ms); the clock counts from here. */
   since: number | null;
   onStop?: () => void;
   reducedMotion?: boolean;
 }
 
-/** The line under the transcript while sightline works: cube, stage, phase, clock. */
-export function StatusLine({ state, stage, phase, since, onStop, reducedMotion }: Props) {
+/** The line under the transcript while sightline works: cube, stage (and step), phase, clock. */
+export function StatusLine({ state, stage, phase, step, since, onStop, reducedMotion }: Props) {
   const now = useNow(state === "working" ? 1000 : null);
   const reduced = useReducedMotion(reducedMotion);
   const working = state === "working";
@@ -28,7 +30,7 @@ export function StatusLine({ state, stage, phase, since, onStop, reducedMotion }
     return () => window.removeEventListener("keydown", onKey);
   }, [working, onStop]);
 
-  const verb = state === "asking" ? WAITING : stageLabel(stage);
+  const verb = state === "asking" ? WAITING : withStep(stageLabel(stage), step);
   return (
     <div className={`status status--${state}`} role="status" aria-live="polite">
       <WorkingCube state={state} size={16} reducedMotion={reducedMotion} />
@@ -45,6 +47,12 @@ export function StatusLine({ state, stage, phase, since, onStop, reducedMotion }
       </span>
     </div>
   );
+}
+
+/** "Analysing…" with the step "the prior period" reads "Analysing · the prior period…". */
+function withStep(label: string, step: string | null | undefined): string {
+  if (!step) return label;
+  return `${label.replace(/…$/, "")} · ${step}…`;
 }
 
 function useNow(everyMs: number | null): number {

@@ -9,6 +9,7 @@ import {
   usePickChart,
   useRevise,
   useTakeBack,
+  useThreadOpened,
 } from "../api/queries";
 import { isOpen, isWorking, type RunView } from "../api/types";
 import { useShell } from "../App";
@@ -40,8 +41,9 @@ function ThreadView({ ws, threadId, sidebarButton }: ViewProps) {
   const cancel = useCancel(ws);
   const pickChart = usePickChart(ws);
   const feedback = useFeedback(ws);
-  const scroll = useFollowBottom(live.runs);
+  const scroll = useFollowBottom(live.turns);
   const composer = useRef<HTMLTextAreaElement | null>(null);
+  useThreadOpened(ws, threadId);
 
   // Arriving with focus nowhere (the question was just asked, or the link followed went
   // away with the page it was on), the composer takes it, ready for a revision.
@@ -50,7 +52,7 @@ function ThreadView({ ws, threadId, sidebarButton }: ViewProps) {
     if (active === null || active === document.body) composer.current?.focus();
   }, []);
 
-  const question = live.thread?.question ?? live.runs[0]?.prompt ?? "";
+  const question = live.thread?.question ?? live.turns[0]?.summary.prompt ?? "";
   useEffect(() => {
     document.title = question ? `${question} · sightline` : "sightline";
   }, [question]);
@@ -112,11 +114,29 @@ function ThreadView({ ws, threadId, sidebarButton }: ViewProps) {
       revised();
       takeBack.mutate({ n });
     },
-    // A suggested question (clarify's nearest answerable ones) goes in as if typed; a failure shows in the banner.
+    // The thread's next run, sent the way the offering run's status calls for (never its kind):
+    // a clarify run has no answer to follow, so its nearest questions go as a revision via
+    // "nearest"; a complete run's follow-ups name the run and the follow-up they came from.
+    onFollowUp: (run, followUp) => {
+      revised();
+      revise.mutate(
+        run.status === "clarify"
+          ? { message: followUp.question, via: "nearest" }
+          : { message: followUp.question, follows: { run_id: run.id, follow_up_id: followUp.id } },
+      );
+    },
+    // A full revised question (a clarify gap's suggestion) goes in as if typed; a failure shows in the banner.
     onRevise: (text) => {
       revised();
       revise.mutate({ message: text });
     },
+  };
+
+  // Unfolding an earlier turn is reading back: the view stays on the turn opened, while its run
+  // loads and its chart grows, instead of following the bottom away from it.
+  const unfold = (runId: string) => {
+    scroll.release();
+    live.expand(runId);
   };
 
   const missing = live.error !== null && live.thread === undefined;
@@ -146,7 +166,7 @@ function ThreadView({ ws, threadId, sidebarButton }: ViewProps) {
               ))}
             </div>
           ) : (
-            <Transcript runs={live.runs} busy={busy} actions={actions} />
+            <Transcript turns={live.turns} busy={busy} actions={actions} onExpand={unfold} />
           )}
         </div>
       </div>
@@ -155,9 +175,7 @@ function ThreadView({ ws, threadId, sidebarButton }: ViewProps) {
         <footer className="thread__foot">
           {failure && (
             <div className="thread__banner" role="alert">
-              <span>
-                Could not {failure.what}: {reasonOf(failure.error)}
-              </span>
+              <span>{failureText(failure.what, failure.error)}</span>
               <button type="button" className="icon-button" aria-label="Dismiss" onClick={failure.dismiss}>
                 <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
                   <path d="m3.5 3.5 7 7m0-7-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -171,6 +189,7 @@ function ThreadView({ ws, threadId, sidebarButton }: ViewProps) {
                 state={status.state}
                 stage={status.stage}
                 phase={status.phase}
+                step={status.step}
                 since={status.since}
                 onStop={onStop}
               />
@@ -195,18 +214,21 @@ interface Status {
   state: "working" | "asking";
   stage: string | null;
   phase: string | null;
+  /** The analysis step under way, in the asker's words (RunView.step.label). */
+  step: string | null;
   /** When the run started (epoch ms), for the clock. */
   since: number | null;
 }
 
 /** A run on its way that the thread does not show yet: no stage, no clock, like a queued run. */
-const STARTING: Status = { state: "working", stage: null, phase: null, since: null };
+const STARTING: Status = { state: "working", stage: null, phase: null, step: null, since: null };
 
 function statusOf(run: RunView): Status {
   return {
     state: isWorking(run.status) ? "working" : "asking",
     stage: run.stage,
     phase: run.phase,
+    step: run.step?.label ?? null,
     since: run.started_at ? Date.parse(run.started_at) : null,
   };
 }
@@ -229,22 +251,46 @@ function ThreadMissing({ ws, error }: { ws: string; error: Error | null }) {
   );
 }
 
-/** A 404 from the API, however the data layer chose to carry it. */
+/** The thread's own 404: the workspace holds no thread by this id. */
 function isNotFound(error: Error | null): boolean {
-  if (!error) return false;
-  const status = (error as Error & { status?: unknown }).status;
-  return status === 404 || /\b404\b|not found/i.test(error.message);
+  return error instanceof ApiError && error.code === "no_thread";
+}
+
+/** The agreed sentence for a run made by an earlier version of sightline. */
+const STALE_RUN =
+  "This answer was made by an earlier version of sightline and can't be changed any more. Ask the question again for a fresh answer.";
+
+/**
+ * What the banner says: "Could not …: reason". The reason for stale_run is two whole
+ * sentences that already say what to do, so it stands alone, without the prefix.
+ */
+function failureText(what: string, error: Error): string {
+  const reason = reasonOf(error);
+  return error instanceof ApiError && error.code === "stale_run" ? reason : `Could not ${what}: ${reason}`;
 }
 
 /**
- * Why the server refused, in the thread's words. The codes that only say the view was
- * behind are put in words (it has caught up meanwhile); any other refusal, not_answerable
- * among them, is best said by the server's own detail.
+ * Why the server refused, in the thread's words. The codes the client knows are put in
+ * words (a refusal that says the view was behind has caught it up meanwhile); any other
+ * failure is said by the server's own detail, a sentence fit to show.
  */
 function reasonOf(error: Error): string {
-  const code = error instanceof ApiError ? error.code : null;
-  if (code === "not_latest") return "a newer revision has replaced this answer.";
-  if (code === "stale_run") return "the run has moved on since. The thread shows it as it is now.";
+  if (!(error instanceof ApiError)) return error.message;
+  switch (error.code) {
+    case "not_latest":
+      return "a newer revision has replaced this answer.";
+    case "not_answerable":
+      return "that is no longer offered for this answer.";
+    case "stale_run":
+      return STALE_RUN;
+    case "too_many_active":
+      return error.retryAfter !== null
+        ? `too many questions are running; try again in ${error.retryAfter} s.`
+        : "too many questions are running; try again in a moment.";
+  }
+  if (error.status === 422 && error.errors.some((item) => item.type === "follow_up_mismatch")) {
+    return "the follow-up changed; pick it again.";
+  }
   return error.message;
 }
 
@@ -268,7 +314,8 @@ const FOLLOW_PX = 120;
 
 /**
  * Keeps the transcript scrolled to the bottom while new content arrives, as
- * long as the reader was within FOLLOW_PX of it; `pin` follows again (after a submit).
+ * long as the reader was within FOLLOW_PX of it; `pin` follows again (after a submit),
+ * `release` stops following until the reader scrolls back down or `pin` is called.
  */
 function useFollowBottom(content: unknown) {
   const scroller = useRef<HTMLDivElement>(null);
@@ -305,5 +352,9 @@ function useFollowBottom(content: unknown) {
     toBottom();
   };
 
-  return { scroller, content: inner, onScroll, pin };
+  const release = () => {
+    follow.current = false;
+  };
+
+  return { scroller, content: inner, onScroll, pin, release };
 }

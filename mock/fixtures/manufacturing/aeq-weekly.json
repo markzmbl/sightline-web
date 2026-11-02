@@ -71,7 +71,42 @@
       "ms": 1916
     }
   ],
-  "restatement": "You want to see how availability, quality ratio and effectiveness developed per week, from 1 Oct 2025 to 31 Dec 2025. Defined as: availability is a proposed definition from sightline's KPI library (ISO 22400-2:2014, key performance indicators for manufacturing operations management), not yet approved: actual production time (run hours) over planned busy time (planned busy hours). Defined as: quality ratio is a proposed definition from sightline's KPI library (ISO 22400-2:2014, key performance indicators for manufacturing operations management), not yet approved: good quantity over produced quantity. Defined as: effectiveness is a proposed definition from sightline's KPI library (ISO 22400-2:2014, key performance indicators for manufacturing operations management), not yet approved: ideal production time (ideal hours) over actual production time (run hours).",
+  "restatement": "You want to see how availability, quality ratio and effectiveness developed per week, from 1 Oct 2025 to 31 Dec 2025.",
+  "definitions": [
+    {
+      "name": "availability",
+      "label": "Availability",
+      "definition": "actual production time (run hours) over planned busy time (planned busy hours)",
+      "entry_id": "measure-availability",
+      "source": {
+        "kind": "library",
+        "text": "from sightline's KPI library (ISO 22400-2)"
+      },
+      "status": "proposed"
+    },
+    {
+      "name": "quality ratio",
+      "label": "Quality ratio",
+      "definition": "good quantity over produced quantity",
+      "entry_id": "measure-quality-ratio",
+      "source": {
+        "kind": "library",
+        "text": "from sightline's KPI library (ISO 22400-2)"
+      },
+      "status": "proposed"
+    },
+    {
+      "name": "effectiveness",
+      "label": "Effectiveness",
+      "definition": "ideal production time (ideal hours) over actual production time (run hours)",
+      "entry_id": "measure-effectiveness",
+      "source": {
+        "kind": "library",
+        "text": "from sightline's KPI library (ISO 22400-2)"
+      },
+      "status": "proposed"
+    }
+  ],
   "card": {
     "blocking": false,
     "points": [
@@ -97,29 +132,53 @@
         "confidence": 0.36,
         "why": "the System 1 model was not sure (0.36 below 0.50)",
         "open": true,
-        "stage": "idiom"
+        "stage": "idiom",
+        "entry_id": null
       }
     ]
   },
   "clarify": null,
+  "follow_ups": [],
+  "error": null,
   "result": {
     "sql": "SELECT DATE_TRUNC('WEEK', \"f\".\"shift_date\") AS \"week\", (100 * ((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"planned_busy_minutes\" / 60.0), 0)), 0)) AS \"availability\", (100 * ((COALESCE(SUM(\"f\".\"good_qty\"), 0))) / NULLIF((COALESCE(SUM(\"f\".\"produced_qty\"), 0)), 0)) AS \"quality_ratio\", (100 * ((COALESCE(SUM(\"f\".\"ideal_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0)), 0)) AS \"effectiveness\" FROM \"main\".\"fct_production_shifts\" AS \"f\" WHERE \"f\".\"shift_date\" >= CAST('2025-10-01' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-31' AS DATE) GROUP BY DATE_TRUNC('WEEK', \"f\".\"shift_date\") ORDER BY \"week\" ASC LIMIT 10000",
+    "step_id": "st1",
     "columns": [
       {
         "name": "week",
-        "type": "temporal"
+        "label": "week",
+        "type": "temporal",
+        "role": "time",
+        "unit": null,
+        "format": null,
+        "description": null
       },
       {
         "name": "availability",
-        "type": "q_ratio"
+        "label": "Availability",
+        "type": "q_ratio",
+        "role": "measure",
+        "unit": "%",
+        "format": ",.1f",
+        "description": "Availability: actual production time (run hours) over planned busy time (planned busy hours)"
       },
       {
         "name": "quality_ratio",
-        "type": "q_ratio"
+        "label": "Quality ratio",
+        "type": "q_ratio",
+        "role": "measure",
+        "unit": "%",
+        "format": ",.1f",
+        "description": "Quality ratio: good quantity over produced quantity"
       },
       {
         "name": "effectiveness",
-        "type": "q_ratio"
+        "label": "Effectiveness",
+        "type": "q_ratio",
+        "role": "measure",
+        "unit": "%",
+        "format": ",.1f",
+        "description": "Effectiveness: ideal production time (ideal hours) over actual production time (run hours)"
       }
     ],
     "rows": [
@@ -207,9 +266,15 @@
     "chart": {
       "chart": "line",
       "label": "lines",
+      "title": "Availability, quality ratio and effectiveness per week",
+      "subtitle": [
+        "Oct–Dec 2025"
+      ],
+      "hint": "follow the direction of each series and compare them",
+      "score": 49,
       "spec": {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "description": "line (deterministic fallback); rules: CH-Q-POS, CH-T-POS, FORM-RECOGNISED, INTENT-AFFINITY, VIS-TASK-FIT, VIS-TEMPORAL-X",
+        "description": "Lines: Availability, quality ratio and effectiveness per week, Oct–Dec 2025",
         "data": {
           "values": [
             {
@@ -1253,12 +1318,26 @@
         "title": {
           "text": "Availability, quality ratio and effectiveness per week",
           "subtitle": [
-            "Oct–Dec 2025",
-            "* incomplete weeks: the data shown starts on 1 Oct 2025 and ends on 23 Dec 2025"
+            "Oct–Dec 2025"
           ]
         },
         "usermeta": {
-          "theme": "pattern-perspectives"
+          "theme": "pattern-perspectives",
+          "rules": [
+            "CH-Q-POS",
+            "CH-T-POS",
+            "FORM-AREA-FILL",
+            "FORM-PARTIAL-PERIOD",
+            "FORM-QUIET-AXIS",
+            "FORM-RECOGNISED",
+            "FORM-SERIES-LABEL",
+            "FORM-TITLE-WHAT",
+            "FORM-YES-NO",
+            "INTENT-AFFINITY",
+            "VIS-RATE-DOMAIN",
+            "VIS-TASK-FIT",
+            "VIS-TEMPORAL-X"
+          ]
         },
         "config": {
           "background": "#FFFFFF",
@@ -1400,20 +1479,41 @@
         }
       },
       "png_url": null,
-      "alternatives": [
+      "min_width": null,
+      "options": [
+        {
+          "chart": "line",
+          "label": "lines",
+          "hint": "follow the direction of each series and compare them",
+          "score": 49,
+          "drawn": true
+        },
         {
           "chart": "table",
           "label": "a table",
-          "hint": null
+          "hint": null,
+          "score": 1,
+          "drawn": false
         }
       ]
     },
-    "findings": []
+    "findings": [],
+    "notes": [
+      "Incomplete weeks: the data shown starts on 1 Oct 2025 and ends on 23 Dec 2025"
+    ],
+    "verdict": "warn",
+    "concerns": [
+      "Banking median: 42.263 deg vs 25 deg; median 3 deg over 36 segments",
+      "Banking flat: 0.556 share vs 0.5 share; 56% flatter than 3 deg"
+    ],
+    "storyline": null,
+    "lead": null,
+    "supports": []
   },
   "charts": {
     "line": {
       "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "description": "line (deterministic fallback); rules: CH-Q-POS, CH-T-POS, FORM-RECOGNISED, INTENT-AFFINITY, VIS-TASK-FIT, VIS-TEMPORAL-X",
+      "description": "Lines: Availability, quality ratio and effectiveness per week, Oct–Dec 2025",
       "data": {
         "values": [
           {
@@ -2457,12 +2557,26 @@
       "title": {
         "text": "Availability, quality ratio and effectiveness per week",
         "subtitle": [
-          "Oct–Dec 2025",
-          "* incomplete weeks: the data shown starts on 1 Oct 2025 and ends on 23 Dec 2025"
+          "Oct–Dec 2025"
         ]
       },
       "usermeta": {
-        "theme": "pattern-perspectives"
+        "theme": "pattern-perspectives",
+        "rules": [
+          "CH-Q-POS",
+          "CH-T-POS",
+          "FORM-AREA-FILL",
+          "FORM-PARTIAL-PERIOD",
+          "FORM-QUIET-AXIS",
+          "FORM-RECOGNISED",
+          "FORM-SERIES-LABEL",
+          "FORM-TITLE-WHAT",
+          "FORM-YES-NO",
+          "INTENT-AFFINITY",
+          "VIS-RATE-DOMAIN",
+          "VIS-TASK-FIT",
+          "VIS-TEMPORAL-X"
+        ]
       },
       "config": {
         "background": "#FFFFFF",
@@ -2608,12 +2722,915 @@
     {
       "chart": "line",
       "label": "lines",
-      "hint": "follow the direction of each series and compare them"
+      "hint": "follow the direction of each series and compare them",
+      "score": 49,
+      "drawn": false
     },
     {
       "chart": "table",
       "label": "a table",
-      "hint": null
+      "hint": null,
+      "score": 1,
+      "drawn": false
     }
-  ]
+  ],
+  "form_point": {
+    "id": "idiom",
+    "step": "form",
+    "question": "How do you want to see it?",
+    "options": [
+      {
+        "id": "line",
+        "label": "lines",
+        "hint": "to follow the direction of each series and compare them"
+      },
+      {
+        "id": "table",
+        "label": "a table",
+        "hint": ""
+      }
+    ],
+    "chosen": "line",
+    "default": "line",
+    "by": "s1",
+    "confidence": 0.92,
+    "why": "",
+    "open": false,
+    "stage": "idiom",
+    "entry_id": null
+  },
+  "refs": [
+    {
+      "table": "fct_production_shifts",
+      "column": "availability",
+      "label": "Availability",
+      "type": "q_ratio",
+      "role": "measure",
+      "unit": "%",
+      "description": "Availability: actual production time (run hours) over planned busy time (planned busy hours)",
+      "metric": true
+    },
+    {
+      "table": "fct_production_shifts",
+      "column": "quality_ratio",
+      "label": "Quality ratio",
+      "type": "q_ratio",
+      "role": "measure",
+      "unit": "%",
+      "description": "Quality ratio: good quantity over produced quantity",
+      "metric": true
+    },
+    {
+      "table": "fct_production_shifts",
+      "column": "effectiveness",
+      "label": "Effectiveness",
+      "type": "q_ratio",
+      "role": "measure",
+      "unit": "%",
+      "description": "Effectiveness: ideal production time (ideal hours) over actual production time (run hours)",
+      "metric": true
+    },
+    {
+      "table": "fct_production_shifts",
+      "column": "shift_date",
+      "label": "shift date",
+      "type": "temporal",
+      "role": "time",
+      "unit": null,
+      "description": "Day of the shift. Joins to dim_date.",
+      "metric": false
+    }
+  ],
+  "analysis": {
+    "synthetic": true,
+    "about": "Synthetic: made up by mock/showcase.ts from the run's own rows, to show what the core's analysis (plan, analyse, gather) will add to the answer; the core does not make it yet.",
+    "stages": [
+      {
+        "phase": "understand",
+        "stage": "plan",
+        "ms": 2600
+      },
+      {
+        "phase": "analyse",
+        "stage": "analyse",
+        "ms": 4220
+      },
+      {
+        "phase": "analyse",
+        "stage": "gather",
+        "ms": 1900
+      }
+    ],
+    "storyline": {
+      "top": "Availability rose 2.4 points from November, while quality ratio and effectiveness held steady",
+      "key_line": [
+        {
+          "id": "k1",
+          "text": "Availability averaged 89.9% in the five weeks to 27 Oct and 92.3% in the eight weeks after"
+        },
+        {
+          "id": "k2",
+          "text": "Quality ratio stayed between 98.3% and 98.6% every week"
+        },
+        {
+          "id": "k3",
+          "text": "Effectiveness stayed between 83.6% and 84.5% every week"
+        }
+      ]
+    },
+    "lead": "sp1",
+    "supports": [
+      {
+        "id": "sp1",
+        "role": "answer",
+        "point": "k1",
+        "text": "Availability, quality ratio and effectiveness per week",
+        "drawn": "main",
+        "chart": null,
+        "layer": "answer",
+        "note": null
+      },
+      {
+        "id": "sp2",
+        "role": "comparison",
+        "point": "k1",
+        "text": "Availability alone, on its own scale: the step up comes in the week of 3 Nov",
+        "drawn": "small",
+        "chart": {
+          "chart": "line",
+          "label": "lines",
+          "title": null,
+          "subtitle": [],
+          "hint": null,
+          "score": null,
+          "spec": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "description": "Line: availability per week on its own scale, Q4 2025",
+            "data": {
+              "values": [
+                {
+                  "at": "2025-09-29T00:00:00",
+                  "value": 89.117247
+                },
+                {
+                  "at": "2025-10-06T00:00:00",
+                  "value": 90.215769
+                },
+                {
+                  "at": "2025-10-13T00:00:00",
+                  "value": 90.357863
+                },
+                {
+                  "at": "2025-10-20T00:00:00",
+                  "value": 89.834829
+                },
+                {
+                  "at": "2025-10-27T00:00:00",
+                  "value": 90.000726
+                },
+                {
+                  "at": "2025-11-03T00:00:00",
+                  "value": 92.166026
+                },
+                {
+                  "at": "2025-11-10T00:00:00",
+                  "value": 92.672479
+                },
+                {
+                  "at": "2025-11-17T00:00:00",
+                  "value": 92.83093
+                },
+                {
+                  "at": "2025-11-24T00:00:00",
+                  "value": 92.861624
+                },
+                {
+                  "at": "2025-12-01T00:00:00",
+                  "value": 92.144444
+                },
+                {
+                  "at": "2025-12-08T00:00:00",
+                  "value": 91.675646
+                },
+                {
+                  "at": "2025-12-15T00:00:00",
+                  "value": 92.231026
+                },
+                {
+                  "at": "2025-12-22T00:00:00",
+                  "value": 91.722115
+                }
+              ]
+            },
+            "height": 160,
+            "mark": {
+              "type": "line",
+              "point": {
+                "filled": true,
+                "size": 28
+              },
+              "strokeWidth": 2,
+              "color": "#1227FD"
+            },
+            "encoding": {
+              "x": {
+                "field": "at",
+                "type": "temporal",
+                "title": null,
+                "axis": {
+                  "format": "%d %b",
+                  "tickCount": 4,
+                  "grid": false
+                }
+              },
+              "y": {
+                "field": "value",
+                "type": "quantitative",
+                "title": "availability (%)",
+                "scale": {
+                  "zero": false
+                },
+                "axis": {
+                  "format": ".0f",
+                  "tickCount": 3
+                }
+              },
+              "tooltip": [
+                {
+                  "field": "at",
+                  "type": "temporal",
+                  "title": "week of",
+                  "format": "%d %b %Y"
+                },
+                {
+                  "field": "value",
+                  "type": "quantitative",
+                  "title": "availability (%)",
+                  "format": ".0f"
+                }
+              ]
+            },
+            "usermeta": {
+              "theme": "pattern-perspectives",
+              "drawn_by": "mock",
+              "synthetic": true
+            },
+            "config": {
+              "background": "#FFFFFF",
+              "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+              "padding": {
+                "left": 20,
+                "right": 24,
+                "top": 20,
+                "bottom": 18
+              },
+              "view": {
+                "stroke": null
+              },
+              "title": {
+                "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "fontSize": 16,
+                "fontWeight": 600,
+                "color": "#191C1F",
+                "anchor": "start",
+                "offset": 16,
+                "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "subtitleColor": "#5F6368",
+                "subtitleFontSize": 12.5,
+                "subtitleFontWeight": 400,
+                "subtitlePadding": 6,
+                "subtitleLineHeight": 17
+              },
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelFontSize": 10.5,
+                "labelColor": "#5F6368",
+                "labelPadding": 8,
+                "labelSeparation": 6,
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "titlePadding": 12,
+                "domainColor": "#C9C9CD",
+                "tickColor": "#C9C9CD",
+                "gridColor": "#E2E2E7",
+                "gridWidth": 1
+              },
+              "axisX": {
+                "grid": false,
+                "ticks": true,
+                "tickSize": 4,
+                "domain": true
+              },
+              "axisY": {
+                "domain": false,
+                "ticks": false,
+                "grid": true
+              },
+              "axisBand": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelColor": "#191C1F",
+                "labelFontSize": 11,
+                "labelPadding": 10
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelFontSize": 12,
+                "labelColor": "#191C1F",
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "symbolType": "circle",
+                "symbolSize": 110,
+                "symbolStrokeWidth": 0,
+                "columnPadding": 16,
+                "padding": 4,
+                "offset": 16
+              },
+              "range": {
+                "category": [
+                  "#1227FD",
+                  "#00967A",
+                  "#8B5CF6",
+                  "#B07800",
+                  "#46277A",
+                  "#4F7BFF",
+                  "#191C1F"
+                ],
+                "ramp": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "heatmap": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "diverging": [
+                  "#E23B4A",
+                  "#F4F4F6",
+                  "#1227FD"
+                ]
+              },
+              "mark": {
+                "color": "#1227FD"
+              },
+              "line": {
+                "color": "#1227FD",
+                "strokeWidth": 2.5,
+                "strokeCap": "round",
+                "strokeJoin": "round"
+              },
+              "point": {
+                "color": "#1227FD",
+                "size": 56,
+                "filled": true
+              },
+              "area": {
+                "color": "#1227FD",
+                "opacity": 0.16
+              },
+              "bar": {
+                "color": "#1227FD",
+                "cornerRadiusEnd": 5
+              },
+              "arc": {
+                "stroke": "#FFFFFF",
+                "strokeWidth": 2
+              },
+              "rect": {
+                "color": "#1227FD"
+              },
+              "rule": {
+                "color": "#C9C9CD"
+              },
+              "text": {
+                "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "fontSize": 11,
+                "color": "#191C1F"
+              }
+            }
+          },
+          "png_url": null,
+          "min_width": 260,
+          "options": []
+        },
+        "layer": null,
+        "note": null
+      },
+      {
+        "id": "sp3",
+        "role": "routine_band",
+        "point": "k2",
+        "text": "Quality ratio on its own scale: it never left a band of 0.3 points",
+        "drawn": "small",
+        "chart": {
+          "chart": "line",
+          "label": "lines",
+          "title": null,
+          "subtitle": [],
+          "hint": null,
+          "score": null,
+          "spec": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "description": "Line: quality ratio per week on its own scale, Q4 2025",
+            "data": {
+              "values": [
+                {
+                  "at": "2025-09-29T00:00:00",
+                  "value": 98.581857
+                },
+                {
+                  "at": "2025-10-06T00:00:00",
+                  "value": 98.333483
+                },
+                {
+                  "at": "2025-10-13T00:00:00",
+                  "value": 98.269794
+                },
+                {
+                  "at": "2025-10-20T00:00:00",
+                  "value": 98.366285
+                },
+                {
+                  "at": "2025-10-27T00:00:00",
+                  "value": 98.331955
+                },
+                {
+                  "at": "2025-11-03T00:00:00",
+                  "value": 98.322349
+                },
+                {
+                  "at": "2025-11-10T00:00:00",
+                  "value": 98.409148
+                },
+                {
+                  "at": "2025-11-17T00:00:00",
+                  "value": 98.333422
+                },
+                {
+                  "at": "2025-11-24T00:00:00",
+                  "value": 98.283635
+                },
+                {
+                  "at": "2025-12-01T00:00:00",
+                  "value": 98.282147
+                },
+                {
+                  "at": "2025-12-08T00:00:00",
+                  "value": 98.352058
+                },
+                {
+                  "at": "2025-12-15T00:00:00",
+                  "value": 98.292593
+                },
+                {
+                  "at": "2025-12-22T00:00:00",
+                  "value": 98.347341
+                }
+              ]
+            },
+            "height": 160,
+            "mark": {
+              "type": "line",
+              "point": {
+                "filled": true,
+                "size": 28
+              },
+              "strokeWidth": 2,
+              "color": "#1227FD"
+            },
+            "encoding": {
+              "x": {
+                "field": "at",
+                "type": "temporal",
+                "title": null,
+                "axis": {
+                  "format": "%d %b",
+                  "tickCount": 4,
+                  "grid": false
+                }
+              },
+              "y": {
+                "field": "value",
+                "type": "quantitative",
+                "title": "quality ratio (%)",
+                "scale": {
+                  "zero": false
+                },
+                "axis": {
+                  "format": ".1f",
+                  "tickCount": 3
+                }
+              },
+              "tooltip": [
+                {
+                  "field": "at",
+                  "type": "temporal",
+                  "title": "week of",
+                  "format": "%d %b %Y"
+                },
+                {
+                  "field": "value",
+                  "type": "quantitative",
+                  "title": "quality ratio (%)",
+                  "format": ".1f"
+                }
+              ]
+            },
+            "usermeta": {
+              "theme": "pattern-perspectives",
+              "drawn_by": "mock",
+              "synthetic": true
+            },
+            "config": {
+              "background": "#FFFFFF",
+              "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+              "padding": {
+                "left": 20,
+                "right": 24,
+                "top": 20,
+                "bottom": 18
+              },
+              "view": {
+                "stroke": null
+              },
+              "title": {
+                "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "fontSize": 16,
+                "fontWeight": 600,
+                "color": "#191C1F",
+                "anchor": "start",
+                "offset": 16,
+                "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "subtitleColor": "#5F6368",
+                "subtitleFontSize": 12.5,
+                "subtitleFontWeight": 400,
+                "subtitlePadding": 6,
+                "subtitleLineHeight": 17
+              },
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelFontSize": 10.5,
+                "labelColor": "#5F6368",
+                "labelPadding": 8,
+                "labelSeparation": 6,
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "titlePadding": 12,
+                "domainColor": "#C9C9CD",
+                "tickColor": "#C9C9CD",
+                "gridColor": "#E2E2E7",
+                "gridWidth": 1
+              },
+              "axisX": {
+                "grid": false,
+                "ticks": true,
+                "tickSize": 4,
+                "domain": true
+              },
+              "axisY": {
+                "domain": false,
+                "ticks": false,
+                "grid": true
+              },
+              "axisBand": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelColor": "#191C1F",
+                "labelFontSize": 11,
+                "labelPadding": 10
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelFontSize": 12,
+                "labelColor": "#191C1F",
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "symbolType": "circle",
+                "symbolSize": 110,
+                "symbolStrokeWidth": 0,
+                "columnPadding": 16,
+                "padding": 4,
+                "offset": 16
+              },
+              "range": {
+                "category": [
+                  "#1227FD",
+                  "#00967A",
+                  "#8B5CF6",
+                  "#B07800",
+                  "#46277A",
+                  "#4F7BFF",
+                  "#191C1F"
+                ],
+                "ramp": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "heatmap": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "diverging": [
+                  "#E23B4A",
+                  "#F4F4F6",
+                  "#1227FD"
+                ]
+              },
+              "mark": {
+                "color": "#1227FD"
+              },
+              "line": {
+                "color": "#1227FD",
+                "strokeWidth": 2.5,
+                "strokeCap": "round",
+                "strokeJoin": "round"
+              },
+              "point": {
+                "color": "#1227FD",
+                "size": 56,
+                "filled": true
+              },
+              "area": {
+                "color": "#1227FD",
+                "opacity": 0.16
+              },
+              "bar": {
+                "color": "#1227FD",
+                "cornerRadiusEnd": 5
+              },
+              "arc": {
+                "stroke": "#FFFFFF",
+                "strokeWidth": 2
+              },
+              "rect": {
+                "color": "#1227FD"
+              },
+              "rule": {
+                "color": "#C9C9CD"
+              },
+              "text": {
+                "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "fontSize": 11,
+                "color": "#191C1F"
+              }
+            }
+          },
+          "png_url": null,
+          "min_width": 260,
+          "options": []
+        },
+        "layer": null,
+        "note": null
+      },
+      {
+        "id": "sp4",
+        "role": "context",
+        "point": "k3",
+        "text": "Effectiveness moved less than a point over the quarter",
+        "drawn": "none",
+        "chart": null,
+        "layer": null,
+        "note": null
+      }
+    ],
+    "notes": [
+      "Where the rise in availability came from was not broken down by line or plant"
+    ],
+    "steps": [
+      {
+        "id": "st1",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "the three ratios per week",
+        "role": "answer",
+        "ms": 140,
+        "verdict": null,
+        "cached": true,
+        "sql": "SELECT DATE_TRUNC('WEEK', \"f\".\"shift_date\") AS \"week\", (100 * ((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"planned_busy_minutes\" / 60.0), 0)), 0)) AS \"availability\", (100 * ((COALESCE(SUM(\"f\".\"good_qty\"), 0))) / NULLIF((COALESCE(SUM(\"f\".\"produced_qty\"), 0)), 0)) AS \"quality_ratio\", (100 * ((COALESCE(SUM(\"f\".\"ideal_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0)), 0)) AS \"effectiveness\" FROM \"main\".\"fct_production_shifts\" AS \"f\" WHERE \"f\".\"shift_date\" >= CAST('2025-10-01' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-31' AS DATE) GROUP BY DATE_TRUNC('WEEK', \"f\".\"shift_date\") ORDER BY \"week\" ASC LIMIT 10000",
+        "columns": [
+          {
+            "name": "week",
+            "label": "week",
+            "type": "temporal",
+            "role": "time",
+            "unit": null,
+            "format": null,
+            "description": null
+          },
+          {
+            "name": "availability",
+            "label": "Availability",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "%",
+            "format": ",.1f",
+            "description": "Availability: actual production time (run hours) over planned busy time (planned busy hours)"
+          },
+          {
+            "name": "quality_ratio",
+            "label": "Quality ratio",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "%",
+            "format": ",.1f",
+            "description": "Quality ratio: good quantity over produced quantity"
+          },
+          {
+            "name": "effectiveness",
+            "label": "Effectiveness",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "%",
+            "format": ",.1f",
+            "description": "Effectiveness: ideal production time (ideal hours) over actual production time (run hours)"
+          }
+        ],
+        "rows": [
+          [
+            "2025-09-29T00:00:00",
+            89.117247,
+            98.581857,
+            83.598833
+          ],
+          [
+            "2025-10-06T00:00:00",
+            90.215769,
+            98.333483,
+            84.364921
+          ],
+          [
+            "2025-10-13T00:00:00",
+            90.357863,
+            98.269794,
+            84.294689
+          ],
+          [
+            "2025-10-20T00:00:00",
+            89.834829,
+            98.366285,
+            84.48574
+          ],
+          [
+            "2025-10-27T00:00:00",
+            90.000726,
+            98.331955,
+            84.421854
+          ],
+          [
+            "2025-11-03T00:00:00",
+            92.166026,
+            98.322349,
+            84.128069
+          ],
+          [
+            "2025-11-10T00:00:00",
+            92.672479,
+            98.409148,
+            84.272917
+          ],
+          [
+            "2025-11-17T00:00:00",
+            92.83093,
+            98.333422,
+            84.264514
+          ],
+          [
+            "2025-11-24T00:00:00",
+            92.861624,
+            98.283635,
+            84.283155
+          ],
+          [
+            "2025-12-01T00:00:00",
+            92.144444,
+            98.282147,
+            84.41519
+          ],
+          [
+            "2025-12-08T00:00:00",
+            91.675646,
+            98.352058,
+            84.242786
+          ],
+          [
+            "2025-12-15T00:00:00",
+            92.231026,
+            98.292593,
+            84.135742
+          ],
+          [
+            "2025-12-22T00:00:00",
+            91.722115,
+            98.347341,
+            84.523785
+          ]
+        ],
+        "row_count": 13
+      },
+      {
+        "id": "st2",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "availability before and after 3 Nov",
+        "role": "comparison",
+        "ms": 2300,
+        "verdict": "as_expected",
+        "cached": false,
+        "sql": "SELECT CASE WHEN \"week\" < CAST('2025-11-03' AS DATE) THEN 'before' ELSE 'after' END AS \"period\", AVG(\"availability\") AS \"availability\"\nFROM (\n  SELECT DATE_TRUNC('WEEK', \"f\".\"shift_date\") AS \"week\", (100 * ((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"planned_busy_minutes\" / 60.0), 0)), 0)) AS \"availability\", (100 * ((COALESCE(SUM(\"f\".\"good_qty\"), 0))) / NULLIF((COALESCE(SUM(\"f\".\"produced_qty\"), 0)), 0)) AS \"quality_ratio\", (100 * ((COALESCE(SUM(\"f\".\"ideal_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0)), 0)) AS \"effectiveness\" FROM \"main\".\"fct_production_shifts\" AS \"f\" WHERE \"f\".\"shift_date\" >= CAST('2025-10-01' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-31' AS DATE) GROUP BY DATE_TRUNC('WEEK', \"f\".\"shift_date\") ORDER BY \"week\" ASC LIMIT 10000\n) AS \"answer\"\nGROUP BY 1\nORDER BY MIN(\"week\")",
+        "columns": [
+          {
+            "name": "period",
+            "label": "period",
+            "type": "nominal",
+            "role": "dimension",
+            "unit": null,
+            "format": null,
+            "description": null
+          },
+          {
+            "name": "availability",
+            "label": "Availability",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "%",
+            "format": ",.1f",
+            "description": "Availability: actual production time (run hours) over planned busy time (planned busy hours)"
+          }
+        ],
+        "rows": [
+          [
+            "before",
+            89.905287
+          ],
+          [
+            "after",
+            92.288036
+          ]
+        ],
+        "row_count": 2
+      },
+      {
+        "id": "st3",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "the routine band of quality ratio",
+        "role": "check",
+        "ms": 1700,
+        "verdict": "routine",
+        "cached": true,
+        "sql": "SELECT MIN(\"quality_ratio\") AS \"lowest\", MAX(\"quality_ratio\") AS \"highest\"\nFROM (\n  SELECT DATE_TRUNC('WEEK', \"f\".\"shift_date\") AS \"week\", (100 * ((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"planned_busy_minutes\" / 60.0), 0)), 0)) AS \"availability\", (100 * ((COALESCE(SUM(\"f\".\"good_qty\"), 0))) / NULLIF((COALESCE(SUM(\"f\".\"produced_qty\"), 0)), 0)) AS \"quality_ratio\", (100 * ((COALESCE(SUM(\"f\".\"ideal_minutes\" / 60.0), 0))) / NULLIF((COALESCE(SUM(\"f\".\"run_minutes\" / 60.0), 0)), 0)) AS \"effectiveness\" FROM \"main\".\"fct_production_shifts\" AS \"f\" WHERE \"f\".\"shift_date\" >= CAST('2025-10-01' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-31' AS DATE) GROUP BY DATE_TRUNC('WEEK', \"f\".\"shift_date\") ORDER BY \"week\" ASC LIMIT 10000\n) AS \"answer\"",
+        "columns": [
+          {
+            "name": "lowest",
+            "label": "lowest",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "%",
+            "format": ",.1f",
+            "description": "Quality ratio: good quantity over produced quantity"
+          },
+          {
+            "name": "highest",
+            "label": "highest",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "%",
+            "format": ",.1f",
+            "description": "Quality ratio: good quantity over produced quantity"
+          }
+        ],
+        "rows": [
+          [
+            98.269794,
+            98.581857
+          ]
+        ],
+        "row_count": 1
+      }
+    ],
+    "follow_ups": [
+      {
+        "id": "fu1",
+        "kind": "next_level",
+        "question": "What was the OEE of each line last week?",
+        "fixture": "oee-line"
+      },
+      {
+        "id": "fu2",
+        "kind": "check",
+        "question": "Which production orders had the most scrap against plan in 2025?",
+        "fixture": "scrap"
+      }
+    ]
+  }
 }

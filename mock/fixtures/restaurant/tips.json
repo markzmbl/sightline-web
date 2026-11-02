@@ -1,6 +1,9 @@
 {
   "slug": "tips",
   "workspace": "restaurant",
+  "made_up": [
+    "definitions"
+  ],
   "question": "What is the average tip by payment method?",
   "final_status": "complete",
   "continuation": null,
@@ -56,7 +59,20 @@
       "ms": 1267
     }
   ],
-  "restatement": null,
+  "restatement": "You want to see average tip amount by payment method.",
+  "definitions": [
+    {
+      "name": "average tip",
+      "label": "Average tip",
+      "definition": "the mean tip amount per payment",
+      "entry_id": "measure-average-tip",
+      "source": {
+        "kind": "drafted",
+        "text": "drafted by sightline"
+      },
+      "status": "proposed"
+    }
+  ],
   "card": {
     "blocking": false,
     "points": [
@@ -92,7 +108,8 @@
         "confidence": 0.37,
         "why": "the System 1 model was not sure (0.37 below 0.50)",
         "open": true,
-        "stage": "idiom"
+        "stage": "idiom",
+        "entry_id": null
       },
       {
         "id": "labels",
@@ -116,21 +133,35 @@
         "confidence": 0.32,
         "why": "the System 1 model was not sure (0.32 below 0.50)",
         "open": true,
-        "stage": "idiom"
+        "stage": "idiom",
+        "entry_id": null
       }
     ]
   },
   "clarify": null,
+  "follow_ups": [],
+  "error": null,
   "result": {
     "sql": "SELECT \"f\".\"payment_method\" AS \"payment_method\", AVG(\"f\".\"tip_amount\") AS \"tip_amount\" FROM \"fact_payments\" AS \"f\" GROUP BY \"f\".\"payment_method\" ORDER BY \"tip_amount\" DESC LIMIT 10000",
+    "step_id": "st1",
     "columns": [
       {
         "name": "payment_method",
-        "type": "nominal"
+        "label": "payment method",
+        "type": "nominal",
+        "role": "dimension",
+        "unit": null,
+        "format": null,
+        "description": "How this payment was made, card or cash."
       },
       {
         "name": "tip_amount",
-        "type": "q_ratio"
+        "label": "tip amount",
+        "type": "q_ratio",
+        "role": "measure",
+        "unit": "EUR",
+        "format": ",.2f",
+        "description": "Tip on this payment, EUR. Zero on cash payments because cash tips are not recorded."
       }
     ],
     "rows": [
@@ -148,9 +179,13 @@
     "chart": {
       "chart": "horizontal_bar",
       "label": "ranked bars",
+      "title": "Average tip amount by payment method",
+      "subtitle": [],
+      "hint": "see which categories are the largest and how far apart they are",
+      "score": 25,
       "spec": {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "description": "horizontal_bar (deterministic fallback); rules: CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO",
+        "description": "Ranked bars: Average tip amount by payment method",
         "data": {
           "values": [
             {
@@ -313,7 +348,24 @@
           "text": "Average tip amount by payment method"
         },
         "usermeta": {
-          "theme": "pattern-perspectives"
+          "theme": "pattern-perspectives",
+          "rules": [
+            "CH-N-POS",
+            "CH-Q-LEN",
+            "FORM-BAR-STEP",
+            "FORM-FOLD-REST",
+            "FORM-QUIET-AXIS",
+            "FORM-RECOGNISED",
+            "FORM-SHARE-TIP",
+            "FORM-SHORT-LABEL",
+            "FORM-SORT-SIZE",
+            "FORM-TELL-APART",
+            "FORM-TITLE-WHAT",
+            "FORM-VALUE-TIP",
+            "FORM-YES-NO",
+            "INTENT-AFFINITY",
+            "VIS-BAR-ZERO"
+          ]
         },
         "config": {
           "background": "#FFFFFF",
@@ -455,30 +507,53 @@
         }
       },
       "png_url": null,
-      "alternatives": [
+      "min_width": null,
+      "options": [
+        {
+          "chart": "horizontal_bar",
+          "label": "ranked bars",
+          "hint": "see which categories are the largest and how far apart they are",
+          "score": 25,
+          "drawn": true
+        },
         {
           "chart": "bar",
           "label": "columns",
-          "hint": null
+          "hint": null,
+          "score": 24,
+          "drawn": false
         },
         {
           "chart": "point",
           "label": "ranked dots",
-          "hint": "see which categories are the largest and how far apart they are"
+          "hint": "see which categories are the largest and how far apart they are",
+          "score": 23,
+          "drawn": false
         },
         {
           "chart": "table",
           "label": "a table",
-          "hint": null
+          "hint": null,
+          "score": 1,
+          "drawn": false
         }
       ]
     },
-    "findings": []
+    "findings": [],
+    "notes": [],
+    "verdict": "warn",
+    "concerns": [
+      "System 1 doubts that the chart answers the question asked (P 0.32)",
+      "System 1 doubts that the question asks for tip amount (P 0.47)"
+    ],
+    "storyline": null,
+    "lead": null,
+    "supports": []
   },
   "charts": {
     "horizontal_bar": {
       "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "description": "horizontal_bar (deterministic fallback); rules: CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO",
+      "description": "Ranked bars: Average tip amount by payment method",
       "data": {
         "values": [
           {
@@ -641,7 +716,24 @@
         "text": "Average tip amount by payment method"
       },
       "usermeta": {
-        "theme": "pattern-perspectives"
+        "theme": "pattern-perspectives",
+        "rules": [
+          "CH-N-POS",
+          "CH-Q-LEN",
+          "FORM-BAR-STEP",
+          "FORM-FOLD-REST",
+          "FORM-QUIET-AXIS",
+          "FORM-RECOGNISED",
+          "FORM-SHARE-TIP",
+          "FORM-SHORT-LABEL",
+          "FORM-SORT-SIZE",
+          "FORM-TELL-APART",
+          "FORM-TITLE-WHAT",
+          "FORM-VALUE-TIP",
+          "FORM-YES-NO",
+          "INTENT-AFFINITY",
+          "VIS-BAR-ZERO"
+        ]
       },
       "config": {
         "background": "#FFFFFF",
@@ -787,22 +879,473 @@
     {
       "chart": "horizontal_bar",
       "label": "ranked bars",
-      "hint": "see which categories are the largest and how far apart they are"
+      "hint": "see which categories are the largest and how far apart they are",
+      "score": 25,
+      "drawn": false
     },
     {
       "chart": "bar",
       "label": "columns",
-      "hint": null
+      "hint": null,
+      "score": 24,
+      "drawn": false
     },
     {
       "chart": "point",
       "label": "ranked dots",
-      "hint": "see which categories are the largest and how far apart they are"
+      "hint": "see which categories are the largest and how far apart they are",
+      "score": 23,
+      "drawn": false
     },
     {
       "chart": "table",
       "label": "a table",
-      "hint": null
+      "hint": null,
+      "score": 1,
+      "drawn": false
     }
-  ]
+  ],
+  "form_point": {
+    "id": "idiom",
+    "step": "form",
+    "question": "How do you want to see it?",
+    "options": [
+      {
+        "id": "horizontal_bar",
+        "label": "ranked bars",
+        "hint": "to see which categories are the largest and how far apart they are"
+      },
+      {
+        "id": "bar",
+        "label": "columns",
+        "hint": ""
+      },
+      {
+        "id": "point",
+        "label": "ranked dots",
+        "hint": "to see which categories are the largest and how far apart they are"
+      },
+      {
+        "id": "table",
+        "label": "a table",
+        "hint": ""
+      }
+    ],
+    "chosen": "horizontal_bar",
+    "default": "horizontal_bar",
+    "by": "s1",
+    "confidence": 0.37,
+    "why": "the System 1 model was not sure (0.37 below 0.50)",
+    "open": true,
+    "stage": "idiom",
+    "entry_id": null
+  },
+  "refs": [
+    {
+      "table": "fact_payments",
+      "column": "tip_amount",
+      "label": "tip amount",
+      "type": "q_ratio",
+      "role": "measure",
+      "unit": "EUR",
+      "description": "Tip on this payment, EUR. Zero on cash payments because cash tips are not recorded.",
+      "metric": false
+    },
+    {
+      "table": "fact_payments",
+      "column": "payment_method",
+      "label": "payment method",
+      "type": "nominal",
+      "role": "dimension",
+      "unit": null,
+      "description": "How this payment was made, card or cash.",
+      "metric": false
+    }
+  ],
+  "analysis": {
+    "synthetic": true,
+    "about": "Synthetic: made up by mock/showcase.ts from the run's own rows, to show what the core's analysis (plan, analyse, gather) will add to the answer; the core does not make it yet.",
+    "stages": [
+      {
+        "phase": "understand",
+        "stage": "plan",
+        "ms": 2600
+      },
+      {
+        "phase": "analyse",
+        "stage": "analyse",
+        "ms": 2320
+      },
+      {
+        "phase": "analyse",
+        "stage": "gather",
+        "ms": 1900
+      }
+    ],
+    "storyline": {
+      "top": "Card payments averaged €1.51 in tips per payment",
+      "key_line": [
+        {
+          "id": "k1",
+          "text": "Card payments carry every tip the data records"
+        }
+      ]
+    },
+    "lead": "sp1",
+    "supports": [
+      {
+        "id": "sp1",
+        "role": "answer",
+        "point": "k1",
+        "text": "The average tip per payment, by payment method",
+        "drawn": "main",
+        "chart": null,
+        "layer": "answer",
+        "note": null
+      },
+      {
+        "id": "sp2",
+        "role": "whole",
+        "point": "k1",
+        "text": "Each method's share of the recorded tips: card holds all of them",
+        "drawn": "small",
+        "chart": {
+          "chart": "bar",
+          "label": "columns",
+          "title": null,
+          "subtitle": [],
+          "hint": null,
+          "score": null,
+          "spec": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "description": "Columns: the share of the recorded tips by payment method",
+            "data": {
+              "values": [
+                {
+                  "part": "card",
+                  "value": 1
+                },
+                {
+                  "part": "cash",
+                  "value": 0
+                }
+              ]
+            },
+            "height": 160,
+            "mark": {
+              "type": "bar",
+              "cornerRadiusEnd": 3
+            },
+            "encoding": {
+              "x": {
+                "field": "part",
+                "type": "ordinal",
+                "sort": null,
+                "title": null,
+                "axis": {
+                  "labelAngle": 0
+                }
+              },
+              "y": {
+                "field": "value",
+                "type": "quantitative",
+                "title": "share of the recorded tips",
+                "axis": {
+                  "format": ".0%",
+                  "tickCount": 4
+                }
+              },
+              "color": {
+                "value": "#1227FD"
+              },
+              "tooltip": [
+                {
+                  "field": "part",
+                  "title": ""
+                },
+                {
+                  "field": "value",
+                  "type": "quantitative",
+                  "title": "share of the recorded tips",
+                  "format": ".0%"
+                }
+              ]
+            },
+            "usermeta": {
+              "theme": "pattern-perspectives",
+              "drawn_by": "mock",
+              "synthetic": true
+            },
+            "config": {
+              "background": "#FFFFFF",
+              "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+              "padding": {
+                "left": 20,
+                "right": 24,
+                "top": 20,
+                "bottom": 18
+              },
+              "view": {
+                "stroke": null
+              },
+              "title": {
+                "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "fontSize": 16,
+                "fontWeight": 600,
+                "color": "#191C1F",
+                "anchor": "start",
+                "offset": 16,
+                "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "subtitleColor": "#5F6368",
+                "subtitleFontSize": 12.5,
+                "subtitleFontWeight": 400,
+                "subtitlePadding": 6,
+                "subtitleLineHeight": 17
+              },
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelFontSize": 10.5,
+                "labelColor": "#5F6368",
+                "labelPadding": 8,
+                "labelSeparation": 6,
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "titlePadding": 12,
+                "domainColor": "#C9C9CD",
+                "tickColor": "#C9C9CD",
+                "gridColor": "#E2E2E7",
+                "gridWidth": 1
+              },
+              "axisX": {
+                "grid": false,
+                "ticks": true,
+                "tickSize": 4,
+                "domain": true
+              },
+              "axisY": {
+                "domain": false,
+                "ticks": false,
+                "grid": true
+              },
+              "axisBand": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelColor": "#191C1F",
+                "labelFontSize": 11,
+                "labelPadding": 10
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelFontSize": 12,
+                "labelColor": "#191C1F",
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "symbolType": "circle",
+                "symbolSize": 110,
+                "symbolStrokeWidth": 0,
+                "columnPadding": 16,
+                "padding": 4,
+                "offset": 16
+              },
+              "range": {
+                "category": [
+                  "#1227FD",
+                  "#00967A",
+                  "#8B5CF6",
+                  "#B07800",
+                  "#46277A",
+                  "#4F7BFF",
+                  "#191C1F"
+                ],
+                "ramp": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "heatmap": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "diverging": [
+                  "#E23B4A",
+                  "#F4F4F6",
+                  "#1227FD"
+                ]
+              },
+              "mark": {
+                "color": "#1227FD"
+              },
+              "line": {
+                "color": "#1227FD",
+                "strokeWidth": 2.5,
+                "strokeCap": "round",
+                "strokeJoin": "round"
+              },
+              "point": {
+                "color": "#1227FD",
+                "size": 56,
+                "filled": true
+              },
+              "area": {
+                "color": "#1227FD",
+                "opacity": 0.16
+              },
+              "bar": {
+                "color": "#1227FD",
+                "cornerRadiusEnd": 5
+              },
+              "arc": {
+                "stroke": "#FFFFFF",
+                "strokeWidth": 2
+              },
+              "rect": {
+                "color": "#1227FD"
+              },
+              "rule": {
+                "color": "#C9C9CD"
+              },
+              "text": {
+                "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "fontSize": 11,
+                "color": "#191C1F"
+              }
+            }
+          },
+          "png_url": null,
+          "min_width": 260,
+          "options": []
+        },
+        "layer": null,
+        "note": null
+      },
+      {
+        "id": "sp3",
+        "role": "exception",
+        "point": null,
+        "text": "Cash tips over the year",
+        "drawn": "dropped",
+        "chart": null,
+        "layer": null,
+        "note": "A chart of cash tips would show only zeros: they are not recorded"
+      },
+      {
+        "id": "sp4",
+        "role": "context",
+        "point": null,
+        "text": "Every 100 card payments brought €150.97 in tips",
+        "drawn": "none",
+        "chart": null,
+        "layer": null,
+        "note": null
+      }
+    ],
+    "notes": [
+      "Cash tips are not recorded, so cash shows €0.00 whatever guests tipped; the comparison with card says nothing about cash guests",
+      "The average is over payments, not bills: a split bill counts once for each of its payments"
+    ],
+    "steps": [
+      {
+        "id": "st1",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "the average tip per payment method",
+        "role": "answer",
+        "ms": 140,
+        "verdict": null,
+        "cached": true,
+        "sql": "SELECT \"f\".\"payment_method\" AS \"payment_method\", AVG(\"f\".\"tip_amount\") AS \"tip_amount\" FROM \"fact_payments\" AS \"f\" GROUP BY \"f\".\"payment_method\" ORDER BY \"tip_amount\" DESC LIMIT 10000",
+        "columns": [
+          {
+            "name": "payment_method",
+            "label": "payment method",
+            "type": "nominal",
+            "role": "dimension",
+            "unit": null,
+            "format": null,
+            "description": "How this payment was made, card or cash."
+          },
+          {
+            "name": "tip_amount",
+            "label": "tip amount",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "EUR",
+            "format": ",.2f",
+            "description": "Tip on this payment, EUR. Zero on cash payments because cash tips are not recorded."
+          }
+        ],
+        "rows": [
+          [
+            "card",
+            1.509664
+          ],
+          [
+            "cash",
+            0
+          ]
+        ],
+        "row_count": 2
+      },
+      {
+        "id": "st2",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "cash tips in the data",
+        "role": "check",
+        "ms": 1500,
+        "verdict": "contradicts",
+        "cached": false,
+        "sql": "SELECT MAX(\"f\".\"tip_amount\") AS \"tip_amount\"\nFROM \"fact_payments\" AS \"f\"\nWHERE \"f\".\"payment_method\" = 'cash'",
+        "columns": [
+          {
+            "name": "tip_amount",
+            "label": "tip amount",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "EUR",
+            "format": ",.2f",
+            "description": "Tip on this payment, EUR. Zero on cash payments because cash tips are not recorded."
+          }
+        ],
+        "rows": [
+          [
+            0
+          ]
+        ],
+        "row_count": 1
+      },
+      {
+        "id": "st3",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "the contract on tip_amount",
+        "role": "lookup",
+        "ms": 600,
+        "verdict": "as_expected",
+        "cached": false,
+        "sql": null,
+        "columns": [],
+        "rows": [],
+        "row_count": null
+      }
+    ],
+    "follow_ups": [
+      {
+        "id": "fu1",
+        "kind": "breakdown",
+        "question": "How did the average card tip develop per month in 2025?",
+        "fixture": null
+      },
+      {
+        "id": "fu2",
+        "kind": "next_level",
+        "question": "What is the average card tip per branch?",
+        "fixture": null
+      }
+    ]
+  }
 }

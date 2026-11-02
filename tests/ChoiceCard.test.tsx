@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router";
+import type { ReactElement } from "react";
 import type { Card, DecisionPoint } from "../src/api/types";
 import { AskedNote, ChoiceCard } from "../src/components/thread/ChoiceCard";
 
@@ -15,6 +17,7 @@ function point(id: string, options: [string, string, string][], extra: Partial<D
     default: null,
     by: "rules",
     confidence: null,
+    entry_id: null,
     why: "",
     open: false,
     stage: "abstract",
@@ -276,5 +279,45 @@ describe("ChoiceCard, beside the chart", () => {
     expect(button("Last calendar week").getAttribute("aria-pressed")).toBe("true");
     fireEvent.click(button("The last seven days"));
     expect(onSubmit).toHaveBeenCalledWith({ period: "seven" }, null);
+  });
+});
+
+describe("ChoiceCard, a key user's default", () => {
+  /** On the thread's page, where the tag's link resolves. */
+  const onThread = (ui: ReactElement) => (
+    <MemoryRouter initialEntries={["/w/ws1/t/t1"]}>
+      <Routes>
+        <Route path="/w/:ws/t/:threadId" element={ui} />
+      </Routes>
+    </MemoryRouter>
+  );
+  const settled: DecisionPoint = {
+    ...LINE,
+    chosen: "plant",
+    by: "default",
+    entry_id: "default-best-plant",
+    why: "'best plant' means the highest OEE",
+  };
+
+  it("tags a choice an approved default settled as the key user's, linking to its entry, with what it says", () => {
+    render(onThread(<ChoiceCard card={{ blocking: false, points: [settled] }} busy={false} onSubmit={vi.fn()} />));
+    const tag = screen.getByRole("link", { name: "your key user's default" });
+    expect(tag.getAttribute("href")).toBe("/w/ws1/review/default-best-plant");
+    expect(screen.getByText("Per plant")).toBeTruthy();
+    expect(screen.getByText("'best plant' means the highest OEE").className).toBe("tx-made__why");
+    // It can still be changed, like any choice beside the chart.
+    expect(button("Change").disabled).toBe(false);
+  });
+
+  it("tags it without a link when no entry is named", () => {
+    render(<AskedNote card={{ blocking: false, points: [{ ...settled, entry_id: null }] }} />);
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.getByText("your key user's default").tagName).toBe("SPAN");
+  });
+
+  it("names the default on an option of a blocking card as text", () => {
+    render(<ChoiceCard card={blocking({ ...settled, open: true })} busy={false} onSubmit={vi.fn()} />);
+    expect(button(/Per plant/).textContent).toContain("your key user's default");
+    expect(screen.queryByRole("link")).toBeNull();
   });
 });

@@ -1,6 +1,9 @@
 {
   "slug": "delivery-monthly",
   "workspace": "restaurant",
+  "made_up": [
+    "definitions"
+  ],
   "question": "How did delivery revenue develop per month over the last year?",
   "final_status": "complete",
   "continuation": null,
@@ -56,7 +59,20 @@
       "ms": 690
     }
   ],
-  "restatement": null,
+  "restatement": "You want to see how line revenue developed per month, only for delivery (channel), over the last year.",
+  "definitions": [
+    {
+      "name": "delivery revenue",
+      "label": "Delivery revenue",
+      "definition": "line revenue of the order lines sold through the delivery channel",
+      "entry_id": "measure-delivery-revenue",
+      "source": {
+        "kind": "drafted",
+        "text": "drafted by sightline"
+      },
+      "status": "proposed"
+    }
+  ],
   "card": {
     "blocking": false,
     "points": [
@@ -82,21 +98,35 @@
         "confidence": 0.1200000000000001,
         "why": "the System 1 model was not sure (0.12 below 0.50)",
         "open": true,
-        "stage": "idiom"
+        "stage": "idiom",
+        "entry_id": null
       }
     ]
   },
   "clarify": null,
+  "follow_ups": [],
+  "error": null,
   "result": {
     "sql": "SELECT DATE_TRUNC('MONTH', \"f\".\"date_key\") AS \"month\", SUM(\"f\".\"line_revenue\") AS \"line_revenue\" FROM \"fact_order_lines\" AS \"f\" JOIN \"dim_channel\" AS \"dim_channel\" ON \"f\".\"channel_key\" = \"dim_channel\".\"channel_key\" WHERE \"dim_channel\".\"channel_name\" = 'delivery' AND \"f\".\"date_key\" >= CAST('2025-01-01' AS DATE) AND \"f\".\"date_key\" <= CAST('2025-12-31' AS DATE) GROUP BY DATE_TRUNC('MONTH', \"f\".\"date_key\") ORDER BY \"month\" ASC LIMIT 10000",
+    "step_id": "st1",
     "columns": [
       {
         "name": "month",
-        "type": "temporal"
+        "label": "month",
+        "type": "temporal",
+        "role": "time",
+        "unit": null,
+        "format": null,
+        "description": null
       },
       {
         "name": "line_revenue",
-        "type": "q_ratio"
+        "label": "line revenue",
+        "type": "q_ratio",
+        "role": "measure",
+        "unit": "EUR",
+        "format": ",.0f",
+        "description": "Net revenue of the line (quantity times unit_price minus discount), EUR."
       }
     ],
     "rows": [
@@ -154,9 +184,15 @@
     "chart": {
       "chart": "line",
       "label": "lines",
+      "title": "Delivery revenue rose from €84k to €105k, Jan–Dec 2025",
+      "subtitle": [
+        "Line revenue per month · delivery only · 2025"
+      ],
+      "hint": "follow the direction of each series and compare them",
+      "score": 29,
       "spec": {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "description": "line (deterministic fallback); rules: CH-Q-POS, CH-T-POS, FORM-RECOGNISED, INTENT-AFFINITY, VIS-TASK-FIT, VIS-TEMPORAL-X",
+        "description": "Lines: Delivery revenue rose from €84k to €105k, Jan–Dec 2025, Line revenue per month · delivery only · 2025",
         "data": {
           "values": [
             {
@@ -671,7 +707,23 @@
           ]
         },
         "usermeta": {
-          "theme": "pattern-perspectives"
+          "theme": "pattern-perspectives",
+          "rules": [
+            "CH-Q-POS",
+            "CH-T-POS",
+            "FORM-AREA-FILL",
+            "FORM-PARTIAL-PERIOD",
+            "FORM-QUIET-AXIS",
+            "FORM-RECOGNISED",
+            "FORM-SERIES-LABEL",
+            "FORM-TITLE-WHAT",
+            "FORM-YES-NO",
+            "INTENT-AFFINITY",
+            "VIS-CLAIM-TITLE",
+            "VIS-FOCUS-ACCENT",
+            "VIS-TASK-FIT",
+            "VIS-TEMPORAL-X"
+          ]
         },
         "config": {
           "background": "#FFFFFF",
@@ -813,32 +865,54 @@
         }
       },
       "png_url": null,
-      "alternatives": [
+      "min_width": null,
+      "options": [
+        {
+          "chart": "line",
+          "label": "lines",
+          "hint": "follow the direction of each series and compare them",
+          "score": 29,
+          "drawn": true
+        },
         {
           "chart": "area",
           "label": "areas",
-          "hint": null
+          "hint": null,
+          "score": 23,
+          "drawn": false
         },
         {
           "chart": "bar",
           "label": "columns",
-          "hint": "read how much each period holds, one by one"
+          "hint": "read how much each period holds, one by one",
+          "score": 19,
+          "drawn": false
         },
         {
           "chart": "table",
           "label": "a table",
-          "hint": null
+          "hint": null,
+          "score": 1,
+          "drawn": false
         }
       ]
     },
     "findings": [
       "line revenue €84k → €105k, Jan–Dec 2025"
-    ]
+    ],
+    "notes": [],
+    "verdict": "warn",
+    "concerns": [
+      "System 1 doubts that the chart is drawn so that the reader can follow the direction of each series and compare them (P 0.46)"
+    ],
+    "storyline": null,
+    "lead": null,
+    "supports": []
   },
   "charts": {
     "line": {
       "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "description": "line (deterministic fallback); rules: CH-Q-POS, CH-T-POS, FORM-RECOGNISED, INTENT-AFFINITY, VIS-TASK-FIT, VIS-TEMPORAL-X",
+      "description": "Lines: Delivery revenue rose from €84k to €105k, Jan–Dec 2025, Line revenue per month · delivery only · 2025",
       "data": {
         "values": [
           {
@@ -1353,7 +1427,23 @@
         ]
       },
       "usermeta": {
-        "theme": "pattern-perspectives"
+        "theme": "pattern-perspectives",
+        "rules": [
+          "CH-Q-POS",
+          "CH-T-POS",
+          "FORM-AREA-FILL",
+          "FORM-PARTIAL-PERIOD",
+          "FORM-QUIET-AXIS",
+          "FORM-RECOGNISED",
+          "FORM-SERIES-LABEL",
+          "FORM-TITLE-WHAT",
+          "FORM-YES-NO",
+          "INTENT-AFFINITY",
+          "VIS-CLAIM-TITLE",
+          "VIS-FOCUS-ACCENT",
+          "VIS-TASK-FIT",
+          "VIS-TEMPORAL-X"
+        ]
       },
       "config": {
         "background": "#FFFFFF",
@@ -1499,22 +1589,793 @@
     {
       "chart": "line",
       "label": "lines",
-      "hint": "follow the direction of each series and compare them"
+      "hint": "follow the direction of each series and compare them",
+      "score": 29,
+      "drawn": false
     },
     {
       "chart": "area",
       "label": "areas",
-      "hint": null
+      "hint": null,
+      "score": 23,
+      "drawn": false
     },
     {
       "chart": "bar",
       "label": "columns",
-      "hint": "read how much each period holds, one by one"
+      "hint": "read how much each period holds, one by one",
+      "score": 19,
+      "drawn": false
     },
     {
       "chart": "table",
       "label": "a table",
-      "hint": null
+      "hint": null,
+      "score": 1,
+      "drawn": false
     }
-  ]
+  ],
+  "form_point": {
+    "id": "idiom",
+    "step": "form",
+    "question": "How do you want to see it?",
+    "options": [
+      {
+        "id": "line",
+        "label": "lines",
+        "hint": "to follow the direction of each series and compare them"
+      },
+      {
+        "id": "area",
+        "label": "areas",
+        "hint": ""
+      },
+      {
+        "id": "bar",
+        "label": "columns",
+        "hint": "to read how much each period holds, one by one"
+      },
+      {
+        "id": "table",
+        "label": "a table",
+        "hint": ""
+      }
+    ],
+    "chosen": "line",
+    "default": "line",
+    "by": "s1",
+    "confidence": 0.87,
+    "why": "",
+    "open": false,
+    "stage": "idiom",
+    "entry_id": null
+  },
+  "refs": [
+    {
+      "table": "fact_order_lines",
+      "column": "line_revenue",
+      "label": "line revenue",
+      "type": "q_ratio",
+      "role": "measure",
+      "unit": "EUR",
+      "description": "Net revenue of the line (quantity times unit_price minus discount), EUR.",
+      "metric": false
+    },
+    {
+      "table": "fact_order_lines",
+      "column": "date_key",
+      "label": "date key",
+      "type": "temporal",
+      "role": "time",
+      "unit": null,
+      "description": "Calendar date of the order. Joins to dim_date.",
+      "metric": false
+    },
+    {
+      "table": "dim_channel",
+      "column": "channel_name",
+      "label": "channel name",
+      "type": "nominal",
+      "role": "dimension",
+      "unit": null,
+      "description": "Sales channel, one of dine_in, takeaway, delivery.",
+      "metric": false
+    }
+  ],
+  "analysis": {
+    "synthetic": true,
+    "about": "Synthetic: made up by mock/showcase.ts from the run's own rows, to show what the core's analysis (plan, analyse, gather) will add to the answer; the core does not make it yet.",
+    "stages": [
+      {
+        "phase": "understand",
+        "stage": "plan",
+        "ms": 2600
+      },
+      {
+        "phase": "analyse",
+        "stage": "analyse",
+        "ms": 3120
+      },
+      {
+        "phase": "analyse",
+        "stage": "gather",
+        "ms": 1900
+      }
+    ],
+    "storyline": {
+      "top": "Delivery revenue rose from €84k to €105k, Jan–Dec 2025",
+      "key_line": [
+        {
+          "id": "k1",
+          "text": "Revenue peaked in August at €113k"
+        },
+        {
+          "id": "k2",
+          "text": "The second half averaged €104k a month, against €79k in the first"
+        },
+        {
+          "id": "k3",
+          "text": "February was the low point at €65k"
+        }
+      ]
+    },
+    "lead": "sp1",
+    "supports": [
+      {
+        "id": "sp1",
+        "role": "answer",
+        "point": "k1",
+        "text": "Delivery revenue per month in 2025",
+        "drawn": "main",
+        "chart": null,
+        "layer": "answer",
+        "note": null
+      },
+      {
+        "id": "sp2",
+        "role": "comparison",
+        "point": "k2",
+        "text": "The average month of each half of 2025",
+        "drawn": "small",
+        "chart": {
+          "chart": "bar",
+          "label": "columns",
+          "title": null,
+          "subtitle": [],
+          "hint": null,
+          "score": null,
+          "spec": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "description": "Columns: the average monthly delivery revenue of the first and of the second half of 2025",
+            "data": {
+              "values": [
+                {
+                  "part": "Jan–Jun",
+                  "value": 79127.478333
+                },
+                {
+                  "part": "Jul–Dec",
+                  "value": 104361.303333
+                }
+              ]
+            },
+            "height": 160,
+            "mark": {
+              "type": "bar",
+              "cornerRadiusEnd": 3
+            },
+            "encoding": {
+              "x": {
+                "field": "part",
+                "type": "ordinal",
+                "sort": null,
+                "title": null,
+                "axis": {
+                  "labelAngle": 0
+                }
+              },
+              "y": {
+                "field": "value",
+                "type": "quantitative",
+                "title": "revenue per month (EUR)",
+                "axis": {
+                  "format": "~s",
+                  "tickCount": 4
+                }
+              },
+              "color": {
+                "value": "#1227FD"
+              },
+              "tooltip": [
+                {
+                  "field": "part",
+                  "title": ""
+                },
+                {
+                  "field": "value",
+                  "type": "quantitative",
+                  "title": "revenue per month (EUR)",
+                  "format": "~s"
+                }
+              ]
+            },
+            "usermeta": {
+              "theme": "pattern-perspectives",
+              "drawn_by": "mock",
+              "synthetic": true
+            },
+            "config": {
+              "background": "#FFFFFF",
+              "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+              "padding": {
+                "left": 20,
+                "right": 24,
+                "top": 20,
+                "bottom": 18
+              },
+              "view": {
+                "stroke": null
+              },
+              "title": {
+                "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "fontSize": 16,
+                "fontWeight": 600,
+                "color": "#191C1F",
+                "anchor": "start",
+                "offset": 16,
+                "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "subtitleColor": "#5F6368",
+                "subtitleFontSize": 12.5,
+                "subtitleFontWeight": 400,
+                "subtitlePadding": 6,
+                "subtitleLineHeight": 17
+              },
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelFontSize": 10.5,
+                "labelColor": "#5F6368",
+                "labelPadding": 8,
+                "labelSeparation": 6,
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "titlePadding": 12,
+                "domainColor": "#C9C9CD",
+                "tickColor": "#C9C9CD",
+                "gridColor": "#E2E2E7",
+                "gridWidth": 1
+              },
+              "axisX": {
+                "grid": false,
+                "ticks": true,
+                "tickSize": 4,
+                "domain": true
+              },
+              "axisY": {
+                "domain": false,
+                "ticks": false,
+                "grid": true
+              },
+              "axisBand": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelColor": "#191C1F",
+                "labelFontSize": 11,
+                "labelPadding": 10
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelFontSize": 12,
+                "labelColor": "#191C1F",
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "symbolType": "circle",
+                "symbolSize": 110,
+                "symbolStrokeWidth": 0,
+                "columnPadding": 16,
+                "padding": 4,
+                "offset": 16
+              },
+              "range": {
+                "category": [
+                  "#1227FD",
+                  "#00967A",
+                  "#8B5CF6",
+                  "#B07800",
+                  "#46277A",
+                  "#4F7BFF",
+                  "#191C1F"
+                ],
+                "ramp": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "heatmap": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "diverging": [
+                  "#E23B4A",
+                  "#F4F4F6",
+                  "#1227FD"
+                ]
+              },
+              "mark": {
+                "color": "#1227FD"
+              },
+              "line": {
+                "color": "#1227FD",
+                "strokeWidth": 2.5,
+                "strokeCap": "round",
+                "strokeJoin": "round"
+              },
+              "point": {
+                "color": "#1227FD",
+                "size": 56,
+                "filled": true
+              },
+              "area": {
+                "color": "#1227FD",
+                "opacity": 0.16
+              },
+              "bar": {
+                "color": "#1227FD",
+                "cornerRadiusEnd": 5
+              },
+              "arc": {
+                "stroke": "#FFFFFF",
+                "strokeWidth": 2
+              },
+              "rect": {
+                "color": "#1227FD"
+              },
+              "rule": {
+                "color": "#C9C9CD"
+              },
+              "text": {
+                "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "fontSize": 11,
+                "color": "#191C1F"
+              }
+            }
+          },
+          "png_url": null,
+          "min_width": 260,
+          "options": []
+        },
+        "layer": null,
+        "note": null
+      },
+      {
+        "id": "sp3",
+        "role": "decomposition",
+        "point": "k3",
+        "text": "Each month against the one before",
+        "drawn": "small",
+        "chart": {
+          "chart": "bar",
+          "label": "columns",
+          "title": null,
+          "subtitle": [],
+          "hint": null,
+          "score": null,
+          "spec": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "description": "Columns: each month's delivery revenue minus the month before's; falls in red",
+            "data": {
+              "values": [
+                {
+                  "part": "Feb",
+                  "value": -18657.71
+                },
+                {
+                  "part": "Mar",
+                  "value": 12839.97
+                },
+                {
+                  "part": "Apr",
+                  "value": -3444.58
+                },
+                {
+                  "part": "May",
+                  "value": 10779.3
+                },
+                {
+                  "part": "Jun",
+                  "value": 2123.1
+                },
+                {
+                  "part": "Jul",
+                  "value": 9270.14
+                },
+                {
+                  "part": "Aug",
+                  "value": 15811.09
+                },
+                {
+                  "part": "Sep",
+                  "value": -9343.82
+                },
+                {
+                  "part": "Oct",
+                  "value": 4083.31
+                },
+                {
+                  "part": "Nov",
+                  "value": -6274.01
+                },
+                {
+                  "part": "Dec",
+                  "value": 3978.84
+                }
+              ]
+            },
+            "height": 160,
+            "mark": {
+              "type": "bar",
+              "cornerRadiusEnd": 3
+            },
+            "encoding": {
+              "x": {
+                "field": "part",
+                "type": "ordinal",
+                "sort": null,
+                "title": null,
+                "axis": {
+                  "labelAngle": 0
+                }
+              },
+              "y": {
+                "field": "value",
+                "type": "quantitative",
+                "title": "change (EUR)",
+                "axis": {
+                  "format": "+~s",
+                  "tickCount": 4
+                }
+              },
+              "color": {
+                "condition": {
+                  "test": "datum.value < 0",
+                  "value": "#E23B4A"
+                },
+                "value": "#1227FD"
+              },
+              "tooltip": [
+                {
+                  "field": "part",
+                  "title": ""
+                },
+                {
+                  "field": "value",
+                  "type": "quantitative",
+                  "title": "change (EUR)",
+                  "format": "+~s"
+                }
+              ]
+            },
+            "usermeta": {
+              "theme": "pattern-perspectives",
+              "drawn_by": "mock",
+              "synthetic": true
+            },
+            "config": {
+              "background": "#FFFFFF",
+              "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+              "padding": {
+                "left": 20,
+                "right": 24,
+                "top": 20,
+                "bottom": 18
+              },
+              "view": {
+                "stroke": null
+              },
+              "title": {
+                "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "fontSize": 16,
+                "fontWeight": 600,
+                "color": "#191C1F",
+                "anchor": "start",
+                "offset": 16,
+                "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "subtitleColor": "#5F6368",
+                "subtitleFontSize": 12.5,
+                "subtitleFontWeight": 400,
+                "subtitlePadding": 6,
+                "subtitleLineHeight": 17
+              },
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelFontSize": 10.5,
+                "labelColor": "#5F6368",
+                "labelPadding": 8,
+                "labelSeparation": 6,
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "titlePadding": 12,
+                "domainColor": "#C9C9CD",
+                "tickColor": "#C9C9CD",
+                "gridColor": "#E2E2E7",
+                "gridWidth": 1
+              },
+              "axisX": {
+                "grid": false,
+                "ticks": true,
+                "tickSize": 4,
+                "domain": true
+              },
+              "axisY": {
+                "domain": false,
+                "ticks": false,
+                "grid": true
+              },
+              "axisBand": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelColor": "#191C1F",
+                "labelFontSize": 11,
+                "labelPadding": 10
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelFontSize": 12,
+                "labelColor": "#191C1F",
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "symbolType": "circle",
+                "symbolSize": 110,
+                "symbolStrokeWidth": 0,
+                "columnPadding": 16,
+                "padding": 4,
+                "offset": 16
+              },
+              "range": {
+                "category": [
+                  "#1227FD",
+                  "#00967A",
+                  "#8B5CF6",
+                  "#B07800",
+                  "#46277A",
+                  "#4F7BFF",
+                  "#191C1F"
+                ],
+                "ramp": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "heatmap": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "diverging": [
+                  "#E23B4A",
+                  "#F4F4F6",
+                  "#1227FD"
+                ]
+              },
+              "mark": {
+                "color": "#1227FD"
+              },
+              "line": {
+                "color": "#1227FD",
+                "strokeWidth": 2.5,
+                "strokeCap": "round",
+                "strokeJoin": "round"
+              },
+              "point": {
+                "color": "#1227FD",
+                "size": 56,
+                "filled": true
+              },
+              "area": {
+                "color": "#1227FD",
+                "opacity": 0.16
+              },
+              "bar": {
+                "color": "#1227FD",
+                "cornerRadiusEnd": 5
+              },
+              "arc": {
+                "stroke": "#FFFFFF",
+                "strokeWidth": 2
+              },
+              "rect": {
+                "color": "#1227FD"
+              },
+              "rule": {
+                "color": "#C9C9CD"
+              },
+              "text": {
+                "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "fontSize": 11,
+                "color": "#191C1F"
+              }
+            }
+          },
+          "png_url": null,
+          "min_width": 260,
+          "options": []
+        },
+        "layer": null,
+        "note": null
+      },
+      {
+        "id": "sp4",
+        "role": "context",
+        "point": null,
+        "text": "Revenue rose from one month to the next seven times out of 11",
+        "drawn": "none",
+        "chart": null,
+        "layer": null,
+        "note": null
+      }
+    ],
+    "notes": [
+      "Line revenue is net of discounts; tips and service charges are not in it"
+    ],
+    "steps": [
+      {
+        "id": "st1",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "delivery revenue per month",
+        "role": "answer",
+        "ms": 140,
+        "verdict": null,
+        "cached": true,
+        "sql": "SELECT DATE_TRUNC('MONTH', \"f\".\"date_key\") AS \"month\", SUM(\"f\".\"line_revenue\") AS \"line_revenue\" FROM \"fact_order_lines\" AS \"f\" JOIN \"dim_channel\" AS \"dim_channel\" ON \"f\".\"channel_key\" = \"dim_channel\".\"channel_key\" WHERE \"dim_channel\".\"channel_name\" = 'delivery' AND \"f\".\"date_key\" >= CAST('2025-01-01' AS DATE) AND \"f\".\"date_key\" <= CAST('2025-12-31' AS DATE) GROUP BY DATE_TRUNC('MONTH', \"f\".\"date_key\") ORDER BY \"month\" ASC LIMIT 10000",
+        "columns": [
+          {
+            "name": "month",
+            "label": "month",
+            "type": "temporal",
+            "role": "time",
+            "unit": null,
+            "format": null,
+            "description": null
+          },
+          {
+            "name": "line_revenue",
+            "label": "line revenue",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "EUR",
+            "format": ",.0f",
+            "description": "Net revenue of the line (quantity times unit_price minus discount), EUR."
+          }
+        ],
+        "rows": [
+          [
+            "2025-01-01T00:00:00",
+            83890.93
+          ],
+          [
+            "2025-02-01T00:00:00",
+            65233.22
+          ],
+          [
+            "2025-03-01T00:00:00",
+            78073.19
+          ],
+          [
+            "2025-04-01T00:00:00",
+            74628.61
+          ],
+          [
+            "2025-05-01T00:00:00",
+            85407.91
+          ],
+          [
+            "2025-06-01T00:00:00",
+            87531.01
+          ],
+          [
+            "2025-07-01T00:00:00",
+            96801.15
+          ],
+          [
+            "2025-08-01T00:00:00",
+            112612.24
+          ],
+          [
+            "2025-09-01T00:00:00",
+            103268.42
+          ],
+          [
+            "2025-10-01T00:00:00",
+            107351.73
+          ],
+          [
+            "2025-11-01T00:00:00",
+            101077.72
+          ],
+          [
+            "2025-12-01T00:00:00",
+            105056.56
+          ]
+        ],
+        "row_count": 12
+      },
+      {
+        "id": "st2",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "the first half against the second",
+        "role": "comparison",
+        "ms": 2000,
+        "verdict": "as_expected",
+        "cached": false,
+        "sql": "SELECT CASE WHEN \"month\" < CAST('2025-07-01' AS DATE) THEN 'Jan–Jun' ELSE 'Jul–Dec' END AS \"half\", AVG(\"line_revenue\") AS \"line_revenue\"\nFROM (\n  SELECT DATE_TRUNC('MONTH', \"f\".\"date_key\") AS \"month\", SUM(\"f\".\"line_revenue\") AS \"line_revenue\" FROM \"fact_order_lines\" AS \"f\" JOIN \"dim_channel\" AS \"dim_channel\" ON \"f\".\"channel_key\" = \"dim_channel\".\"channel_key\" WHERE \"dim_channel\".\"channel_name\" = 'delivery' AND \"f\".\"date_key\" >= CAST('2025-01-01' AS DATE) AND \"f\".\"date_key\" <= CAST('2025-12-31' AS DATE) GROUP BY DATE_TRUNC('MONTH', \"f\".\"date_key\") ORDER BY \"month\" ASC LIMIT 10000\n) AS \"answer\"\nGROUP BY 1\nORDER BY 1",
+        "columns": [
+          {
+            "name": "half",
+            "label": "half",
+            "type": "ordinal",
+            "role": "dimension",
+            "unit": null,
+            "format": null,
+            "description": null
+          },
+          {
+            "name": "line_revenue",
+            "label": "line revenue",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "EUR",
+            "format": ",.0f",
+            "description": "Net revenue of the line (quantity times unit_price minus discount), EUR."
+          }
+        ],
+        "rows": [
+          [
+            "Jan–Jun",
+            79127.478333
+          ],
+          [
+            "Jul–Dec",
+            104361.303333
+          ]
+        ],
+        "row_count": 2
+      },
+      {
+        "id": "st3",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "a month left incomplete",
+        "role": "check",
+        "ms": 900,
+        "verdict": "as_expected",
+        "cached": false,
+        "sql": null,
+        "columns": [],
+        "rows": [],
+        "row_count": null
+      }
+    ],
+    "follow_ups": [
+      {
+        "id": "fu1",
+        "kind": "breakdown",
+        "question": "What was the revenue by city and channel?",
+        "fixture": "city-channel"
+      },
+      {
+        "id": "fu2",
+        "kind": "next_level",
+        "question": "How did delivery revenue develop per week over the last 90 days?",
+        "fixture": null
+      }
+    ]
+  }
 }

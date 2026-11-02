@@ -6,23 +6,23 @@ interface Props {
   onPick(chart: string): void;
 }
 
-/** The chart shown, then the other admissible charts; picking one presents the run again. */
+/**
+ * Every admissible chart in the server's order, which a switch does not change, the
+ * drawn one pressed; picking another presents the run again.
+ */
 export function ChartSwitcher({ chart, disabled, onPick }: Props) {
-  if (chart.alternatives.length === 0) return null;
+  if (chart.options.length < 2) return null;
   return (
     <div className="tx-switcher" role="group" aria-label="Show it as">
-      <button type="button" className="pill" aria-pressed="true" disabled={disabled}>
-        {chart.label}
-      </button>
-      {chart.alternatives.map((option) => (
+      {chart.options.map((option) => (
         <button
           key={option.chart}
           type="button"
           className="pill"
-          aria-pressed="false"
+          aria-pressed={option.drawn}
           title={option.hint ?? undefined}
           disabled={disabled}
-          onClick={() => onPick(option.chart)}
+          onClick={option.drawn ? undefined : () => onPick(option.chart)}
         >
           {option.label}
         </button>

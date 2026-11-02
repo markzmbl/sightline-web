@@ -1,6 +1,9 @@
 {
   "slug": "scrap",
   "workspace": "manufacturing",
+  "made_up": [
+    "definitions"
+  ],
   "question": "Which production orders had the most scrap against plan in 2025?",
   "final_status": "complete",
   "continuation": null,
@@ -56,39 +59,23 @@
       "ms": 1332
     }
   ],
-  "restatement": null,
+  "restatement": "You want to see the top 10 production order by actual to planned scrap, in 2025.",
+  "definitions": [
+    {
+      "name": "scrap against plan",
+      "label": "Scrap against plan",
+      "definition": "scrap quantity over planned scrap quantity",
+      "entry_id": "measure-scrap-against-plan",
+      "source": {
+        "kind": "drafted",
+        "text": "drafted by sightline"
+      },
+      "status": "proposed"
+    }
+  ],
   "card": {
     "blocking": false,
     "points": [
-      {
-        "id": "grain",
-        "step": "meaning",
-        "question": "In which time steps?",
-        "options": [
-          {
-            "id": "none",
-            "label": "no time steps",
-            "hint": ""
-          },
-          {
-            "id": "year",
-            "label": "per year",
-            "hint": ""
-          },
-          {
-            "id": "event",
-            "label": "every single event",
-            "hint": ""
-          }
-        ],
-        "chosen": "none",
-        "default": "none",
-        "by": "s1",
-        "confidence": 0.53,
-        "why": "",
-        "open": false,
-        "stage": "abstract"
-      },
       {
         "id": "labels",
         "step": "detail",
@@ -111,21 +98,35 @@
         "confidence": 0.34,
         "why": "the System 1 model was not sure (0.34 below 0.50)",
         "open": true,
-        "stage": "idiom"
+        "stage": "idiom",
+        "entry_id": null
       }
     ]
   },
   "clarify": null,
+  "follow_ups": [],
+  "error": null,
   "result": {
     "sql": "SELECT \"f\".\"production_order\" AS \"production_order\", ((COALESCE(SUM(\"f\".\"scrap_qty\"), 0)) / NULLIF((COALESCE(SUM(\"f\".\"planned_scrap_qty\"), 0)), 0)) AS \"actual_to_planned_scrap\" FROM \"main\".\"fct_production_shifts\" AS \"f\" WHERE \"f\".\"shift_date\" >= CAST('2025-01-01' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-31' AS DATE) GROUP BY \"f\".\"production_order\" HAVING (COUNT(*) + COUNT(*)) > 0 ORDER BY \"actual_to_planned_scrap\" DESC LIMIT 10",
+    "step_id": "st1",
     "columns": [
       {
         "name": "production_order",
-        "type": "nominal"
+        "label": "production order",
+        "type": "nominal",
+        "role": "dimension",
+        "unit": null,
+        "format": null,
+        "description": "Production order the shift ran."
       },
       {
         "name": "actual_to_planned_scrap",
-        "type": "q_ratio"
+        "label": "actual to planned scrap",
+        "type": "q_ratio",
+        "role": "measure",
+        "unit": "x",
+        "format": ",.2f",
+        "description": "Actual scrap over the scrap the orders allowed; 1 is on plan."
       }
     ],
     "rows": [
@@ -175,9 +176,15 @@
     "chart": {
       "chart": "horizontal_bar",
       "label": "ranked bars",
+      "title": "Top 10 production orders by actual to planned scrap",
+      "subtitle": [
+        "2025"
+      ],
+      "hint": "see which categories are the largest and how far apart they are",
+      "score": 30,
       "spec": {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "description": "horizontal_bar (deterministic fallback); rules: CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO, VIS-TASK-FIT",
+        "description": "Ranked bars: Top 10 production orders by actual to planned scrap, 2025",
         "data": {
           "values": [
             {
@@ -411,12 +418,30 @@
         "title": {
           "text": "Top 10 production orders by actual to planned scrap",
           "subtitle": [
-            "2025",
-            "Top 10 of 10,370 production orders"
+            "2025"
           ]
         },
         "usermeta": {
-          "theme": "pattern-perspectives"
+          "theme": "pattern-perspectives",
+          "rules": [
+            "CH-N-POS",
+            "CH-Q-LEN",
+            "FORM-BAR-STEP",
+            "FORM-FOLD-REST",
+            "FORM-QUIET-AXIS",
+            "FORM-RECOGNISED",
+            "FORM-SHARE-TIP",
+            "FORM-SHORT-LABEL",
+            "FORM-SORT-SIZE",
+            "FORM-TELL-APART",
+            "FORM-TITLE-WHAT",
+            "FORM-VALUE-TIP",
+            "FORM-YES-NO",
+            "INTENT-AFFINITY",
+            "VIS-BAR-ZERO",
+            "VIS-EXCLUSION-NOTE",
+            "VIS-TASK-FIT"
+          ]
         },
         "config": {
           "background": "#FFFFFF",
@@ -558,30 +583,54 @@
         }
       },
       "png_url": null,
-      "alternatives": [
+      "min_width": null,
+      "options": [
+        {
+          "chart": "horizontal_bar",
+          "label": "ranked bars",
+          "hint": "see which categories are the largest and how far apart they are",
+          "score": 30,
+          "drawn": true
+        },
         {
           "chart": "point",
           "label": "ranked dots",
-          "hint": "see which categories are the largest and how far apart they are"
+          "hint": "see which categories are the largest and how far apart they are",
+          "score": 25,
+          "drawn": false
         },
         {
           "chart": "bar",
           "label": "columns",
-          "hint": null
+          "hint": null,
+          "score": 21,
+          "drawn": false
         },
         {
           "chart": "table",
           "label": "a table",
-          "hint": null
+          "hint": null,
+          "score": 1,
+          "drawn": false
         }
       ]
     },
-    "findings": []
+    "findings": [],
+    "notes": [
+      "Top 10 of 10,370 production orders"
+    ],
+    "verdict": "warn",
+    "concerns": [
+      "System 1 doubts that the chart answers the question asked (P 0.49)"
+    ],
+    "storyline": null,
+    "lead": null,
+    "supports": []
   },
   "charts": {
     "horizontal_bar": {
       "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "description": "horizontal_bar (deterministic fallback); rules: CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO, VIS-TASK-FIT",
+      "description": "Ranked bars: Top 10 production orders by actual to planned scrap, 2025",
       "data": {
         "values": [
           {
@@ -815,12 +864,30 @@
       "title": {
         "text": "Top 10 production orders by actual to planned scrap",
         "subtitle": [
-          "2025",
-          "Top 10 of 10,370 production orders"
+          "2025"
         ]
       },
       "usermeta": {
-        "theme": "pattern-perspectives"
+        "theme": "pattern-perspectives",
+        "rules": [
+          "CH-N-POS",
+          "CH-Q-LEN",
+          "FORM-BAR-STEP",
+          "FORM-FOLD-REST",
+          "FORM-QUIET-AXIS",
+          "FORM-RECOGNISED",
+          "FORM-SHARE-TIP",
+          "FORM-SHORT-LABEL",
+          "FORM-SORT-SIZE",
+          "FORM-TELL-APART",
+          "FORM-TITLE-WHAT",
+          "FORM-VALUE-TIP",
+          "FORM-YES-NO",
+          "INTENT-AFFINITY",
+          "VIS-BAR-ZERO",
+          "VIS-EXCLUSION-NOTE",
+          "VIS-TASK-FIT"
+        ]
       },
       "config": {
         "background": "#FFFFFF",
@@ -966,22 +1033,550 @@
     {
       "chart": "horizontal_bar",
       "label": "ranked bars",
-      "hint": "see which categories are the largest and how far apart they are"
+      "hint": "see which categories are the largest and how far apart they are",
+      "score": 30,
+      "drawn": false
     },
     {
       "chart": "point",
       "label": "ranked dots",
-      "hint": "see which categories are the largest and how far apart they are"
+      "hint": "see which categories are the largest and how far apart they are",
+      "score": 25,
+      "drawn": false
     },
     {
       "chart": "bar",
       "label": "columns",
-      "hint": null
+      "hint": null,
+      "score": 21,
+      "drawn": false
     },
     {
       "chart": "table",
       "label": "a table",
-      "hint": null
+      "hint": null,
+      "score": 1,
+      "drawn": false
     }
-  ]
+  ],
+  "form_point": {
+    "id": "idiom",
+    "step": "form",
+    "question": "How do you want to see it?",
+    "options": [
+      {
+        "id": "horizontal_bar",
+        "label": "ranked bars",
+        "hint": "to see which categories are the largest and how far apart they are"
+      },
+      {
+        "id": "point",
+        "label": "ranked dots",
+        "hint": "to see which categories are the largest and how far apart they are"
+      },
+      {
+        "id": "bar",
+        "label": "columns",
+        "hint": ""
+      },
+      {
+        "id": "table",
+        "label": "a table",
+        "hint": ""
+      }
+    ],
+    "chosen": "horizontal_bar",
+    "default": "horizontal_bar",
+    "by": "s1",
+    "confidence": 0.76,
+    "why": "",
+    "open": false,
+    "stage": "idiom",
+    "entry_id": null
+  },
+  "refs": [
+    {
+      "table": "fct_production_shifts",
+      "column": "actual_to_planned_scrap",
+      "label": "actual to planned scrap",
+      "type": "q_ratio",
+      "role": "measure",
+      "unit": "x",
+      "description": "Actual scrap over the scrap the orders allowed; 1 is on plan.",
+      "metric": true
+    },
+    {
+      "table": "fct_production_shifts",
+      "column": "production_order",
+      "label": "production order",
+      "type": "nominal",
+      "role": "dimension",
+      "unit": null,
+      "description": "Production order the shift ran.",
+      "metric": false
+    },
+    {
+      "table": "fct_production_shifts",
+      "column": "shift_date",
+      "label": "shift date",
+      "type": "temporal",
+      "role": "time",
+      "unit": null,
+      "description": "Day of the shift. Joins to dim_date.",
+      "metric": false
+    }
+  ],
+  "analysis": {
+    "synthetic": true,
+    "about": "Synthetic: made up by mock/showcase.ts from the run's own rows, to show what the core's analysis (plan, analyse, gather) will add to the answer; the core does not make it yet.",
+    "stages": [
+      {
+        "phase": "understand",
+        "stage": "plan",
+        "ms": 2600
+      },
+      {
+        "phase": "analyse",
+        "stage": "analyse",
+        "ms": 3720
+      },
+      {
+        "phase": "analyse",
+        "stage": "gather",
+        "ms": 1900
+      }
+    ],
+    "storyline": {
+      "top": "PO302168 had the most scrap against plan in 2025, 4.4 times its allowance",
+      "key_line": [
+        {
+          "id": "k1",
+          "text": "PO302168 scrapped 4.4 times the scrap it allowed, 0.5 more than PO301657"
+        },
+        {
+          "id": "k2",
+          "text": "All ten orders scrapped at least 3.1 times their allowance"
+        }
+      ]
+    },
+    "lead": "sp1",
+    "supports": [
+      {
+        "id": "sp1",
+        "role": "answer",
+        "point": "k1",
+        "text": "The ten orders with the most scrap against plan",
+        "drawn": "main",
+        "chart": null,
+        "layer": "answer",
+        "note": null
+      },
+      {
+        "id": "sp2",
+        "role": "reference",
+        "point": "k2",
+        "text": "How far each order went over its allowance, in multiples of it",
+        "drawn": "small",
+        "chart": {
+          "chart": "horizontal_bar",
+          "label": "ranked bars",
+          "title": null,
+          "subtitle": [],
+          "hint": null,
+          "score": null,
+          "spec": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "description": "Bars: each order's scrap against plan minus 1, the plan; every order is above it",
+            "data": {
+              "values": [
+                {
+                  "member": "PO302168",
+                  "value": 3.375
+                },
+                {
+                  "member": "PO301657",
+                  "value": 2.870968
+                },
+                {
+                  "member": "PO302171",
+                  "value": 2.863636
+                },
+                {
+                  "member": "PO302415",
+                  "value": 2.764706
+                },
+                {
+                  "member": "PO302164",
+                  "value": 2.609865
+                },
+                {
+                  "member": "PO301661",
+                  "value": 2.383459
+                },
+                {
+                  "member": "PO301391",
+                  "value": 2.291139
+                },
+                {
+                  "member": "PO301665",
+                  "value": 2.247496
+                },
+                {
+                  "member": "PO301900",
+                  "value": 2.218884
+                },
+                {
+                  "member": "PO301398",
+                  "value": 2.058824
+                }
+              ]
+            },
+            "height": 160,
+            "mark": {
+              "type": "bar",
+              "cornerRadiusEnd": 3
+            },
+            "encoding": {
+              "y": {
+                "field": "member",
+                "type": "nominal",
+                "sort": "-x",
+                "title": null,
+                "axis": {
+                  "labelLimit": 160
+                }
+              },
+              "x": {
+                "field": "value",
+                "type": "quantitative",
+                "title": "times over the allowance",
+                "axis": {
+                  "format": "+.1f",
+                  "tickCount": 4
+                }
+              },
+              "color": {
+                "value": "#1227FD"
+              },
+              "tooltip": [
+                {
+                  "field": "member",
+                  "title": ""
+                },
+                {
+                  "field": "value",
+                  "type": "quantitative",
+                  "title": "times over the allowance",
+                  "format": "+.1f"
+                }
+              ]
+            },
+            "usermeta": {
+              "theme": "pattern-perspectives",
+              "drawn_by": "mock",
+              "synthetic": true
+            },
+            "config": {
+              "background": "#FFFFFF",
+              "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+              "padding": {
+                "left": 20,
+                "right": 24,
+                "top": 20,
+                "bottom": 18
+              },
+              "view": {
+                "stroke": null
+              },
+              "title": {
+                "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "fontSize": 16,
+                "fontWeight": 600,
+                "color": "#191C1F",
+                "anchor": "start",
+                "offset": 16,
+                "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "subtitleColor": "#5F6368",
+                "subtitleFontSize": 12.5,
+                "subtitleFontWeight": 400,
+                "subtitlePadding": 6,
+                "subtitleLineHeight": 17
+              },
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelFontSize": 10.5,
+                "labelColor": "#5F6368",
+                "labelPadding": 8,
+                "labelSeparation": 6,
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "titlePadding": 12,
+                "domainColor": "#C9C9CD",
+                "tickColor": "#C9C9CD",
+                "gridColor": "#E2E2E7",
+                "gridWidth": 1
+              },
+              "axisX": {
+                "grid": false,
+                "ticks": true,
+                "tickSize": 4,
+                "domain": true
+              },
+              "axisY": {
+                "domain": false,
+                "ticks": false,
+                "grid": true
+              },
+              "axisBand": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelColor": "#191C1F",
+                "labelFontSize": 11,
+                "labelPadding": 10
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelFontSize": 12,
+                "labelColor": "#191C1F",
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "symbolType": "circle",
+                "symbolSize": 110,
+                "symbolStrokeWidth": 0,
+                "columnPadding": 16,
+                "padding": 4,
+                "offset": 16
+              },
+              "range": {
+                "category": [
+                  "#1227FD",
+                  "#00967A",
+                  "#8B5CF6",
+                  "#B07800",
+                  "#46277A",
+                  "#4F7BFF",
+                  "#191C1F"
+                ],
+                "ramp": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "heatmap": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "diverging": [
+                  "#E23B4A",
+                  "#F4F4F6",
+                  "#1227FD"
+                ]
+              },
+              "mark": {
+                "color": "#1227FD"
+              },
+              "line": {
+                "color": "#1227FD",
+                "strokeWidth": 2.5,
+                "strokeCap": "round",
+                "strokeJoin": "round"
+              },
+              "point": {
+                "color": "#1227FD",
+                "size": 56,
+                "filled": true
+              },
+              "area": {
+                "color": "#1227FD",
+                "opacity": 0.16
+              },
+              "bar": {
+                "color": "#1227FD",
+                "cornerRadiusEnd": 5
+              },
+              "arc": {
+                "stroke": "#FFFFFF",
+                "strokeWidth": 2
+              },
+              "rect": {
+                "color": "#1227FD"
+              },
+              "rule": {
+                "color": "#C9C9CD"
+              },
+              "text": {
+                "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "fontSize": 11,
+                "color": "#191C1F"
+              }
+            }
+          },
+          "png_url": null,
+          "min_width": 260,
+          "options": []
+        },
+        "layer": null,
+        "note": null
+      },
+      {
+        "id": "sp3",
+        "role": "context",
+        "point": null,
+        "text": "On average the ten orders scrapped 3.6 times their allowance",
+        "drawn": "none",
+        "chart": null,
+        "layer": null,
+        "note": null
+      }
+    ],
+    "notes": [
+      "Whether these orders allowed unusually little scrap was not settled: a small allowance alone makes the ratio large"
+    ],
+    "steps": [
+      {
+        "id": "st1",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "scrap against plan per order",
+        "role": "answer",
+        "ms": 140,
+        "verdict": null,
+        "cached": true,
+        "sql": "SELECT \"f\".\"production_order\" AS \"production_order\", ((COALESCE(SUM(\"f\".\"scrap_qty\"), 0)) / NULLIF((COALESCE(SUM(\"f\".\"planned_scrap_qty\"), 0)), 0)) AS \"actual_to_planned_scrap\" FROM \"main\".\"fct_production_shifts\" AS \"f\" WHERE \"f\".\"shift_date\" >= CAST('2025-01-01' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-31' AS DATE) GROUP BY \"f\".\"production_order\" HAVING (COUNT(*) + COUNT(*)) > 0 ORDER BY \"actual_to_planned_scrap\" DESC LIMIT 10",
+        "columns": [
+          {
+            "name": "production_order",
+            "label": "production order",
+            "type": "nominal",
+            "role": "dimension",
+            "unit": null,
+            "format": null,
+            "description": "Production order the shift ran."
+          },
+          {
+            "name": "actual_to_planned_scrap",
+            "label": "actual to planned scrap",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "x",
+            "format": ",.2f",
+            "description": "Actual scrap over the scrap the orders allowed; 1 is on plan."
+          }
+        ],
+        "rows": [
+          [
+            "PO302168",
+            4.375
+          ],
+          [
+            "PO301657",
+            3.870968
+          ],
+          [
+            "PO302171",
+            3.863636
+          ],
+          [
+            "PO302415",
+            3.764706
+          ],
+          [
+            "PO302164",
+            3.609865
+          ],
+          [
+            "PO301661",
+            3.383459
+          ],
+          [
+            "PO301391",
+            3.291139
+          ],
+          [
+            "PO301665",
+            3.247496
+          ],
+          [
+            "PO301900",
+            3.218884
+          ],
+          [
+            "PO301398",
+            3.058824
+          ]
+        ],
+        "row_count": 10
+      },
+      {
+        "id": "st2",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "the spread of the top ten",
+        "role": "comparison",
+        "ms": 1400,
+        "verdict": "as_expected",
+        "cached": false,
+        "sql": "SELECT MIN(\"actual_to_planned_scrap\") AS \"lowest\", MAX(\"actual_to_planned_scrap\") AS \"highest\"\nFROM (\n  SELECT \"f\".\"production_order\" AS \"production_order\", ((COALESCE(SUM(\"f\".\"scrap_qty\"), 0)) / NULLIF((COALESCE(SUM(\"f\".\"planned_scrap_qty\"), 0)), 0)) AS \"actual_to_planned_scrap\" FROM \"main\".\"fct_production_shifts\" AS \"f\" WHERE \"f\".\"shift_date\" >= CAST('2025-01-01' AS DATE) AND \"f\".\"shift_date\" <= CAST('2025-12-31' AS DATE) GROUP BY \"f\".\"production_order\" HAVING (COUNT(*) + COUNT(*)) > 0 ORDER BY \"actual_to_planned_scrap\" DESC LIMIT 10\n) AS \"answer\"",
+        "columns": [
+          {
+            "name": "lowest",
+            "label": "lowest",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "x",
+            "format": ",.2f",
+            "description": "Actual scrap over the scrap the orders allowed; 1 is on plan."
+          },
+          {
+            "name": "highest",
+            "label": "highest",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "x",
+            "format": ",.2f",
+            "description": "Actual scrap over the scrap the orders allowed; 1 is on plan."
+          }
+        ],
+        "rows": [
+          [
+            3.058824,
+            4.375
+          ]
+        ],
+        "row_count": 1
+      },
+      {
+        "id": "st3",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "a small allowance behind the ratio",
+        "role": "denominator",
+        "ms": 2100,
+        "verdict": "inconclusive",
+        "cached": false,
+        "sql": null,
+        "columns": [],
+        "rows": [],
+        "row_count": null
+      }
+    ],
+    "follow_ups": [
+      {
+        "id": "fu1",
+        "kind": "breakdown",
+        "question": "How did availability, effectiveness and quality ratio develop per week in Q4 2025?",
+        "fixture": "aeq-weekly"
+      },
+      {
+        "id": "fu2",
+        "kind": "next_level",
+        "question": "Which products had the most scrap against plan in 2025?",
+        "fixture": null
+      }
+    ]
+  }
 }

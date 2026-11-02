@@ -103,12 +103,6 @@
   white-space: nowrap;
 }
 
-.tx-chip--mono {
-  background: var(--raised);
-  color: var(--ink);
-  font-family: var(--mono);
-}
-
 /* User turn */
 
 .tx-user {
@@ -126,6 +120,13 @@
   background: var(--raised);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+/* A take-back's prompt is the text taken back: kept for the record, not sent again. */
+.tx-user__bubble--taken {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--muted);
 }
 
 /* Run turn */
@@ -168,6 +169,52 @@
 
 .tx-restatement--pending {
   color: var(--muted);
+}
+
+.tx-run__loading {
+  margin: 0 0 0 28px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Definitions, under the restatement */
+
+.tx-defs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: -6px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.tx-defs__line {
+  margin: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.tx-defs__name {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+a.tx-defs__name {
+  text-decoration: underline;
+  text-decoration-color: var(--edge);
+  text-underline-offset: 3px;
+}
+
+a.tx-defs__name:hover {
+  text-decoration-color: currentColor;
+}
+
+.tx-defs__text {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
 }
 
 .tx-fold {
@@ -221,6 +268,213 @@
   padding-left: 18px;
 }
 
+/* The answer: the storyline's top, the main chart, the key line with its small charts */
+
+.tx-answer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.tx-answer__top {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.tx-keyline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+/* A list item, not a flex box, so it keeps its marker. */
+.tx-keyline__point {
+  min-width: 0;
+}
+
+.tx-keyline__text {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.tx-keyline__point > .tx-smalls,
+.tx-keyline__point > .tx-dropped {
+  margin-top: 10px;
+}
+
+/* Small charts: two to a row while each keeps its minimum width, else one; never wider than the column. */
+.tx-smalls {
+  --tx-small-gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, max(var(--tx-small-min, 260px), calc((100% - var(--tx-small-gap)) / 2))), 1fr)
+  );
+  gap: var(--tx-small-gap);
+}
+
+.tx-answer > .tx-smalls {
+  margin-left: 18px;
+}
+
+.tx-small {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+}
+
+.tx-small__caption {
+  color: var(--muted);
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+
+.tx-dropped {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-style: italic;
+}
+
+.tx-answer > .tx-dropped {
+  margin-left: 18px;
+}
+
+/* Notes: every caveat of the answer */
+
+.tx-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.tx-notes__title,
+.tx-next__title {
+  margin: 0;
+  color: var(--muted);
+  font: 500 10.5px/1.4 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tx-notes__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding-left: 18px;
+  overflow-wrap: anywhere;
+}
+
+/* validate's doubts, quietly */
+
+.tx-concerns {
+  padding: 8px 12px;
+  border-left: 2px solid var(--warn);
+  border-radius: 0 var(--radius-small) var(--radius-small) 0;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.tx-concerns--fail {
+  border-left-color: var(--bad);
+}
+
+.tx-concerns__title {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.tx-concerns__list {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  overflow-wrap: anywhere;
+}
+
+/* Follow-ups: questions to ask next, chips on the latest run */
+
+.tx-next {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tx-follow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tx-follow li {
+  max-width: 100%;
+}
+
+.tx-follow__chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  max-width: 100%;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  background: var(--raised);
+  font-size: 13.5px;
+  text-align: left;
+}
+
+.tx-follow__chip:hover:not(:disabled) {
+  border-color: var(--edge);
+}
+
+.tx-follow__chip:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.tx-follow__kind {
+  flex: none;
+  color: var(--accent);
+  font: 500 10.5px/1.4 var(--mono);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.tx-follow__question {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.tx-follow--record {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.tx-follow--record li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.tx-follow--record .tx-follow__kind {
+  color: var(--muted);
+}
+
 .tx-run__foot {
   display: flex;
   flex-wrap: wrap;
@@ -245,6 +499,30 @@
 
 .tx-error__message {
   margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+
+.tx-error__retry {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.tx-error__detail {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.tx-error__detail summary {
+  width: fit-content;
+  cursor: pointer;
+}
+
+.tx-error__detail pre {
+  margin: 4px 0 0;
+  overflow-x: auto;
+  font: 12px/1.5 var(--mono);
+  white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
@@ -333,38 +611,28 @@
   overflow-wrap: anywhere;
 }
 
-.tx-clarify__nearest {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-  margin: 2px 0 0;
-  padding: 0;
-  list-style: none;
+.tx-clarify .tx-follow {
+  margin-top: 2px;
 }
 
-.tx-clarify__nearest li {
-  max-width: 100%;
-}
-
-.tx-clarify__ask {
-  max-width: 100%;
-  padding: 6px 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-small);
+/* A gap's suggestion that asks again with it. */
+.tx-clarify .tx-chip--ask {
   background: var(--raised);
-  font-size: 13.5px;
-  text-align: left;
-  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: 12.5px;
 }
 
-.tx-clarify__ask:hover:not(:disabled) {
+.tx-clarify .tx-chip--ask:hover:not(:disabled) {
   border-color: var(--edge);
 }
 
-.tx-clarify__ask:disabled {
+.tx-clarify .tx-chip--ask:disabled {
   opacity: 0.55;
   cursor: default;
+}
+
+.tx-clarify__more {
+  list-style: none;
 }
 
 .tx-clarify__notes {
@@ -478,6 +746,80 @@
   color: var(--muted);
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
+}
+
+/* Analysis steps, under the stage line they ran in */
+
+.tx-trace__steps {
+  margin: 0 0 4px 8px;
+  padding: 0 0 0 12px;
+  border-left: 1px dashed var(--line);
+  list-style: none;
+}
+
+.tx-trace__step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 8px;
+  min-height: 22px;
+  font-size: 12.5px;
+}
+
+.tx-trace__step-label {
+  min-width: 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.tx-trace__step--running .tx-trace__step-label,
+.tx-trace__checks--running > .tx-trace__step .tx-trace__step-label {
+  color: var(--accent);
+}
+
+.tx-trace__role,
+.tx-trace__cached {
+  color: var(--muted);
+  font: 10.5px/1.4 var(--mono);
+}
+
+.tx-trace__cached {
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.tx-trace__verdict {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.tx-trace__verdict--contradicts,
+.tx-trace__verdict--inconclusive,
+.tx-trace__verdict--failed,
+.tx-trace__verdict--loud {
+  color: var(--warn);
+}
+
+/* The folded checks: a quiet row that unfolds */
+.tx-trace__step--checks {
+  flex-wrap: nowrap;
+  width: calc(100% + 12px);
+  margin: 0 -6px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  text-align: left;
+}
+
+.tx-trace__step--checks:hover {
+  background: var(--surface);
+}
+
+.tx-trace__step--checks .tx-trace__step-label {
+  color: inherit;
 }
 
 /* SQL */
@@ -617,6 +959,10 @@
   color: var(--muted);
 }
 
+.tx-rows__unit {
+  font-weight: 400;
+}
+
 .tx-rows__caption {
   margin: 0;
   padding: 6px 10px;
@@ -638,6 +984,15 @@
 .tx-chart__canvas {
   min-height: 120px;
   padding: 16px;
+}
+
+.tx-chart--small {
+  border-radius: var(--radius-small);
+}
+
+.tx-chart--small .tx-chart__canvas {
+  min-height: 80px;
+  padding: 8px;
 }
 
 .tx-chart__canvas .vega-embed {
@@ -852,6 +1207,17 @@
 .tx-made__by {
   color: var(--muted);
   font-size: 12px;
+}
+
+a.tx-made__by {
+  text-decoration: underline;
+  text-decoration-color: var(--edge);
+  text-underline-offset: 3px;
+}
+
+a.tx-made__by:hover {
+  color: var(--ink);
+  text-decoration-color: currentColor;
 }
 
 .tx-made__line .tx-link {

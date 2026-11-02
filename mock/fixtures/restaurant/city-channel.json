@@ -56,7 +56,8 @@
       "ms": 1207
     }
   ],
-  "restatement": null,
+  "restatement": "You want to see line revenue by city and channel.",
+  "definitions": [],
   "card": {
     "blocking": false,
     "points": [
@@ -97,7 +98,8 @@
         "confidence": 0.47,
         "why": "the System 1 model was not sure (0.47 below 0.50)",
         "open": true,
-        "stage": "idiom"
+        "stage": "idiom",
+        "entry_id": null
       },
       {
         "id": "order",
@@ -121,25 +123,44 @@
         "confidence": 0.14,
         "why": "the System 1 model was not sure (0.14 below 0.50)",
         "open": true,
-        "stage": "idiom"
+        "stage": "idiom",
+        "entry_id": null
       }
     ]
   },
   "clarify": null,
+  "follow_ups": [],
+  "error": null,
   "result": {
     "sql": "SELECT \"dim_restaurant\".\"city\" AS \"city\", \"dim_channel\".\"channel_name\" AS \"channel_name\", SUM(\"f\".\"line_revenue\") AS \"line_revenue\" FROM \"fact_order_lines\" AS \"f\" JOIN \"dim_channel\" AS \"dim_channel\" ON \"f\".\"channel_key\" = \"dim_channel\".\"channel_key\" JOIN \"dim_restaurant\" AS \"dim_restaurant\" ON \"f\".\"restaurant_key\" = \"dim_restaurant\".\"restaurant_key\" GROUP BY \"dim_restaurant\".\"city\", \"dim_channel\".\"channel_name\" ORDER BY \"line_revenue\" DESC LIMIT 10000",
+    "step_id": "st1",
     "columns": [
       {
         "name": "city",
-        "type": "nominal"
+        "label": "city",
+        "type": "nominal",
+        "role": "dimension",
+        "unit": null,
+        "format": null,
+        "description": "City the branch operates in."
       },
       {
         "name": "channel_name",
-        "type": "nominal"
+        "label": "channel name",
+        "type": "nominal",
+        "role": "dimension",
+        "unit": null,
+        "format": null,
+        "description": "Sales channel, one of dine_in, takeaway, delivery."
       },
       {
         "name": "line_revenue",
-        "type": "q_ratio"
+        "label": "line revenue",
+        "type": "q_ratio",
+        "role": "measure",
+        "unit": "EUR",
+        "format": ",.0f",
+        "description": "Net revenue of the line (quantity times unit_price minus discount), EUR."
       }
     ],
     "rows": [
@@ -269,9 +290,13 @@
     "chart": {
       "chart": "grouped_bar",
       "label": "columns side by side",
+      "title": "Line revenue by city and channel",
+      "subtitle": [],
+      "hint": "compare a few groups within each category",
+      "score": 33,
       "spec": {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "description": "grouped_bar (deterministic fallback); rules: CH-N-HUE, CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO, VIS-HUE-CARD",
+        "description": "Columns side by side: Line revenue by city and channel",
         "data": {
           "values": [
             {
@@ -652,7 +677,21 @@
           "text": "Line revenue by city and channel"
         },
         "usermeta": {
-          "theme": "pattern-perspectives"
+          "theme": "pattern-perspectives",
+          "rules": [
+            "CH-N-HUE",
+            "CH-N-POS",
+            "CH-Q-LEN",
+            "FORM-LEGEND-TOP",
+            "FORM-QUIET-AXIS",
+            "FORM-RECOGNISED",
+            "FORM-SORT-SIZE",
+            "FORM-TITLE-WHAT",
+            "FORM-YES-NO",
+            "INTENT-AFFINITY",
+            "VIS-BAR-ZERO",
+            "VIS-HUE-CARD"
+          ]
         },
         "config": {
           "background": "#FFFFFF",
@@ -794,35 +833,57 @@
         }
       },
       "png_url": null,
-      "alternatives": [
+      "min_width": null,
+      "options": [
+        {
+          "chart": "grouped_bar",
+          "label": "columns side by side",
+          "hint": "compare a few groups within each category",
+          "score": 33,
+          "drawn": true
+        },
         {
           "chart": "point",
           "label": "ranked dots",
-          "hint": "see which categories are the largest and how far apart they are"
+          "hint": "see which categories are the largest and how far apart they are",
+          "score": 31,
+          "drawn": false
         },
         {
           "chart": "heatmap",
           "label": "a labelled grid",
-          "hint": "find where the large and the small values sit across two groupings, with every value readable"
+          "hint": "find where the large and the small values sit across two groupings, with every value readable",
+          "score": 30,
+          "drawn": false
         },
         {
           "chart": "stacked_bar",
           "label": "stacked columns",
-          "hint": null
+          "hint": null,
+          "score": 27,
+          "drawn": false
         },
         {
           "chart": "table",
           "label": "a table",
-          "hint": null
+          "hint": null,
+          "score": 1,
+          "drawn": false
         }
       ]
     },
-    "findings": []
+    "findings": [],
+    "notes": [],
+    "verdict": "pass",
+    "concerns": [],
+    "storyline": null,
+    "lead": null,
+    "supports": []
   },
   "charts": {
     "grouped_bar": {
       "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "description": "grouped_bar (deterministic fallback); rules: CH-N-HUE, CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO, VIS-HUE-CARD",
+      "description": "Columns side by side: Line revenue by city and channel",
       "data": {
         "values": [
           {
@@ -1203,7 +1264,21 @@
         "text": "Line revenue by city and channel"
       },
       "usermeta": {
-        "theme": "pattern-perspectives"
+        "theme": "pattern-perspectives",
+        "rules": [
+          "CH-N-HUE",
+          "CH-N-POS",
+          "CH-Q-LEN",
+          "FORM-LEGEND-TOP",
+          "FORM-QUIET-AXIS",
+          "FORM-RECOGNISED",
+          "FORM-SORT-SIZE",
+          "FORM-TITLE-WHAT",
+          "FORM-YES-NO",
+          "INTENT-AFFINITY",
+          "VIS-BAR-ZERO",
+          "VIS-HUE-CARD"
+        ]
       },
       "config": {
         "background": "#FFFFFF",
@@ -1349,27 +1424,956 @@
     {
       "chart": "grouped_bar",
       "label": "columns side by side",
-      "hint": "compare a few groups within each category"
+      "hint": "compare a few groups within each category",
+      "score": 33,
+      "drawn": false
     },
     {
       "chart": "point",
       "label": "ranked dots",
-      "hint": "see which categories are the largest and how far apart they are"
+      "hint": "see which categories are the largest and how far apart they are",
+      "score": 31,
+      "drawn": false
     },
     {
       "chart": "heatmap",
       "label": "a labelled grid",
-      "hint": "find where the large and the small values sit across two groupings, with every value readable"
+      "hint": "find where the large and the small values sit across two groupings, with every value readable",
+      "score": 30,
+      "drawn": false
     },
     {
       "chart": "stacked_bar",
       "label": "stacked columns",
-      "hint": null
+      "hint": null,
+      "score": 27,
+      "drawn": false
     },
     {
       "chart": "table",
       "label": "a table",
-      "hint": null
+      "hint": null,
+      "score": 1,
+      "drawn": false
     }
-  ]
+  ],
+  "form_point": {
+    "id": "idiom",
+    "step": "form",
+    "question": "How do you want to see it?",
+    "options": [
+      {
+        "id": "grouped_bar",
+        "label": "columns side by side",
+        "hint": "to compare a few groups within each category"
+      },
+      {
+        "id": "point",
+        "label": "ranked dots",
+        "hint": "to see which categories are the largest and how far apart they are"
+      },
+      {
+        "id": "heatmap",
+        "label": "a labelled grid",
+        "hint": "to find where the large and the small values sit across two groupings, with every value readable"
+      },
+      {
+        "id": "stacked_bar",
+        "label": "stacked columns",
+        "hint": ""
+      },
+      {
+        "id": "table",
+        "label": "a table",
+        "hint": ""
+      }
+    ],
+    "chosen": "grouped_bar",
+    "default": "grouped_bar",
+    "by": "s1",
+    "confidence": 0.47,
+    "why": "the System 1 model was not sure (0.47 below 0.50)",
+    "open": true,
+    "stage": "idiom",
+    "entry_id": null
+  },
+  "refs": [
+    {
+      "table": "fact_order_lines",
+      "column": "line_revenue",
+      "label": "line revenue",
+      "type": "q_ratio",
+      "role": "measure",
+      "unit": "EUR",
+      "description": "Net revenue of the line (quantity times unit_price minus discount), EUR.",
+      "metric": false
+    },
+    {
+      "table": "dim_restaurant",
+      "column": "city",
+      "label": "city",
+      "type": "nominal",
+      "role": "dimension",
+      "unit": null,
+      "description": "City the branch operates in.",
+      "metric": false
+    },
+    {
+      "table": "dim_channel",
+      "column": "channel_name",
+      "label": "channel name",
+      "type": "nominal",
+      "role": "dimension",
+      "unit": null,
+      "description": "Sales channel, one of dine_in, takeaway, delivery.",
+      "metric": false
+    }
+  ],
+  "analysis": {
+    "synthetic": true,
+    "about": "Synthetic: made up by mock/showcase.ts from the run's own rows, to show what the core's analysis (plan, analyse, gather) will add to the answer; the core does not make it yet.",
+    "stages": [
+      {
+        "phase": "understand",
+        "stage": "plan",
+        "ms": 2600
+      },
+      {
+        "phase": "analyse",
+        "stage": "analyse",
+        "ms": 5020
+      },
+      {
+        "phase": "analyse",
+        "stage": "gather",
+        "ms": 1900
+      }
+    ],
+    "storyline": {
+      "top": "Frankfurt made the most revenue in every channel, and dine-in led in every city",
+      "key_line": [
+        {
+          "id": "k1",
+          "text": "Frankfurt made €1.33m, the most of the eight cities"
+        },
+        {
+          "id": "k2",
+          "text": "Dine-in brought €3.02m, 44% of all revenue"
+        },
+        {
+          "id": "k3",
+          "text": "Heidelberg made the least, €522k"
+        }
+      ]
+    },
+    "lead": "sp1",
+    "supports": [
+      {
+        "id": "sp1",
+        "role": "answer",
+        "point": "k1",
+        "text": "Line revenue by city and channel",
+        "drawn": "main",
+        "chart": null,
+        "layer": "answer",
+        "note": null
+      },
+      {
+        "id": "sp2",
+        "role": "whole",
+        "point": "k2",
+        "text": "Each channel's share of all revenue",
+        "drawn": "small",
+        "chart": {
+          "chart": "bar",
+          "label": "columns",
+          "title": null,
+          "subtitle": [],
+          "hint": null,
+          "score": null,
+          "spec": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "description": "Columns: each sales channel's share of all line revenue",
+            "data": {
+              "values": [
+                {
+                  "part": "dine-in",
+                  "value": 0.437809
+                },
+                {
+                  "part": "delivery",
+                  "value": 0.321686
+                },
+                {
+                  "part": "takeaway",
+                  "value": 0.240505
+                }
+              ]
+            },
+            "height": 160,
+            "mark": {
+              "type": "bar",
+              "cornerRadiusEnd": 3
+            },
+            "encoding": {
+              "x": {
+                "field": "part",
+                "type": "ordinal",
+                "sort": null,
+                "title": null,
+                "axis": {
+                  "labelAngle": 0
+                }
+              },
+              "y": {
+                "field": "value",
+                "type": "quantitative",
+                "title": "share of revenue",
+                "axis": {
+                  "format": ".0%",
+                  "tickCount": 4
+                }
+              },
+              "color": {
+                "value": "#1227FD"
+              },
+              "tooltip": [
+                {
+                  "field": "part",
+                  "title": ""
+                },
+                {
+                  "field": "value",
+                  "type": "quantitative",
+                  "title": "share of revenue",
+                  "format": ".0%"
+                }
+              ]
+            },
+            "usermeta": {
+              "theme": "pattern-perspectives",
+              "drawn_by": "mock",
+              "synthetic": true
+            },
+            "config": {
+              "background": "#FFFFFF",
+              "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+              "padding": {
+                "left": 20,
+                "right": 24,
+                "top": 20,
+                "bottom": 18
+              },
+              "view": {
+                "stroke": null
+              },
+              "title": {
+                "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "fontSize": 16,
+                "fontWeight": 600,
+                "color": "#191C1F",
+                "anchor": "start",
+                "offset": 16,
+                "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "subtitleColor": "#5F6368",
+                "subtitleFontSize": 12.5,
+                "subtitleFontWeight": 400,
+                "subtitlePadding": 6,
+                "subtitleLineHeight": 17
+              },
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelFontSize": 10.5,
+                "labelColor": "#5F6368",
+                "labelPadding": 8,
+                "labelSeparation": 6,
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "titlePadding": 12,
+                "domainColor": "#C9C9CD",
+                "tickColor": "#C9C9CD",
+                "gridColor": "#E2E2E7",
+                "gridWidth": 1
+              },
+              "axisX": {
+                "grid": false,
+                "ticks": true,
+                "tickSize": 4,
+                "domain": true
+              },
+              "axisY": {
+                "domain": false,
+                "ticks": false,
+                "grid": true
+              },
+              "axisBand": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelColor": "#191C1F",
+                "labelFontSize": 11,
+                "labelPadding": 10
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelFontSize": 12,
+                "labelColor": "#191C1F",
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "symbolType": "circle",
+                "symbolSize": 110,
+                "symbolStrokeWidth": 0,
+                "columnPadding": 16,
+                "padding": 4,
+                "offset": 16
+              },
+              "range": {
+                "category": [
+                  "#1227FD",
+                  "#00967A",
+                  "#8B5CF6",
+                  "#B07800",
+                  "#46277A",
+                  "#4F7BFF",
+                  "#191C1F"
+                ],
+                "ramp": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "heatmap": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "diverging": [
+                  "#E23B4A",
+                  "#F4F4F6",
+                  "#1227FD"
+                ]
+              },
+              "mark": {
+                "color": "#1227FD"
+              },
+              "line": {
+                "color": "#1227FD",
+                "strokeWidth": 2.5,
+                "strokeCap": "round",
+                "strokeJoin": "round"
+              },
+              "point": {
+                "color": "#1227FD",
+                "size": 56,
+                "filled": true
+              },
+              "area": {
+                "color": "#1227FD",
+                "opacity": 0.16
+              },
+              "bar": {
+                "color": "#1227FD",
+                "cornerRadiusEnd": 5
+              },
+              "arc": {
+                "stroke": "#FFFFFF",
+                "strokeWidth": 2
+              },
+              "rect": {
+                "color": "#1227FD"
+              },
+              "rule": {
+                "color": "#C9C9CD"
+              },
+              "text": {
+                "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "fontSize": 11,
+                "color": "#191C1F"
+              }
+            }
+          },
+          "png_url": null,
+          "min_width": 260,
+          "options": []
+        },
+        "layer": null,
+        "note": null
+      },
+      {
+        "id": "sp3",
+        "role": "decomposition",
+        "point": "k3",
+        "text": "Revenue per city, all channels together",
+        "drawn": "small",
+        "chart": {
+          "chart": "horizontal_bar",
+          "label": "ranked bars",
+          "title": null,
+          "subtitle": [],
+          "hint": null,
+          "score": null,
+          "spec": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "description": "Bars: each city's line revenue over all channels, highest first",
+            "data": {
+              "values": [
+                {
+                  "member": "Frankfurt",
+                  "value": 1326096.84
+                },
+                {
+                  "member": "Berlin",
+                  "value": 1140226.11
+                },
+                {
+                  "member": "Koeln",
+                  "value": 1041346.75
+                },
+                {
+                  "member": "Hamburg",
+                  "value": 843153.8
+                },
+                {
+                  "member": "Stuttgart",
+                  "value": 760978.31
+                },
+                {
+                  "member": "Muenchen",
+                  "value": 690867.06
+                },
+                {
+                  "member": "Dresden",
+                  "value": 569600.81
+                },
+                {
+                  "member": "Heidelberg",
+                  "value": 521866.8
+                }
+              ]
+            },
+            "height": 160,
+            "mark": {
+              "type": "bar",
+              "cornerRadiusEnd": 3
+            },
+            "encoding": {
+              "y": {
+                "field": "member",
+                "type": "nominal",
+                "sort": "-x",
+                "title": null,
+                "axis": {
+                  "labelLimit": 160
+                }
+              },
+              "x": {
+                "field": "value",
+                "type": "quantitative",
+                "title": "revenue (EUR)",
+                "axis": {
+                  "format": "~s",
+                  "tickCount": 4
+                }
+              },
+              "color": {
+                "value": "#1227FD"
+              },
+              "tooltip": [
+                {
+                  "field": "member",
+                  "title": ""
+                },
+                {
+                  "field": "value",
+                  "type": "quantitative",
+                  "title": "revenue (EUR)",
+                  "format": "~s"
+                }
+              ]
+            },
+            "usermeta": {
+              "theme": "pattern-perspectives",
+              "drawn_by": "mock",
+              "synthetic": true
+            },
+            "config": {
+              "background": "#FFFFFF",
+              "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+              "padding": {
+                "left": 20,
+                "right": 24,
+                "top": 20,
+                "bottom": 18
+              },
+              "view": {
+                "stroke": null
+              },
+              "title": {
+                "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "fontSize": 16,
+                "fontWeight": 600,
+                "color": "#191C1F",
+                "anchor": "start",
+                "offset": 16,
+                "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "subtitleColor": "#5F6368",
+                "subtitleFontSize": 12.5,
+                "subtitleFontWeight": 400,
+                "subtitlePadding": 6,
+                "subtitleLineHeight": 17
+              },
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelFontSize": 10.5,
+                "labelColor": "#5F6368",
+                "labelPadding": 8,
+                "labelSeparation": 6,
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "titlePadding": 12,
+                "domainColor": "#C9C9CD",
+                "tickColor": "#C9C9CD",
+                "gridColor": "#E2E2E7",
+                "gridWidth": 1
+              },
+              "axisX": {
+                "grid": false,
+                "ticks": true,
+                "tickSize": 4,
+                "domain": true
+              },
+              "axisY": {
+                "domain": false,
+                "ticks": false,
+                "grid": true
+              },
+              "axisBand": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelColor": "#191C1F",
+                "labelFontSize": 11,
+                "labelPadding": 10
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelFontSize": 12,
+                "labelColor": "#191C1F",
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "symbolType": "circle",
+                "symbolSize": 110,
+                "symbolStrokeWidth": 0,
+                "columnPadding": 16,
+                "padding": 4,
+                "offset": 16
+              },
+              "range": {
+                "category": [
+                  "#1227FD",
+                  "#00967A",
+                  "#8B5CF6",
+                  "#B07800",
+                  "#46277A",
+                  "#4F7BFF",
+                  "#191C1F"
+                ],
+                "ramp": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "heatmap": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "diverging": [
+                  "#E23B4A",
+                  "#F4F4F6",
+                  "#1227FD"
+                ]
+              },
+              "mark": {
+                "color": "#1227FD"
+              },
+              "line": {
+                "color": "#1227FD",
+                "strokeWidth": 2.5,
+                "strokeCap": "round",
+                "strokeJoin": "round"
+              },
+              "point": {
+                "color": "#1227FD",
+                "size": 56,
+                "filled": true
+              },
+              "area": {
+                "color": "#1227FD",
+                "opacity": 0.16
+              },
+              "bar": {
+                "color": "#1227FD",
+                "cornerRadiusEnd": 5
+              },
+              "arc": {
+                "stroke": "#FFFFFF",
+                "strokeWidth": 2
+              },
+              "rect": {
+                "color": "#1227FD"
+              },
+              "rule": {
+                "color": "#C9C9CD"
+              },
+              "text": {
+                "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "fontSize": 11,
+                "color": "#191C1F"
+              }
+            }
+          },
+          "png_url": null,
+          "min_width": 260,
+          "options": []
+        },
+        "layer": null,
+        "note": null
+      },
+      {
+        "id": "sp4",
+        "role": "context",
+        "point": null,
+        "text": "Dine-in's share ranges only from 43.4% to 44.1% across the cities",
+        "drawn": "none",
+        "chart": null,
+        "layer": null,
+        "note": null
+      }
+    ],
+    "notes": [
+      "The cities are compared as they stand, without regard to how many branches each has"
+    ],
+    "steps": [
+      {
+        "id": "st1",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "revenue per city and channel",
+        "role": "answer",
+        "ms": 140,
+        "verdict": null,
+        "cached": true,
+        "sql": "SELECT \"dim_restaurant\".\"city\" AS \"city\", \"dim_channel\".\"channel_name\" AS \"channel_name\", SUM(\"f\".\"line_revenue\") AS \"line_revenue\" FROM \"fact_order_lines\" AS \"f\" JOIN \"dim_channel\" AS \"dim_channel\" ON \"f\".\"channel_key\" = \"dim_channel\".\"channel_key\" JOIN \"dim_restaurant\" AS \"dim_restaurant\" ON \"f\".\"restaurant_key\" = \"dim_restaurant\".\"restaurant_key\" GROUP BY \"dim_restaurant\".\"city\", \"dim_channel\".\"channel_name\" ORDER BY \"line_revenue\" DESC LIMIT 10000",
+        "columns": [
+          {
+            "name": "city",
+            "label": "city",
+            "type": "nominal",
+            "role": "dimension",
+            "unit": null,
+            "format": null,
+            "description": "City the branch operates in."
+          },
+          {
+            "name": "channel_name",
+            "label": "channel name",
+            "type": "nominal",
+            "role": "dimension",
+            "unit": null,
+            "format": null,
+            "description": "Sales channel, one of dine_in, takeaway, delivery."
+          },
+          {
+            "name": "line_revenue",
+            "label": "line revenue",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "EUR",
+            "format": ",.0f",
+            "description": "Net revenue of the line (quantity times unit_price minus discount), EUR."
+          }
+        ],
+        "rows": [
+          [
+            "Frankfurt",
+            "dine_in",
+            582673.9
+          ],
+          [
+            "Berlin",
+            "dine_in",
+            496559.93
+          ],
+          [
+            "Koeln",
+            "dine_in",
+            452291.82
+          ],
+          [
+            "Frankfurt",
+            "delivery",
+            424109.58
+          ],
+          [
+            "Hamburg",
+            "dine_in",
+            371691.69
+          ],
+          [
+            "Berlin",
+            "delivery",
+            367767.36
+          ],
+          [
+            "Koeln",
+            "delivery",
+            333934.8
+          ],
+          [
+            "Stuttgart",
+            "dine_in",
+            333892.17
+          ],
+          [
+            "Frankfurt",
+            "takeaway",
+            319313.36
+          ],
+          [
+            "Muenchen",
+            "dine_in",
+            301518.79
+          ],
+          [
+            "Berlin",
+            "takeaway",
+            275898.82
+          ],
+          [
+            "Hamburg",
+            "delivery",
+            270258.21
+          ],
+          [
+            "Koeln",
+            "takeaway",
+            255120.13
+          ],
+          [
+            "Dresden",
+            "dine_in",
+            250714.9
+          ],
+          [
+            "Stuttgart",
+            "delivery",
+            245172.82
+          ],
+          [
+            "Heidelberg",
+            "dine_in",
+            228972.62
+          ],
+          [
+            "Muenchen",
+            "delivery",
+            223584.95
+          ],
+          [
+            "Hamburg",
+            "takeaway",
+            201203.9
+          ],
+          [
+            "Dresden",
+            "delivery",
+            183437.29
+          ],
+          [
+            "Stuttgart",
+            "takeaway",
+            181913.32
+          ],
+          [
+            "Heidelberg",
+            "delivery",
+            169481.14
+          ],
+          [
+            "Muenchen",
+            "takeaway",
+            165763.32
+          ],
+          [
+            "Dresden",
+            "takeaway",
+            135448.62
+          ],
+          [
+            "Heidelberg",
+            "takeaway",
+            123413.04
+          ]
+        ],
+        "row_count": 24
+      },
+      {
+        "id": "st2",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "revenue per channel",
+        "role": "decomposition",
+        "ms": 1800,
+        "verdict": "as_expected",
+        "cached": false,
+        "sql": "SELECT \"channel_name\", SUM(\"line_revenue\") AS \"line_revenue\", SUM(\"line_revenue\") / SUM(SUM(\"line_revenue\")) OVER () AS \"share\"\nFROM (\n  SELECT \"dim_restaurant\".\"city\" AS \"city\", \"dim_channel\".\"channel_name\" AS \"channel_name\", SUM(\"f\".\"line_revenue\") AS \"line_revenue\" FROM \"fact_order_lines\" AS \"f\" JOIN \"dim_channel\" AS \"dim_channel\" ON \"f\".\"channel_key\" = \"dim_channel\".\"channel_key\" JOIN \"dim_restaurant\" AS \"dim_restaurant\" ON \"f\".\"restaurant_key\" = \"dim_restaurant\".\"restaurant_key\" GROUP BY \"dim_restaurant\".\"city\", \"dim_channel\".\"channel_name\" ORDER BY \"line_revenue\" DESC LIMIT 10000\n) AS \"answer\"\nGROUP BY \"channel_name\"\nORDER BY 2 DESC",
+        "columns": [
+          {
+            "name": "channel_name",
+            "label": "channel name",
+            "type": "nominal",
+            "role": "dimension",
+            "unit": null,
+            "format": null,
+            "description": "Sales channel, one of dine_in, takeaway, delivery."
+          },
+          {
+            "name": "line_revenue",
+            "label": "line revenue",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "EUR",
+            "format": ",.0f",
+            "description": "Net revenue of the line (quantity times unit_price minus discount), EUR."
+          },
+          {
+            "name": "share",
+            "label": "share",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "%",
+            "format": ".1%",
+            "description": null
+          }
+        ],
+        "rows": [
+          [
+            "dine_in",
+            3018315.82,
+            0.437809
+          ],
+          [
+            "delivery",
+            2217746.15,
+            0.321686
+          ],
+          [
+            "takeaway",
+            1658074.51,
+            0.240505
+          ]
+        ],
+        "row_count": 3
+      },
+      {
+        "id": "st3",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "revenue per city",
+        "role": "decomposition",
+        "ms": 1700,
+        "verdict": "as_expected",
+        "cached": false,
+        "sql": "SELECT \"city\", SUM(\"line_revenue\") AS \"line_revenue\"\nFROM (\n  SELECT \"dim_restaurant\".\"city\" AS \"city\", \"dim_channel\".\"channel_name\" AS \"channel_name\", SUM(\"f\".\"line_revenue\") AS \"line_revenue\" FROM \"fact_order_lines\" AS \"f\" JOIN \"dim_channel\" AS \"dim_channel\" ON \"f\".\"channel_key\" = \"dim_channel\".\"channel_key\" JOIN \"dim_restaurant\" AS \"dim_restaurant\" ON \"f\".\"restaurant_key\" = \"dim_restaurant\".\"restaurant_key\" GROUP BY \"dim_restaurant\".\"city\", \"dim_channel\".\"channel_name\" ORDER BY \"line_revenue\" DESC LIMIT 10000\n) AS \"answer\"\nGROUP BY \"city\"\nORDER BY 2 DESC",
+        "columns": [
+          {
+            "name": "city",
+            "label": "city",
+            "type": "nominal",
+            "role": "dimension",
+            "unit": null,
+            "format": null,
+            "description": "City the branch operates in."
+          },
+          {
+            "name": "line_revenue",
+            "label": "line revenue",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "EUR",
+            "format": ",.0f",
+            "description": "Net revenue of the line (quantity times unit_price minus discount), EUR."
+          }
+        ],
+        "rows": [
+          [
+            "Frankfurt",
+            1326096.84
+          ],
+          [
+            "Berlin",
+            1140226.11
+          ],
+          [
+            "Koeln",
+            1041346.75
+          ],
+          [
+            "Hamburg",
+            843153.8
+          ],
+          [
+            "Stuttgart",
+            760978.31
+          ],
+          [
+            "Muenchen",
+            690867.06
+          ],
+          [
+            "Dresden",
+            569600.81
+          ],
+          [
+            "Heidelberg",
+            521866.8
+          ]
+        ],
+        "row_count": 8
+      },
+      {
+        "id": "st4",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "the channel mix per city",
+        "role": "check",
+        "ms": 1300,
+        "verdict": "routine",
+        "cached": false,
+        "sql": null,
+        "columns": [],
+        "rows": [],
+        "row_count": null
+      }
+    ],
+    "follow_ups": [
+      {
+        "id": "fu1",
+        "kind": "next_level",
+        "question": "How did delivery revenue develop per month over the last year?",
+        "fixture": "delivery-monthly"
+      },
+      {
+        "id": "fu2",
+        "kind": "breakdown",
+        "question": "How much delivery revenue did each city make per month in 2025?",
+        "fixture": null
+      }
+    ]
+  }
 }

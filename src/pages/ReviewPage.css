@@ -56,6 +56,16 @@
   min-height: 0;
 }
 
+/* The search and the order, between the kind chips and the list; the order wraps under a narrow search. */
+.review__tools {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  padding: 4px 12px 8px;
+}
+
 .review__detail {
   min-width: 0;
   min-height: 0;

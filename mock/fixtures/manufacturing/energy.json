@@ -1,6 +1,9 @@
 {
   "slug": "energy",
   "workspace": "manufacturing",
+  "made_up": [
+    "definitions"
+  ],
   "question": "Which lines use the most energy per 1,000 good units?",
   "final_status": "complete",
   "continuation": null,
@@ -56,76 +59,45 @@
       "ms": 1083
     }
   ],
-  "restatement": null,
-  "card": {
-    "blocking": false,
-    "points": [
-      {
-        "id": "grain",
-        "step": "meaning",
-        "question": "In which time steps?",
-        "options": [
-          {
-            "id": "month",
-            "label": "per month",
-            "hint": ""
-          },
-          {
-            "id": "none",
-            "label": "no time steps",
-            "hint": ""
-          }
-        ],
-        "chosen": "month",
-        "default": "month",
-        "by": "s2",
-        "confidence": 0.49,
-        "why": "Claude settled what System 1 left open",
-        "open": false,
-        "stage": "abstract"
+  "restatement": "You want to see the top line by kWh per 1,000 good units.",
+  "definitions": [
+    {
+      "name": "energy per good unit",
+      "label": "Energy per 1,000 good units",
+      "definition": "1,000 times the energy used (energy kWh) over the good quantity (good units)",
+      "entry_id": "measure-energy-per-good-unit",
+      "source": {
+        "kind": "question",
+        "text": "as the question states it"
       },
-      {
-        "id": "reading",
-        "step": "form",
-        "question": "What do you want to read from it?",
-        "options": [
-          {
-            "id": "none",
-            "label": "it does not run over time",
-            "hint": ""
-          },
-          {
-            "id": "comparison",
-            "label": "two or three series against each other, period by period",
-            "hint": "columns side by side"
-          },
-          {
-            "id": "amounts",
-            "label": "how much each period holds, read one by one",
-            "hint": "columns, each with its value"
-          }
-        ],
-        "chosen": "comparison",
-        "default": "none",
-        "by": "s1",
-        "confidence": 0.56,
-        "why": "",
-        "open": false,
-        "stage": "abstract"
-      }
-    ]
-  },
+      "status": "proposed"
+    }
+  ],
+  "card": null,
   "clarify": null,
+  "follow_ups": [],
+  "error": null,
   "result": {
     "sql": "SELECT \"dim_line\".\"line_name\" AS \"line_name\", (1000.0 * (COALESCE(SUM(\"f\".\"energy_kwh\"), 0)) / NULLIF((COALESCE(SUM(\"f\".\"good_qty\"), 0)), 0)) AS \"energy_per_thousand_good_units\" FROM \"main\".\"mart_line_performance_month\" AS \"f\" JOIN \"main\".\"dim_line\" AS \"dim_line\" ON \"f\".\"line_code\" = \"dim_line\".\"line_code\" GROUP BY \"dim_line\".\"line_name\" HAVING (COUNT(*) + COUNT(*)) > 0 ORDER BY \"energy_per_thousand_good_units\" DESC LIMIT 10000",
+    "step_id": "st1",
     "columns": [
       {
         "name": "line_name",
-        "type": "nominal"
+        "label": "line name",
+        "type": "nominal",
+        "role": "dimension",
+        "unit": null,
+        "format": null,
+        "description": "Production line, e.g. Brno welding."
       },
       {
         "name": "energy_per_thousand_good_units",
-        "type": "q_ratio"
+        "label": "kWh per 1,000 good units",
+        "type": "q_ratio",
+        "role": "measure",
+        "unit": "kWh",
+        "format": ",.0f",
+        "description": "Electricity per 1,000 good units, kWh."
       }
     ],
     "rows": [
@@ -171,9 +143,13 @@
     "chart": {
       "chart": "horizontal_bar",
       "label": "ranked bars",
+      "title": "Top lines by kWh per 1,000 good units",
+      "subtitle": [],
+      "hint": "see which categories are the largest and how far apart they are",
+      "score": 30,
       "spec": {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "description": "horizontal_bar (deterministic fallback); rules: CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO, VIS-TASK-FIT",
+        "description": "Ranked bars: Top lines by kWh per 1,000 good units",
         "data": {
           "values": [
             {
@@ -348,7 +324,25 @@
           "text": "Top lines by kWh per 1,000 good units"
         },
         "usermeta": {
-          "theme": "pattern-perspectives"
+          "theme": "pattern-perspectives",
+          "rules": [
+            "CH-N-POS",
+            "CH-Q-LEN",
+            "FORM-BAR-STEP",
+            "FORM-FOLD-REST",
+            "FORM-QUIET-AXIS",
+            "FORM-RECOGNISED",
+            "FORM-SHARE-TIP",
+            "FORM-SHORT-LABEL",
+            "FORM-SORT-SIZE",
+            "FORM-TELL-APART",
+            "FORM-TITLE-WHAT",
+            "FORM-VALUE-TIP",
+            "FORM-YES-NO",
+            "INTENT-AFFINITY",
+            "VIS-BAR-ZERO",
+            "VIS-TASK-FIT"
+          ]
         },
         "config": {
           "background": "#FFFFFF",
@@ -490,30 +484,52 @@
         }
       },
       "png_url": null,
-      "alternatives": [
+      "min_width": null,
+      "options": [
+        {
+          "chart": "horizontal_bar",
+          "label": "ranked bars",
+          "hint": "see which categories are the largest and how far apart they are",
+          "score": 30,
+          "drawn": true
+        },
         {
           "chart": "point",
           "label": "ranked dots",
-          "hint": "see which categories are the largest and how far apart they are"
+          "hint": "see which categories are the largest and how far apart they are",
+          "score": 25,
+          "drawn": false
         },
         {
           "chart": "bar",
           "label": "columns",
-          "hint": null
+          "hint": null,
+          "score": 21,
+          "drawn": false
         },
         {
           "chart": "table",
           "label": "a table",
-          "hint": null
+          "hint": null,
+          "score": 1,
+          "drawn": false
         }
       ]
     },
-    "findings": []
+    "findings": [],
+    "notes": [],
+    "verdict": "warn",
+    "concerns": [
+      "Ticks per axis: 16 labels vs 10 labels; bottom: 16 labels (quantitative)"
+    ],
+    "storyline": null,
+    "lead": null,
+    "supports": []
   },
   "charts": {
     "horizontal_bar": {
       "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "description": "horizontal_bar (deterministic fallback); rules: CH-N-POS, CH-Q-LEN, FORM-RECOGNISED, INTENT-AFFINITY, VIS-BAR-ZERO, VIS-TASK-FIT",
+      "description": "Ranked bars: Top lines by kWh per 1,000 good units",
       "data": {
         "values": [
           {
@@ -688,7 +704,25 @@
         "text": "Top lines by kWh per 1,000 good units"
       },
       "usermeta": {
-        "theme": "pattern-perspectives"
+        "theme": "pattern-perspectives",
+        "rules": [
+          "CH-N-POS",
+          "CH-Q-LEN",
+          "FORM-BAR-STEP",
+          "FORM-FOLD-REST",
+          "FORM-QUIET-AXIS",
+          "FORM-RECOGNISED",
+          "FORM-SHARE-TIP",
+          "FORM-SHORT-LABEL",
+          "FORM-SORT-SIZE",
+          "FORM-TELL-APART",
+          "FORM-TITLE-WHAT",
+          "FORM-VALUE-TIP",
+          "FORM-YES-NO",
+          "INTENT-AFFINITY",
+          "VIS-BAR-ZERO",
+          "VIS-TASK-FIT"
+        ]
       },
       "config": {
         "background": "#FFFFFF",
@@ -834,22 +868,558 @@
     {
       "chart": "horizontal_bar",
       "label": "ranked bars",
-      "hint": "see which categories are the largest and how far apart they are"
+      "hint": "see which categories are the largest and how far apart they are",
+      "score": 30,
+      "drawn": false
     },
     {
       "chart": "point",
       "label": "ranked dots",
-      "hint": "see which categories are the largest and how far apart they are"
+      "hint": "see which categories are the largest and how far apart they are",
+      "score": 25,
+      "drawn": false
     },
     {
       "chart": "bar",
       "label": "columns",
-      "hint": null
+      "hint": null,
+      "score": 21,
+      "drawn": false
     },
     {
       "chart": "table",
       "label": "a table",
-      "hint": null
+      "hint": null,
+      "score": 1,
+      "drawn": false
     }
-  ]
+  ],
+  "form_point": {
+    "id": "idiom",
+    "step": "form",
+    "question": "How do you want to see it?",
+    "options": [
+      {
+        "id": "horizontal_bar",
+        "label": "ranked bars",
+        "hint": "to see which categories are the largest and how far apart they are"
+      },
+      {
+        "id": "point",
+        "label": "ranked dots",
+        "hint": "to see which categories are the largest and how far apart they are"
+      },
+      {
+        "id": "bar",
+        "label": "columns",
+        "hint": ""
+      },
+      {
+        "id": "table",
+        "label": "a table",
+        "hint": ""
+      }
+    ],
+    "chosen": "horizontal_bar",
+    "default": "horizontal_bar",
+    "by": "s1",
+    "confidence": 0.8,
+    "why": "",
+    "open": false,
+    "stage": "idiom",
+    "entry_id": null
+  },
+  "refs": [
+    {
+      "table": "mart_line_performance_month",
+      "column": "energy_per_thousand_good_units",
+      "label": "kWh per 1,000 good units",
+      "type": "q_ratio",
+      "role": "measure",
+      "unit": "kWh",
+      "description": "Electricity per 1,000 good units, kWh.",
+      "metric": true
+    },
+    {
+      "table": "dim_line",
+      "column": "line_name",
+      "label": "line name",
+      "type": "nominal",
+      "role": "dimension",
+      "unit": null,
+      "description": "Production line, e.g. Brno welding.",
+      "metric": false
+    }
+  ],
+  "analysis": {
+    "synthetic": true,
+    "about": "Synthetic: made up by mock/showcase.ts from the run's own rows, to show what the core's analysis (plan, analyse, gather) will add to the answer; the core does not make it yet.",
+    "stages": [
+      {
+        "phase": "understand",
+        "stage": "plan",
+        "ms": 2600
+      },
+      {
+        "phase": "analyse",
+        "stage": "analyse",
+        "ms": 3720
+      },
+      {
+        "phase": "analyse",
+        "stage": "gather",
+        "ms": 1900
+      }
+    ],
+    "storyline": {
+      "top": "Linz assembly used the most energy per 1,000 good units, 1,552 kWh",
+      "key_line": [
+        {
+          "id": "k1",
+          "text": "Linz assembly used 1,552 kWh per 1,000 good units, 1.3 times Brno assembly"
+        },
+        {
+          "id": "k2",
+          "text": "Brno stamping and Linz stamping used the least, 83 kWh and 78 kWh"
+        },
+        {
+          "id": "k3",
+          "text": "Five of the nine lines used less than the average of 631 kWh"
+        }
+      ]
+    },
+    "lead": "sp1",
+    "supports": [
+      {
+        "id": "sp1",
+        "role": "answer",
+        "point": "k1",
+        "text": "kWh per 1,000 good units for each line, highest first",
+        "drawn": "main",
+        "chart": null,
+        "layer": "answer",
+        "note": null
+      },
+      {
+        "id": "sp2",
+        "role": "comparison",
+        "point": "k3",
+        "text": "Each line against the average of 631 kWh",
+        "drawn": "small",
+        "chart": {
+          "chart": "horizontal_bar",
+          "label": "ranked bars",
+          "title": null,
+          "subtitle": [],
+          "hint": null,
+          "score": null,
+          "spec": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "description": "Bars: each line's kWh per 1,000 good units minus the average over the lines; above the average to the right",
+            "data": {
+              "values": [
+                {
+                  "member": "Linz assembly",
+                  "value": 920.605834
+                },
+                {
+                  "member": "Brno assembly",
+                  "value": 533.5309
+                },
+                {
+                  "member": "Brno welding",
+                  "value": 217.358741
+                },
+                {
+                  "member": "Augsburg assembly",
+                  "value": 55.477988
+                },
+                {
+                  "member": "Linz laser bending",
+                  "value": -157.939025
+                },
+                {
+                  "member": "Augsburg moulding 2",
+                  "value": -168.68537
+                },
+                {
+                  "member": "Augsburg moulding 1",
+                  "value": -299.256757
+                },
+                {
+                  "member": "Brno stamping",
+                  "value": -548.142643
+                },
+                {
+                  "member": "Linz stamping",
+                  "value": -552.949666
+                }
+              ]
+            },
+            "height": 160,
+            "mark": {
+              "type": "bar",
+              "cornerRadiusEnd": 3
+            },
+            "encoding": {
+              "y": {
+                "field": "member",
+                "type": "nominal",
+                "sort": "-x",
+                "title": null,
+                "axis": {
+                  "labelLimit": 160
+                }
+              },
+              "x": {
+                "field": "value",
+                "type": "quantitative",
+                "title": "kWh from the average",
+                "axis": {
+                  "format": "+,.0f",
+                  "tickCount": 4
+                }
+              },
+              "color": {
+                "condition": {
+                  "test": "datum.value < 0",
+                  "value": "#E23B4A"
+                },
+                "value": "#1227FD"
+              },
+              "tooltip": [
+                {
+                  "field": "member",
+                  "title": ""
+                },
+                {
+                  "field": "value",
+                  "type": "quantitative",
+                  "title": "kWh from the average",
+                  "format": "+,.0f"
+                }
+              ]
+            },
+            "usermeta": {
+              "theme": "pattern-perspectives",
+              "drawn_by": "mock",
+              "synthetic": true
+            },
+            "config": {
+              "background": "#FFFFFF",
+              "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+              "padding": {
+                "left": 20,
+                "right": 24,
+                "top": 20,
+                "bottom": 18
+              },
+              "view": {
+                "stroke": null
+              },
+              "title": {
+                "font": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "fontSize": 16,
+                "fontWeight": 600,
+                "color": "#191C1F",
+                "anchor": "start",
+                "offset": 16,
+                "subtitleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "subtitleColor": "#5F6368",
+                "subtitleFontSize": 12.5,
+                "subtitleFontWeight": 400,
+                "subtitlePadding": 6,
+                "subtitleLineHeight": 17
+              },
+              "axis": {
+                "labelFont": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "labelFontSize": 10.5,
+                "labelColor": "#5F6368",
+                "labelPadding": 8,
+                "labelSeparation": 6,
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "titlePadding": 12,
+                "domainColor": "#C9C9CD",
+                "tickColor": "#C9C9CD",
+                "gridColor": "#E2E2E7",
+                "gridWidth": 1
+              },
+              "axisX": {
+                "grid": false,
+                "ticks": true,
+                "tickSize": 4,
+                "domain": true
+              },
+              "axisY": {
+                "domain": false,
+                "ticks": false,
+                "grid": true
+              },
+              "axisBand": {
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelColor": "#191C1F",
+                "labelFontSize": 11,
+                "labelPadding": 10
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "labelFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "labelFontSize": 12,
+                "labelColor": "#191C1F",
+                "titleFont": "'Geist', 'Geist Variable', Inter, 'Segoe UI', system-ui, sans-serif",
+                "titleFontSize": 11.5,
+                "titleFontWeight": 500,
+                "titleColor": "#5F6368",
+                "symbolType": "circle",
+                "symbolSize": 110,
+                "symbolStrokeWidth": 0,
+                "columnPadding": 16,
+                "padding": 4,
+                "offset": 16
+              },
+              "range": {
+                "category": [
+                  "#1227FD",
+                  "#00967A",
+                  "#8B5CF6",
+                  "#B07800",
+                  "#46277A",
+                  "#4F7BFF",
+                  "#191C1F"
+                ],
+                "ramp": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "heatmap": [
+                  "#EEF2FF",
+                  "#1227FD"
+                ],
+                "diverging": [
+                  "#E23B4A",
+                  "#F4F4F6",
+                  "#1227FD"
+                ]
+              },
+              "mark": {
+                "color": "#1227FD"
+              },
+              "line": {
+                "color": "#1227FD",
+                "strokeWidth": 2.5,
+                "strokeCap": "round",
+                "strokeJoin": "round"
+              },
+              "point": {
+                "color": "#1227FD",
+                "size": 56,
+                "filled": true
+              },
+              "area": {
+                "color": "#1227FD",
+                "opacity": 0.16
+              },
+              "bar": {
+                "color": "#1227FD",
+                "cornerRadiusEnd": 5
+              },
+              "arc": {
+                "stroke": "#FFFFFF",
+                "strokeWidth": 2
+              },
+              "rect": {
+                "color": "#1227FD"
+              },
+              "rule": {
+                "color": "#C9C9CD"
+              },
+              "text": {
+                "font": "'Geist Mono', 'Geist Mono Variable', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace",
+                "fontSize": 11,
+                "color": "#191C1F"
+              }
+            }
+          },
+          "png_url": null,
+          "min_width": 260,
+          "options": []
+        },
+        "layer": null,
+        "note": null
+      },
+      {
+        "id": "sp3",
+        "role": "context",
+        "point": null,
+        "text": "Linz assembly used 20 times as much energy per good unit as Linz stamping",
+        "drawn": "none",
+        "chart": null,
+        "layer": null,
+        "note": null
+      }
+    ],
+    "notes": [
+      "The average of 631 kWh is the plain mean of the nine lines, not weighted by their output"
+    ],
+    "steps": [
+      {
+        "id": "st1",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "kWh per 1,000 good units per line",
+        "role": "answer",
+        "ms": 140,
+        "verdict": null,
+        "cached": true,
+        "sql": "SELECT \"dim_line\".\"line_name\" AS \"line_name\", (1000.0 * (COALESCE(SUM(\"f\".\"energy_kwh\"), 0)) / NULLIF((COALESCE(SUM(\"f\".\"good_qty\"), 0)), 0)) AS \"energy_per_thousand_good_units\" FROM \"main\".\"mart_line_performance_month\" AS \"f\" JOIN \"main\".\"dim_line\" AS \"dim_line\" ON \"f\".\"line_code\" = \"dim_line\".\"line_code\" GROUP BY \"dim_line\".\"line_name\" HAVING (COUNT(*) + COUNT(*)) > 0 ORDER BY \"energy_per_thousand_good_units\" DESC LIMIT 10000",
+        "columns": [
+          {
+            "name": "line_name",
+            "label": "line name",
+            "type": "nominal",
+            "role": "dimension",
+            "unit": null,
+            "format": null,
+            "description": "Production line, e.g. Brno welding."
+          },
+          {
+            "name": "energy_per_thousand_good_units",
+            "label": "kWh per 1,000 good units",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "kWh",
+            "format": ",.0f",
+            "description": "Electricity per 1,000 good units, kWh."
+          }
+        ],
+        "rows": [
+          [
+            "Linz assembly",
+            1551.690714
+          ],
+          [
+            "Brno assembly",
+            1164.61578
+          ],
+          [
+            "Brno welding",
+            848.443621
+          ],
+          [
+            "Augsburg assembly",
+            686.562868
+          ],
+          [
+            "Linz laser bending",
+            473.145855
+          ],
+          [
+            "Augsburg moulding 2",
+            462.39951
+          ],
+          [
+            "Augsburg moulding 1",
+            331.828123
+          ],
+          [
+            "Brno stamping",
+            82.942237
+          ],
+          [
+            "Linz stamping",
+            78.135214
+          ]
+        ],
+        "row_count": 9
+      },
+      {
+        "id": "st2",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "the average over all lines",
+        "role": "comparison",
+        "ms": 1900,
+        "verdict": "as_expected",
+        "cached": false,
+        "sql": "SELECT AVG(\"energy_per_thousand_good_units\") AS \"energy_per_thousand_good_units\"\nFROM (\n  SELECT \"dim_line\".\"line_name\" AS \"line_name\", (1000.0 * (COALESCE(SUM(\"f\".\"energy_kwh\"), 0)) / NULLIF((COALESCE(SUM(\"f\".\"good_qty\"), 0)), 0)) AS \"energy_per_thousand_good_units\" FROM \"main\".\"mart_line_performance_month\" AS \"f\" JOIN \"main\".\"dim_line\" AS \"dim_line\" ON \"f\".\"line_code\" = \"dim_line\".\"line_code\" GROUP BY \"dim_line\".\"line_name\" HAVING (COUNT(*) + COUNT(*)) > 0 ORDER BY \"energy_per_thousand_good_units\" DESC LIMIT 10000\n) AS \"answer\"",
+        "columns": [
+          {
+            "name": "energy_per_thousand_good_units",
+            "label": "kWh per 1,000 good units",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "kWh",
+            "format": ",.0f",
+            "description": "Electricity per 1,000 good units, kWh."
+          }
+        ],
+        "rows": [
+          [
+            631.08488
+          ]
+        ],
+        "row_count": 1
+      },
+      {
+        "id": "st3",
+        "stage": "analyse",
+        "truncated": false,
+        "label": "the lead over the runner-up",
+        "role": "check",
+        "ms": 1600,
+        "verdict": "as_expected",
+        "cached": false,
+        "sql": "SELECT *\nFROM (\n  SELECT \"dim_line\".\"line_name\" AS \"line_name\", (1000.0 * (COALESCE(SUM(\"f\".\"energy_kwh\"), 0)) / NULLIF((COALESCE(SUM(\"f\".\"good_qty\"), 0)), 0)) AS \"energy_per_thousand_good_units\" FROM \"main\".\"mart_line_performance_month\" AS \"f\" JOIN \"main\".\"dim_line\" AS \"dim_line\" ON \"f\".\"line_code\" = \"dim_line\".\"line_code\" GROUP BY \"dim_line\".\"line_name\" HAVING (COUNT(*) + COUNT(*)) > 0 ORDER BY \"energy_per_thousand_good_units\" DESC LIMIT 10000\n) AS \"answer\"\nORDER BY \"energy_per_thousand_good_units\" DESC\nLIMIT 2",
+        "columns": [
+          {
+            "name": "line_name",
+            "label": "line name",
+            "type": "nominal",
+            "role": "dimension",
+            "unit": null,
+            "format": null,
+            "description": "Production line, e.g. Brno welding."
+          },
+          {
+            "name": "energy_per_thousand_good_units",
+            "label": "kWh per 1,000 good units",
+            "type": "q_ratio",
+            "role": "measure",
+            "unit": "kWh",
+            "format": ",.0f",
+            "description": "Electricity per 1,000 good units, kWh."
+          }
+        ],
+        "rows": [
+          [
+            "Linz assembly",
+            1551.690714
+          ],
+          [
+            "Brno assembly",
+            1164.61578
+          ]
+        ],
+        "row_count": 2
+      }
+    ],
+    "follow_ups": [
+      {
+        "id": "fu1",
+        "kind": "check",
+        "question": "What was the OEE of each line last week?",
+        "fixture": "oee-line"
+      },
+      {
+        "id": "fu2",
+        "kind": "next_level",
+        "question": "Which machines on Linz assembly use the most energy per 1,000 good units?",
+        "fixture": null
+      }
+    ]
+  }
 }

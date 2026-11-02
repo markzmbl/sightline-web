@@ -32,7 +32,44 @@ export type RunEvent = Schemas["RunEvent"];
 export type RunEventType = RunEvent["type"];
 export type DecidedBy = Schemas["DecidedBy"];
 export type Problem = Schemas["Problem"];
+export type ProblemCode = Schemas["ProblemCode"];
 export type ErrorItem = Schemas["ErrorItem"];
+export type RunErrorCode = Schemas["RunErrorCode"];
+export type RunSummary = Schemas["RunSummary"];
+export type RunOrigin = Schemas["RunOrigin"];
+export type Locale = Schemas["Locale"];
+export type FollowUp = Schemas["FollowUp"];
+export type FollowUpKind = Schemas["FollowUpKind"];
+export type FollowRef = Schemas["FollowRef"];
+export type FollowRequest = Schemas["FollowRequest"];
+export type Revise = Schemas["Revise"];
+export type Storyline = Schemas["Storyline"];
+export type KeyPoint = Schemas["KeyPoint"];
+export type Support = Schemas["Support"];
+export type SupportRole = Schemas["SupportRole"];
+export type SupportDrawn = Schemas["SupportDrawn"];
+export type StepRecord = Schemas["StepRecord"];
+export type StepRole = Schemas["StepRole"];
+export type StepVerdict = Schemas["StepVerdict"];
+export type AnalysisStep = Schemas["AnalysisStep"];
+export type StepResult = Schemas["StepResult"];
+export type ChartRef = Schemas["ChartRef"];
+export type Definition = Schemas["Definition"];
+export type GapSuggestion = Schemas["GapSuggestion"];
+export type ResultVerdict = Schemas["ResultVerdict"];
+export type ColumnRole = Schemas["ColumnRole"];
+export type WorkspaceRole = Schemas["WorkspaceRole"];
+export type SchemaInfo = Schemas["SchemaInfo"];
+
+/**
+ * One turn of a thread: what the user sent and what sightline made of it. The thread
+ * carries every run as a summary and only its latest in full; an earlier run's full
+ * view arrives when its turn is unfolded (getRun), and is null until then.
+ */
+export interface Turn {
+  summary: RunSummary;
+  run: RunView | null;
+}
 
 export type RegistryKind = Schemas["RegistryKind"];
 export type RegistryStatus = Schemas["RegistryStatus"];
@@ -44,6 +81,8 @@ export type EntrySource = Schemas["EntrySource"];
 export type EntryRun = Schemas["EntryRun"];
 export type EntryGap = Schemas["EntryGap"];
 export type EntryChoice = Schemas["EntryChoice"];
+export type EntryChange = Schemas["EntryChange"];
+export type KindInfo = Schemas["KindInfo"];
 export type Demand = Schemas["Demand"];
 export type Review = Schemas["Review"];
 export type ReviewAction = Schemas["ReviewAction"];

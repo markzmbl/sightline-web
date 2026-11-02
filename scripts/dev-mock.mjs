@@ -1,7 +1,8 @@
 // Runs the mock backend and Vite together (npm run dev:mock), with prefixed output.
 // Ctrl+C, or either one exiting, stops both. No shell, so it behaves the same on Windows.
-// MOCK_SPEED, MOCK_MIN_STAGE_MS and MOCK_RESTART_EVERY (a worker restart every nth run)
-// pass through to the mock.
+// MOCK_SPEED, MOCK_MIN_STAGE_MS, MOCK_RESTART_EVERY (a worker restart every nth run),
+// MOCK_ANALYSIS (0: answers as the backend sends them today, without the made-up analysis)
+// and MOCK_MAX_ACTIVE (open runs a workspace may have, 3 by default) pass through to the mock.
 import { spawn } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { createInterface } from "node:readline";

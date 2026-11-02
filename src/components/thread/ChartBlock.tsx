@@ -13,9 +13,46 @@ const OPTIONS: EmbedOptions = {
 const COMPOSITE = ["hconcat", "vconcat", "concat", "facet", "repeat"];
 
 /** Fills the column unless the spec sets its own width. The theme stays the core's. */
-function prepare(spec: Spec): Spec {
-  if ("width" in spec || COMPOSITE.some((key) => key in spec)) return spec;
-  return { ...spec, width: "container" };
+function prepare(spec: Spec, untitled: boolean): Spec {
+  const shown = untitled ? untitle(spec) : spec;
+  if ("width" in shown || COMPOSITE.some((key) => key in shown)) return shown;
+  return { ...shown, width: "container" };
+}
+
+const isObject = (value: unknown): value is Spec => typeof value === "object" && value !== null && !Array.isArray(value);
+
+// A title's subtitle style and the plain title property it becomes.
+const SUBTITLE_STYLE: [string, string][] = [
+  ["subtitleFont", "font"],
+  ["subtitleFontSize", "fontSize"],
+  ["subtitleFontStyle", "fontStyle"],
+  ["subtitleFontWeight", "fontWeight"],
+  ["subtitleColor", "color"],
+  ["subtitleLineHeight", "lineHeight"],
+];
+
+/**
+ * The spec without its title text, which the transcript says above the chart instead
+ * (storyline.top); the subtitle, which holds the bases, stays on the paper in its own
+ * type as the title's only text. Vega-Lite drops a title whose text is empty, subtitle
+ * and all, so the subtitle lines become the text.
+ */
+function untitle(spec: Spec): Spec {
+  if (spec.title === undefined) return spec;
+  const rest = Object.fromEntries(Object.entries(spec).filter(([key]) => key !== "title"));
+  const title = isObject(spec.title) ? spec.title : null;
+  const subtitle = title?.subtitle;
+  const lines = Array.isArray(subtitle) ? subtitle.map(String) : typeof subtitle === "string" ? [subtitle] : [];
+  if (!title || lines.length === 0) return rest;
+  const config = isObject(spec.config) && isObject(spec.config.title) ? spec.config.title : {};
+  // Vega's own subtitle look, where neither the title nor the theme gives one.
+  const style: Spec = { fontSize: 12, fontWeight: "normal" };
+  for (const [from, to] of SUBTITLE_STYLE) {
+    const value = title[from] ?? config[from];
+    if (value !== undefined) style[to] = value;
+  }
+  const kept = Object.fromEntries(Object.entries(title).filter(([key]) => key !== "text" && !key.startsWith("subtitle")));
+  return { ...rest, title: { ...kept, ...style, text: lines } };
 }
 
 /** The spec's own background, so the frame around the chart matches it. */
@@ -36,11 +73,19 @@ const loadEmbed = () =>
     throw error;
   }));
 
+interface Props {
+  chart: ChartView;
+  /** The transcript says the title above the chart: draw it without its title text, keeping the subtitle. */
+  untitled?: boolean;
+  /** A support's small chart, on smaller paper. */
+  small?: boolean;
+}
+
 /**
- * The run's chart, drawn by vega-embed on its own paper. The spec is compared by
- * value, so a refetched but unchanged run does not redraw.
+ * A chart, drawn by vega-embed on its own paper: the run's main chart or a support's
+ * small one. The spec is compared by value, so a refetched but unchanged run does not redraw.
  */
-export function ChartBlock({ chart }: { chart: ChartView }) {
+export function ChartBlock({ chart, untitled = false, small = false }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const json = useMemo(() => JSON.stringify(chart.spec), [chart.spec]);
   const [failure, setFailure] = useState<{ json: string; message: string } | null>(null);
@@ -54,7 +99,7 @@ export function ChartBlock({ chart }: { chart: ChartView }) {
     let gone = false;
     let embedded: Embedded | undefined;
     loadEmbed()
-      .then(({ default: embed }) => embed(target, prepare(JSON.parse(json) as Spec) as VisualizationSpec, OPTIONS))
+      .then(({ default: embed }) => embed(target, prepare(JSON.parse(json) as Spec, untitled) as VisualizationSpec, OPTIONS))
       .then((result) => {
         if (gone) result.finalize();
         else embedded = result;
@@ -67,11 +112,15 @@ export function ChartBlock({ chart }: { chart: ChartView }) {
       embedded?.finalize();
       target.remove();
     };
-  }, [json]);
+  }, [json, untitled]);
 
   const error = failure?.json === json ? failure.message : null;
   return (
-    <figure className="tx-chart" style={{ background: paperOf(chart.spec) }} aria-label={chart.label}>
+    <figure
+      className={small ? "tx-chart tx-chart--small" : "tx-chart"}
+      style={{ background: paperOf(chart.spec) }}
+      aria-label={chart.label}
+    >
       <div ref={host} className="tx-chart__canvas" hidden={error !== null} />
       {error !== null && (
         <div className="tx-chart__error">

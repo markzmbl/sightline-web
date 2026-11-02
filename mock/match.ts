@@ -33,14 +33,18 @@ export interface Match {
   score: number;
 }
 
-/** The fixture whose question overlaps `text` most; `avoid` loses unless it is the only one. */
+/**
+ * The fixture whose question overlaps `text` most; `avoid` loses unless it is the only one.
+ * Of two that overlap as much (the same question run twice), the complete one wins.
+ */
 export function bestMatch(fixtures: readonly Fixture[], text: string, avoid?: string): Match | null {
   const asked = words(text);
   const pool = fixtures.some((f) => f.slug !== avoid) ? fixtures.filter((f) => f.slug !== avoid) : fixtures;
   let best: Match | null = null;
   for (const fixture of pool) {
     const score = jaccard(asked, words(fixture.question));
-    if (!best || score > best.score) best = { fixture, score };
+    const better = !best || score > best.score || (score === best.score && fixture.final_status === "complete" && best.fixture.final_status !== "complete");
+    if (better) best = { fixture, score };
   }
   return best;
 }

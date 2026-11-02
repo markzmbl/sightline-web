@@ -1,23 +1,35 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import { useThreads } from "../../api/queries";
-import { filterThreads, groupThreads } from "./groupThreads";
+import { filterThreads, groupThreads, mergeThreads } from "./groupThreads";
 import { ThreadRow } from "./ThreadRow";
 
 interface Props {
   ws: string;
-  /** The search box's text; filters the list here, without asking the server. */
+  /** The search box's text: filters the list here at once, and asks the server once typing pauses. */
   query: string;
 }
+
+/** How long typing must pause before the server is asked. */
+const SEARCH_DELAY_MS = 300;
 
 /** The workspace's past questions, grouped by day. */
 export function ThreadList({ ws, query }: Props) {
   const threads = useThreads(ws);
+  const needle = query.trim();
+  const asked = useDebounced(needle, SEARCH_DELAY_MS);
+  // While the box is blank this is the list above, the same query.
+  const search = useThreads(ws, { q: asked });
   const now = useMinute();
   const id = useId();
-  const groups = useMemo(
-    () => groupThreads(filterThreads(threads.data ?? [], query), now),
-    [threads.data, query, now],
-  );
+
+  // The server's search finds what the list here cannot (a revision's prompt, a thread beyond
+  // the list); its answer for the text in the box joins what the filter here found at once.
+  // Until it is in, or should it fail, the filter here is the answer.
+  const found = needle !== "" && asked === needle && search.isSuccess && !search.isPlaceholderData ? search.data : null;
+  const groups = useMemo(() => {
+    const filtered = filterThreads(threads.data ?? [], query);
+    return groupThreads(found ? mergeThreads(filtered, found) : filtered, now);
+  }, [threads.data, query, found, now]);
 
   if (threads.isPending) {
     return (
@@ -42,9 +54,11 @@ export function ThreadList({ ws, query }: Props) {
   }
 
   if (groups.length === 0) {
+    // Nothing here yet, while the server still looks.
+    const searching = needle !== "" && found === null && !search.isError;
     return (
-      <p className="thread-list thread-list__note">
-        {query.trim() ? "No question matches." : "Your questions will show here."}
+      <p className="thread-list thread-list__note" aria-live="polite">
+        {!needle ? "Your questions will show here." : searching ? "Searching…" : "No question matches."}
       </p>
     );
   }
@@ -65,6 +79,20 @@ export function ThreadList({ ws, query }: Props) {
       ))}
     </nav>
   );
+}
+
+/** The value once it has held still for `ms`; a blank value at once, so clearing the box does not wait. */
+function useDebounced(value: string, ms: number): string {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    if (value === "") {
+      setSettled("");
+      return;
+    }
+    const timer = setTimeout(() => setSettled(value), ms);
+    return () => clearTimeout(timer);
+  }, [value, ms]);
+  return value === "" ? "" : settled;
 }
 
 /** The time, refreshed every minute so "5m" and the day groups stay true. */
